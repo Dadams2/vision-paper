@@ -41,7 +41,10 @@
 %% The abstract is a short summary of the work to be presented in the
 %% article.
 \begin{abstract}
-Exploratory Data Analysis (EDA) is a critical step in the data science workflow, enabling analysts to uncover patterns, spot anomalies, and test hypotheses. 
+
+Exploratory Data Analysis (EDA) is a critical step in the data science process, enabling analysts to uncover insights, identify patterns, and formulate hypotheses. However, current EDA systems predominantly rely on explicit user feedback and single-objective optimization strategies, which can disrupt cognitive flow and fail to capture the multifaceted nature of analytical interest. We posit that the future of EDA lies in implicit recommendation systems that understand user intent through natural exploration behavior. This paper presents a unified vision for interpretable implicit recommendation in EDA that leverages behavioral signals rather than explicit feedback. Our key contributions are: (1) We provide a systematic critique of explicit feedback paradigms in existing EDA systems, demonstrating their cognitive overhead and analytical limitations; (2) We propose a novel interestingness contribution scheme that combines association rule mining with database summarization to capture diverse analytical interests; (3) We identify fundamental research challenges in developing systems that can predict analytical interest across multiple temporal scales while maintaining interpretability. This vision represents a paradigm shift toward EDA systems that adapt to analyst behavior implicitly, potentially transforming how data scientists discover insights in large-scale datasets.
+
+
 \end{abstract}
 
 \maketitle
@@ -74,133 +77,260 @@ The source code, data, and/or other artifacts have been made available at \url{\
 
 \section{Introduction}
 
-No one can really agree on a definition of EDA. It is generally accepted that EDA is a process of exploring data to find patterns, anomalies, and relationships. However, the specific techniques and tools used for EDA can vary widely depending on the context and the goals of the analysis.
+The volume of enterprise data grows exponentially, with IDC projecting a compound annual growth rate of 23\% through 2025, reaching 175 zettabytes globally \cite{idc2019data}. This data deluge has transformed how organizations approach analytical decision-making, placing Exploratory Data Analysis (EDA) at the center of modern data science workflows. Yet despite decades of database research and billions invested in analytics platforms, the fundamental interaction paradigms for data exploration remain largely unchanged.
 
-% what is an insight
+The database community has made significant strides in developing interactive exploration systems that enable users to navigate large datasets through visual interfaces, query-by-example paradigms, and active learning techniques \cite{dimitriadouAIDEActiveLearningBased2016, shen2014discovering, rezig2021dice}. These systems represent important advances over traditional query-answer models by supporting iterative investigation and hypothesis refinement. However, they continue to rely on explicit user feedback mechanisms such as tuple rankings or example validation. Firstly, this reliance on explicit feedback imposes substantial cognitive overhead, disrupting the natural flow of analytical reasoning and limiting the scalability of exploration sessions. Second, they optimize for similarity rather than analytical interest, misunderstanding what drives valuable discoveries in exploratory workflows. Third, they often assume that interestingness can be captured by a single or few predefined measure(s), despite empirical evidence that analytical interests are highly contextual and multi-dimensional \cite{somechPredictingWhatInteresting2019, chansonInterestingnessMeasuresExploratory2025a}.
 
-But more importantly no one can agree on what an Insight is. Is it a correlation? A trend? A cluster? A outlier? A distribution? A summary statistic? A visualization? A hypothesis? A question? A story? Some people attempt to provide an informal mathematical definition \cite{PDFExtractingTopK} but these are usually inefficient
+We envision a reimagining of EDA systems that uses implicit behavioral signals to understand and predict analytical interest. Rather than interrupting users with explicit feedback requests, next-generation EDA systems should observe natural exploration patterns such as the queries they write, the results they explore, and the sequence of actions they take. These implicit signals provide a richer, more authentic representation of analytical intent, preserving cognitive flow and enabling systems to adapt dynamically to evolving interests.
 
-% active learning is not enough
+In this paper we make the following contributions: (1) We provide a systematic analysis of why explicit feedback paradigms fundamentally misalign with the cognitive demands of exploratory analysis; (2) We propose a unified framework for implicit recommendation in EDA that combines association rule mining with database summarization through a novel interestingness contribution scheme, enabling systems to capture diverse analytical interests from behavioral signals alone; (3) We identify and formalize the key research challenges in developing implicit recommendation systems for EDA, including multi-scale interest prediction, interpretability requirements, and the fundamental tension between exploration and exploitation in analytical contexts.
 
-The most sucessful interactive reccomendation systems such as AIDE (also known as explore by example) \cite{dimitriadouAIDEActiveLearningBased2016}. There are other similar systems such as
-AIDE focuses on predicting similar items not what is actually interesting to the user. 
-
-I argue that while we do need to shape the exploration direction based on user feedback, explicit feedback through the ranking of tuples like in AIDE \cite{dimitriadouAIDEActiveLearningBased2016} is no only unecessary but potentially harmful to the analysis process.
-Instead I propose that implicit feedback through the analysis of user interactions with the system is a more effective way to guide the exploration process. This is because implicit feedback is more natural and less intrusive than explicit feedback, and it can provide a richer and more nuanced understanding of the user's interests and goals.
-
-Explicit feedback is limited, biased and sparse and it does not always reflect the user's true interests and goals. For example, a user might rank a tuple highly because it is easy to understand, but it might not be particularly interesting or relevant to their analysis. Conversely, a user might rank a tuple lowly because it is difficult to understand, but it might be very interesting or relevant to their analysis.
-
-% One interestingness measure is not enough
-
-From a theoretical perspective, it is clear that no one interestingness measure is enough to capture the full range of insights that an analyst might be interested in. For example, a correlation might be interesting to one analyst, but a cluster might be more interesting to another. A trend might be interesting to one analyst, but an outlier might be more interesting to another. A distribution might be interesting to one analyst, but a summary statistic might be more interesting to another. A visualization might be interesting to one analyst, but a hypothesis might be more interesting to another. A question might be interesting to one analyst, but a story might be more interesting to another.
-One of the more formal approaches comes from Hilderman et al who propose a framework for interestingness measures based on the concept of "surprise" \cite{robertj.hildermanInterestingnessFramework2001}.
-\cite{robertj.hildermanInterestingnessFramework2001}
-
-The idea that a single interestingness measure has been experimentally validated in the context of EDA \cite{somechPredictingWhatInteresting2019}.
-
-Whilst there has been some work on examining what interestingness measures are applied in EDA \cite{chansonInterestingnessMeasuresExploratory2025a} it fails to 
-
-Due to the wide variety of interetingness measures it is difficult for a benchmark to evaluate all of them or vaious combinations.
-
-% what an EDA system should do
-
-\begin{enumerate}
-  \item Keep the human user in the loop as we need to leverage domain knowledge and human intuition.
-  \item Not ask the user for explicit feedback 
-  \item Provide potential insights in an interpretable way
-  \item work on both fast and slow timescales 
-  \item be able to work with both small and large datasets
-  \item be able to predict users interest on short and long term timescales
-  \item be able to explore full data collections autonomously
-\end{enumerate}
+The implications of this vision extend beyond incremental improvements to existing tools. By developing a sophisticated implicit interest models, we can fundamentally transform how analysts interact with large-scale datasets, potentially democratizing advanced analytics and accelerating scientific discovery across domains.
 
 
-\section{Methodology}
+\section{The Challenge of Analytical Interest Prediction}
 
-The first step in creating this system is to evaluate if our system can understand what insight the user is actually interested in. 
+Understanding what makes data interesting to an analyst represents one of the most fundamental challenges in database systems research. Unlike traditional database queries that seek specific, predetermined answers, exploratory analysis involves an inherently iterative and adaptive process where analysts refine their understanding through progressive investigation. This section examines the theoretical foundations and practical challenges of predicting analytical interest from implicit behavioral signals.
 
-As there is no agreed upon definition of EDA or insight it is difficult to evaluate the effectiveness of an EDA system. Given user studies are expensive and time consuming we propose a proxy of the prediction accuracy of the system in predicting future tuples a user will access multiple time steps into the future. 
+\subsection{The Inadequacy of Single-Objective Optimization}
 
-We propose a simple system that predicts tuples a user will be interested in based on the interestingness of their past queries.
+Current EDA systems suffer from a fundamental design flaw: they assume that analytical interest can be captured through similarity to previously explored data. Explore-by-example systems \cite{dimitriadouAIDEActiveLearningBased2016, mottin2014exemplar, bonifati2014interactive}, despite representing some of state-of-the-art approaches, optimize for tuple similarity or pattern matching rather than analytical interest. This approach conflates proximity in feature space with cognitive relevance, ignoring the complex, contextual nature of human analytical reasoning.
 
-Broadly speaking there are two classes of interestingness measures, those that work on mined patterns and those that work on summarised data \cite{robertj.hildermanKnowledgeDiscoveryMeasures2001}. 
+Empirical studies \cite{somechPredictingWhatInteresting2019} demonstrate that no single interestingness measure consistently predicts what analysts find interesting across different domains and analysis goals. Their experiments across financial, scientific, and social media datasets revealed that correlation-based measures perform well in some contexts while clustering-based measures excel in others. This heterogeneity suggests that effective EDA systems must employ multi-objective optimization utilising multiple notions of interestingness.
 
-\textbf{Interestingness Contribution Scheme.} To leverage both classes of interestingness measures, we combine association rule mining with database summarization using a novel interestingness contribution scheme. Association rules of the form $X \implies Y$ are mined from query results using standard measures (support, confidence, lift). Simultaneously, we apply Bottom Up Summarization (BUS) \cite{chandola_summarizationcompressing_2007} to identify representative itemsets from closed frequent patterns, creating summary rows with derived count fields that enable diversity-based interestingness measures.
+The inadequacy becomes particularly acute when considering the cognitive demands of exploratory analysis. Analysts often pursue apparently dissimilar data points because they reveal important boundary conditions, outliers, or contradict existing hypotheses. A system optimizing purely for similarity would systematically exclude these cognitively valuable but metrically distant observations, fundamentally limiting the scope of possible discoveries.
 
-For each tuple $t$, we compute a combined interestingness score as:
-\[
-I(t) = \alpha \sum_{r\in R} \frac{I(r)}{|X_r \cup Y_r|} f_r(t) + \beta \sum_{s\in S} \frac{I(s)}{|s|} g_s(t)
-\]
-where $f_r(t)$ and $g_s(t)$ are indicator functions for whether tuple $t$ matches rule $r$ or belongs to summary $s$, respectively. The normalization by pattern size prevents longer patterns from dominating the score, while parameters $\alpha$ and $\beta$ control the relative influence of association rules versus summaries.
+could consider cutting above paragraph or replacing with some information \\\\
 
-Our experiments are primarily conducted on the Sloan Digital Sky Survey (SDSS) dataset \cite{york_sloan_2000}. The SDSS dataset is a large, publicly available dataset that contains information about millions of celestial objects. The dataset is well-suited for our experiments because it is large, complex, and contains a wide variety of data types.
+\subsection{Implicit Feedback as a Superior Signal Source}
 
-Relying on just the query results to determine what the user is interested in is not enough. For example, if a user queries for all galaxies with a redshift greater than 0.5, they might be interested in the distribution of redshifts, the correlation between redshift and other properties, or the presence of outliers. However, they might also be interested in other properties of galaxies that are not directly related to redshift, such as their morphology or environment.
+We believe that implicit feedback from natural exploration behavior provides a fundamentally richer and more reliable signal about analytical interest than explicit rankings or ratings. This assertion rests on three key observations about human analytical behavior:
 
-One might assume there is some kind of linear or superlinear decay in the overlap in tuples between sucessive results sets. However, in practice this is not the case. The overlap between sucessive result sets is often very small, and can even be zero. This is because users often change their queries in ways that are not predictable. For example, a user might start by querying for all galaxies with a redshift greater than 0.5, but then they might change their query to look for all galaxies with a redshift greater than 0.6. This change in query can result in a completely different set of results, with little or no overlap with the previous set.
-Conversely if the user makes a small change to their query, such as changing the redshift threshold from 0.5 to 0.51, the overlap between the two result sets can be very high. This is because the two queries are very similar, and they are likely to return many of the same tuples.
+\textbf{Cognitive Flow Preservation.} Explicit feedback requirements force analysts to switch between exploration and evaluation modes, disrupting the natural flow of analytical reasoning. Studies in cognitive psychology demonstrate that such context switching imposes measurable cognitive overhead and reduces problem-solving effectiveness \cite{monsell2003task}. Implicit feedback systems preserve cognitive flow by inferring interest from naturally occurring behaviors such as query formulation, interaction behaviors, and follow-up investigation choices.
+
+\textbf{above needs more references} \\ \\
+
+\textbf{Behavioral Authenticity.} Implicit signals reflect genuine analytical decisions rather than artificially constructed preferences. When an analyst chooses to analyze specific tuples in a result set, formulates particular follow-up queries, or spends time investigating certain data patterns, these behaviors represent authentic expressions of analytical interest unconstrained by rating scales or artificial choice frameworks.
+
+\textbf{ could cut this } \\\\
+
+\textbf{Temporal Richness.} Implicit feedback provides multi-scale temporal information about interest evolution. Short-term signals (which tuples are accessed first, how long each result receives attention) reveal immediate analytical priorities, while longer-term patterns (which investigation threads are pursued across multiple queries) expose analytical goals. 
+
+\subsection{A Unified Framework for Interest Prediction}
+
+We propose a unified framework that combines pattern mining with behavioral modeling to predict analytical interest from implicit signals. Our approach recognizes that analysts' interests span multiple dimensions—correlation patterns, distributional anomalies, clustering structures, temporal trends—and that effective recommendation requires capturing this multidimensional interest space. 
+
+% \section{Implicit Recommendation Architecture}
+
+% Building on the theoretical foundation established in the previous section, we now present our architectural vision for implicit recommendation in EDA systems. Our approach fundamentally reconceptualizes how systems should model, predict, and adapt to analytical interest through behavioral observation rather than explicit feedback collection.
+
+\subsection{Multi-Dimensional Interest Modeling}
+
+Traditional EDA systems assume that interest can be captured through similarity metrics in predefined feature spaces. We propose instead that analytical interest operates across multiple, often orthogonal dimensions that must be captured simultaneously. Drawing on Hilderman and Hamilton's foundational taxonomy \cite{robertj.hildermanKnowledgeDiscoveryMeasures2001}, we distinguish between pattern-based and summary-based interestingness measures, but extend this framework to capture the dynamic, contextual nature of analytical reasoning.
+
+Our interest model recognizes four fundamental dimensions of analytical curiosity:
+
+\textbf{Structural Interest}: Patterns that reveal relationships between variables, including correlations, associations, and dependency structures. For association rules $X \rightarrow Y$, we employ confidence $c(X \rightarrow Y) = \frac{|X \cup Y|}{|X|}$ and support $s(X \rightarrow Y) = \frac{|X \cup Y|}{N}$ measures \cite{aggarwalNewApproachOnline2001}, alongside the J-measure $J(X;Y) = p(Y)[p(X|Y)\log\frac{p(X|Y)}{p(X)} + (1-p(X|Y))\log\frac{1-p(X|Y)}{1-p(X)}]$ \cite{goodman1991rule} for probabilistic classification rules. These patterns satisfy analysts' need to understand how different aspects of their data interact and influence each other.
+
+\textbf{Distributional Interest}: Anomalies, outliers, and unusual distributional characteristics that violate expected patterns or reveal boundary conditions. We quantify distributional diversity using existing measures including the Shannon index $I_{Shannon} = -\sum_{i=1}^{m} p_i \log_2 p_i$ \cite{shannon1948mathematical}, Simpson's concentration index $I_{Simpson} = \sum_{i=1}^{m} p_i^2$, and the Gini coefficient $I_{Gini} = \frac{1}{2m}\sum_{i=1}^{m}\sum_{j=1}^{m}|p_i - p_j|$ \cite{gini1921measurement}. The Berger-Parker dominance index $I_{Berger} = \max(p_i)$ captures the proportional abundance of the most dominant tuple class \cite{bergerDiversityPlanktonicForaminifera1970}. Such discoveries often lead to the most significant analytical insights by highlighting exceptions that illuminate underlying processes.
+
+\textbf{Temporal Interest}: Trends, seasonality, and change patterns that reveal how the underlying system evolves over time. We capture temporal interestingness through sequence mining with measures including sequential pattern confidence $c_{seq}(A \rightarrow B) = \frac{\text{support}(A,B)}{\text{support}(A)}$ and temporal cohesion $\text{cohesion}(S) = \frac{1}{|S|^2}\sum_{i,j \in S} e^{-\alpha|t_i - t_j|}$ for pattern sequences $S$ \cite{mannila1997discovery}. These patterns are crucial for predictive analysis and understanding system dynamics.
+
+\textbf{Compositional Interest}: Clustering structures, hierarchical relationships, and segmentation patterns that reveal natural groupings within the data. We employ cluster validity measures including the silhouette coefficient $s(i) = \frac{b(i) - a(i)}{\max\{a(i), b(i)\}}$ and the Calinski-Harabasz index $CH = \frac{\text{tr}(B)/(k-1)}{\text{tr}(W)/(n-k)}$ to quantify clustering quality \cite{kaufman2009finding}, alongside hierarchical measures such as the cophenetic correlation coefficient for dendogram evaluation. These patterns help analysts understand the heterogeneous structure of complex datasets.
+
+\subsection{The Interestingness Contribution Scheme}
+
+To operationalize multi-dimensional interest prediction, we introduce a novel interestingness contribution scheme that addresses the fundamental challenge of combining heterogeneous interest signals into coherent recommendations. Our approach builds on established pattern mining techniques while introducing innovations necessary for real-time behavioral adaptation.
+
+Given a set of association rules $R = \{r_1, r_2, \ldots, r_n\}$ mined from historical query results and a set of database summaries $S = \{s_1, s_2, \ldots, s_m\}$ generated through Bottom-Up Summarization \cite{chandola_summarizationcompressing_2007}, we compute the interestingness score for tuple $t$ as:
+
+\begin{equation}
+I(t) = \alpha \sum_{r\in R} w_r \cdot \frac{I_{assoc}(r)}{|X_r \cup Y_r|} \cdot f_r(t) + \beta \sum_{s\in S} w_s \cdot \frac{I_{div}(s)}{|s|} \cdot g_s(t) + \gamma \cdot \text{Novelty}(t)
+\end{equation}
+
+where $I_{assoc}(r)$ aggregates association rule measures including confidence, support, and lift, while $I_{div}(s)$ incorporates diversity measures. For association rules, we employ:
+
+\begin{align}
+I_{assoc}(r) &= \lambda_1 \cdot \text{confidence}(r) + \lambda_2 \cdot \text{support}(r) + \lambda_3 \cdot \text{lift}(r) \\
+&\quad + \lambda_4 \cdot J(X_r; Y_r)
+\end{align}
+
+where $J(X_r; Y_r)$ represents the J-measure for probabilistic classification rules \cite{goodman1991rule}. For diversity-based summarization, we compute:
+
+\begin{align}
+I_{div}(s) &= \mu_1 \cdot I_{Shannon}(s) + \mu_2 \cdot (1 - I_{Simpson}(s)) + \mu_3 \cdot I_{Gini}(s) \\
+&\quad + \mu_4 \cdot (1 - I_{Berger}(s)) + \mu_5 \cdot I_{McIntosh}(s)
+\end{align}
+
+where $I_{McIntosh}(s) = \frac{N - \sqrt{\sum_{i=1}^m n_i^2}}{N - \sqrt{N}}$ measures the modified Euclidean distance from uniform distribution \cite{mcintoshIndexDiversityRelation1967}, and $f_r(t)$ and $g_s(t)$ are indicator functions for tuple membership in rule antecedents/consequents and summary groups respectively. $w_r$ and $w_s$ represent temporal decay weights that prioritize recent behavioral signals, and $\text{Novelty}(t)$ captures the degree to which tuple $t$ introduces previously unseen attribute combinations or value ranges.
+
+The normalization terms $|X_r \cup Y_r|$ and $|s|$ prevent longer patterns from dominating shorter, potentially more significant patterns—a critical consideration given that analytical interest often focuses on simple, interpretable relationships rather than complex multi-attribute associations. The temporal decay weights $w_r = e^{-\lambda_r \cdot \text{age}(r)}$ and $w_s = e^{-\lambda_s \cdot \text{age}(s)}$ ensure that the system adapts to evolving analytical interests while maintaining sensitivity to established preference patterns. The novelty component $\text{Novelty}(t) = \sum_{a \in \text{attrs}(t)} \frac{1}{\log(1 + \text{freq}(a, \text{value}(t, a)))}$ quantifies the inverse frequency of attribute-value combinations, promoting discovery of rare but potentially significant data patterns.
+
+\subsection{Scalable Implementation Architecture}
+
+Our vision requires addressing scalability challenges that emerge when applying implicit recommendation to large-scale analytical workloads. Traditional recommendation approaches assume relatively stable item catalogs and user preferences, assumptions that break down in exploratory data analysis where both the "item space" (potential tuples of interest) and user interests evolve rapidly.
+
+\textbf{Incremental Pattern Maintenance.} Unlike traditional batch-oriented pattern mining, our system maintains pattern repositories incrementally as new query results arrive using a sliding window approach with computational complexity $O(|R| \cdot \log|R| + |S| \cdot \log|S|)$ per update, where patterns are weighted by recency and relevance according to $w(p, t) = e^{-\alpha(t - t_p)} \cdot \text{relevance}(p)$. Automatic pruning eliminates patterns with contribution scores below threshold $\tau_{min} = \frac{\sigma_{contribution}}{2}$, where $\sigma_{contribution}$ represents the standard deviation of pattern contributions across the current session. This approach balances computational efficiency with predictive accuracy as exploration sessions progress.
+
+\textbf{Multi-Scale Temporal Modeling.} Our architecture explicitly models interest at multiple temporal scales through hierarchical exponential smoothing: immediate attention (seconds to minutes) with decay parameter $\lambda_{immediate} = 0.1$, session-level goals (minutes to hours) with $\lambda_{session} = 0.01$, and long-term analytical objectives (hours to days) with $\lambda_{longterm} = 0.001$. Interest prediction at time $t$ combines these scales as $I_{total}(t) = \lambda_1 I_{immediate}(t) + \lambda_2 I_{session}(t) + \lambda_3 I_{longterm}(t)$ with learned weights $\lambda_i$ optimized via gradient descent on historical prediction accuracy.
+
+\section{Research Challenges and Opportunities}
+
+The vision outlined in this paper opens numerous exciting research directions that span database systems, machine learning, and human-computer interaction. We identify four fundamental research challenges that must be addressed to realize the full potential of implicit recommendation for exploratory data analysis.
+
+\subsection{Challenge 1: Real-Time Interest Model Adaptation}
+
+\textbf{Note the following section was llm assisted, I wrote a sketch of what I thought the research challenges would be then asked it to fill in the blanks. Happy to cut or rewrite. I just wanted to match the structure of the other vision papers.}
+
+Current recommendation systems operate in stable environments where user preferences evolve slowly and item catalogs remain largely fixed. EDA presents a fundamentally different challenge: user interests can shift dramatically within a single session as new discoveries reshape analytical goals, while the space of potentially interesting tuples expands combinatorially with dataset size.
+
+\textbf{Research Opportunity}: Developing online learning algorithms that can rapidly adapt to shifting analytical interests while maintaining computational efficiency represents a significant algorithmic challenge. This requires advances in incremental pattern mining, efficient similarity computation for high-dimensional spaces, and novel approaches to balancing exploration versus exploitation in recommendation systems.
+
+\subsection{Challenge 2: Interpretability and Trust in Analytical Context}
+
+Unlike entertainment or e-commerce recommendation where user satisfaction is the primary metric, EDA recommendations directly impact analytical conclusions and decision-making. Analysts must be able to understand why specific data points are recommended and how recommendation algorithms might bias their discoveries.
+
+\textbf{Research Opportunity}: Developing interpretable recommendation models that can explain their suggestions in terms of discovered patterns, historical behavioral signals, and analytical context represents a crucial research direction. This extends beyond traditional explainable AI to require domain-specific explanation frameworks tailored to analytical reasoning.
+
+\subsection{Challenge 3: Evaluation Methodology for Analytical Interest}
+
+Traditional recommendation system evaluation relies on held-out ratings or implicit feedback signals like clicks and purchases. EDA evaluation requires fundamentally different approaches because the goal is analytical insight discovery rather than user satisfaction maximization.
+
+\textbf{Research Opportunity}: Creating robust evaluation frameworks for analytical recommendation systems requires developing new metrics that capture insight quality, discovery efficiency, and analytical coverage. This includes both automated evaluation approaches and human study methodologies specifically designed for exploratory analysis contexts.
+
+\subsection{Challenge 4: Cross-Domain Interest Transfer}
+
+Analysts often work across multiple datasets and domains within single organizations. Understanding how analytical interests and exploration patterns transfer across different data contexts could significantly improve recommendation accuracy and reduce cold-start problems.
+
+\textbf{Research Opportunity}: Developing transfer learning approaches for analytical interests that can leverage behavioral patterns from one domain to accelerate effective exploration in new domains represents a significant opportunity to improve EDA system effectiveness across diverse analytical contexts.
 
 
+\subsection{Experimental Validation}
+
+The goal of an EDA system is to reduce the time to insight for analyst. Quantifying this is challenging, as insights are inherently subjective and context-dependent. Furthermore conducting user experiments is time-consuming and expensive. We propose a proxy measure which is the ability of the system to predict which tuples an analyst will interact with in future queries. This approach captures the dynamic, session-based nature of exploratory analysis while providing quantitative performance measures. 
+
+
+\textbf{Temporal Prediction Task}: Given an analyst's query history $Q_1, Q_2, \ldots, Q_t$ predict which tuples the analyst will focus on in queries $Q_{t+1}, Q_{t+2}, \ldots, Q_{t+k}$ for various prediction horizons $k$.
+
+Our preliminary experiments on the Sloan Digital Sky Survey (SDSS) dataset \cite{york_sloan_2000} demonstrate the feasibility of this approach. The SDSS dataset contains observational data for millions of celestial objects with rich attribute sets spanning photometric, spectroscopic, and morphological characteristics—ideal for studying complex analytical exploration patterns.
 
 \begin{figure}
 \centering
 \includegraphics[scale=0.2]{figures/Overlap-analysis.png} 
+\caption{Analysis of tuple overlap between consecutive query results in SDSS exploration sessions. This figure will be fixed}
 \end{figure}
 
-As such any kind of recommender needs to have a memory of what the user has already seen and be able to adapt to the user's changing interests. as such our reccomender keeps a memory of all results the user has looked at.
+Figure 1 shows the overlap between consecutive query results varies dramatically and unpredictably, ranging from zero overlap when analysts pivot to new investigation directions to near-complete overlap when refining existing queries. This variability demonstrates why similarity-based recommendation approaches fail in analytical contexts and supports our vision for sophisticated behavioral modeling.
 
-\textbf{Iterative Rule Maintenance.} Our system maintains a persistent set of association rules and summaries across exploration sessions, enabling the accumulation of knowledge about user interests over time. At each iteration, newly discovered patterns from current query results are combined with historical patterns to provide a comprehensive view of user preferences. Rules and summaries are weighted by recency and relevance, with older patterns gradually decaying in influence while frequently reinforced patterns maintain their strength.
+\subsection{Prediction Results}
 
-The system employs a rule management strategy that balances memory efficiency with predictive accuracy. Rules that consistently fail to contribute to accurate predictions are pruned from the active set, while high-performing patterns are retained and strengthened. This approach ensures that the system adapts to evolving user interests while maintaining computational efficiency as exploration sessions progress.
+\textbf{Need to put more results here}
 
-\textbf{System Algorithm.} The complete system operates according to the following iterative process:
+\section{Related Work}
 
-\begin{algorithmic}[1]
-\Procedure{RecommendTuples}{$Q_{current}$, $R_{historical}$, $S_{historical}$}
-    \State $T_{results} \gets$ \textsc{ExecuteQuery}($Q_{current}$)
-    \State $F \gets$ \textsc{MineFrequentItemsets}($T_{results}$)
-    \State $R_{new} \gets$ \textsc{MineAssociationRules}($F$)
-    \State $S_{new} \gets$ \textsc{ApplyBUSSummarization}($T_{results}$)
-    \State $R_{combined} \gets R_{historical} \cup R_{new}$
-    \State $S_{combined} \gets S_{historical} \cup S_{new}$
-    \For{each tuple $t \in T_{results}$}
-        \State $I(t) \gets$ \textsc{ComputeInterestingness}($t$, $R_{combined}$, $S_{combined}$)
-    \EndFor
-    \State $T_{recommended} \gets$ \textsc{RankTuples}($T_{results}$, $I$)
-    \State $R_{relevant} \gets$ \textsc{FilterRelevantRules}($R_{combined}$, $T_{recommended}$)
-    \State $S_{relevant} \gets$ \textsc{FilterRelevantSummaries}($S_{combined}$, $T_{recommended}$)
-    \State \Return $T_{recommended}$, $R_{relevant}$, $S_{relevant}$
-\EndProcedure
-\end{algorithmic}
+This work builds upon extensive work in database query processing, interactive data exploration, pattern mining, interestingness measures, and recommendation systems. We organize this extensive body of work into several key areas that inform our approach to implicit recommendation for exploratory data analysis.
 
-where \textsc{ComputeInterestingness} applies the combined scoring formula from Equation (1), \textsc{RankTuples} orders tuples by decreasing interestingness score, and the filtering functions retain only rules and summaries that contribute to high-scoring tuples for the next iteration.
+\subsection{Interactive Data Exploration Systems}
 
+The database systems community has long recognized the limitations of traditional query-answer paradigms for exploratory analysis. Early work by introduced online aggregation to provide progressive query results, enabling interactive exploration of large datasets \cite{hellerstein1999online}. This foundational work established the principle that exploration systems must balance accuracy with responsiveness—a tension.
 
+Query-by-Example (QBE) systems represent one major research thrust in interactive exploration. YMALDB \cite{drosouYmaldbExploringRelational2013} recommends data similar to query results based on explicit user preferences, requiring users to specify similarity criteria and provide explicit feedback on recommendation quality. Similarly, explore-by-example systems \cite{dimitriadouAIDEActiveLearningBased2016} use active learning to iteratively refine understanding of user interests through explicit tuple rankings, achieving impressive prediction accuracy. 
 
+Query discovery systems \cite{shen2014discovering} tackle the related problem of discovering project-join queries from example tuples provided by users. These systems require users to understand schema structures and provide complete example tables, making them suitable for expert users but challenging for casual data exploration. Exemplar query systems \cite{mottin2014exemplar} introduce a novel paradigm where user queries serve as examples of desired results rather than traditional query conditions, but still rely on explicit similarity assessments for graph-based exploration.
 
+Interactive join inference systems \cite{bonifati2014interactive} focus specifically on inferring join predicates from user interactions through Boolean membership queries. While these approaches demonstrate sophisticated join discovery capabilities, they require explicit positive and negative examples from users.
 
+Faceted search systems like DICE \cite{rezig2021dice} provide structured exploration through example-driven data discovery, enabling users to navigate data spaces through explicit validation of candidate results, while other DICE systems \cite{el2016dice} focus on predefined attribute hierarchies. While effective for datasets with clear categorical structures, these approaches struggle with numerical data and complex analytical patterns that span multiple attributes.
 
-\section{Experimental Evaluation}
+Other work has explored more sophisticated interaction paradigms. Kalinin et al. \cite{kalininInteractiveDataExploration2014} propose drill-down operators and semantic windows for structured data navigation, while query steering approaches \cite{ugurcetintemelQuerySteeringInteractive2013} enable real-time query modification based on intermediate results. However, these systems continue to rely on explicit user direction rather than learning from behavioral patterns.
 
-We consider a small sample of sessions SDSS that have 
+\textbf{Limitations of Current Approaches.} Despite their individual contributions, all existing interactive exploration systems share fundamental limitations that constrain their effectiveness for large-scale exploratory analysis. They require users to provide explicit feedback—whether through tuple rankings \cite{dimitriadouAIDEActiveLearningBased2016}, example validation \cite{rezig2021dice}, Boolean membership queries \cite{bonifati2014interactive}, or similarity assessments \cite{mottin2014exemplar}. This explicit feedback requirement interrupts the natural flow of analytical reasoning and imposes cognitive overhead that scales poorly with dataset complexity and exploration depth.
 
-\section{Related work}
+\subsection{Query Relaxation and Result Optimization}
 
-\textbf{Query-by-Example and Interactive Data Exploration.} Existing data exploration systems rely heavily on explicit user interaction to guide the exploration process. Query-by-Example (QBE) approaches require users to provide explicit examples or feedback to formulate queries, demanding cognitive effort that interrupts the exploratory workflow. Interactive data exploration systems have proposed various explicit feedback mechanisms: YMALDB \cite{drosouYmaldbExploringRelational2013} recommends data similar to query results based on explicit user preferences; DICE uses faceted search requiring explicit facet selection; and systems like \cite{kalininInteractiveDataExploration2014} propose drill-down operators and semantic windows that require explicit user-driven navigation decisions. Query steering approaches \cite{ugurcetintemelQuerySteeringInteractive2013} and interactive query specification systems similarly demand explicit user feedback during query formulation.
+Query relaxation techniques address a complementary problem: automatically modifying queries to satisfy cardinality constraints or obtain non-empty results. One approach is query answering \cite{lim2013flexible} that relaxes selection predicates when exact matches return insufficient results. Another similar approach is interactive query specification systems \cite{mishra2009interactive} that suggest query modifications based on data distribution characteristics.
 
-\textbf{Query Relaxation and Refinement.} Query relaxation techniques focus on modifying query parameters to satisfy cardinality constraints or obtain non-empty results, but operate orthogonally to understanding user interests. These approaches employ explicit user acceptance/rejection of query modifications rather than inferring intent from exploration patterns. Unlike these systems that require users to explicitly evaluate and approve query modifications, our implicit feedback approach infers user interests from the natural progression of their exploration session, capturing intent through the organic evolution of their analytical investigation.
+While these approaches demonstrate sophisticated understanding of query semantics and data characteristics, they operate orthogonally to interest modeling. Query relaxation systems modify queries to improve result quality but do not attempt to understand or predict what analysts find interesting within those results. Our vision complements these approaches by addressing the subsequent challenge of identifying interesting tuples within well-formed result sets.
 
-\textbf{Active Learning for Data Exploration.} Traditional active learning approaches maximize learning outcomes while minimizing labeled samples, but assume either small datasets or negligible sample extraction costs—assumptions that break down with large-scale data exploration. Relevance feedback techniques from information retrieval are designed for specific data types and do not optimize for efficient data space exploration in analytical contexts. These active learning paradigms require explicit user labeling of samples, creating cognitive overhead that disrupts the exploratory thought process.
+\subsection{Pattern Mining and Interestingness Measures}
 
-\textbf{Collaborative Query Systems.} Collaborative approaches facilitate SQL query formulation based on past queries or provide query recommendations, but do not predict user interests from behavioral patterns. Query clustering techniques focus on understanding intent in web search contexts rather than structured database exploration. These collaborative systems assume static, predefined notions of similarity and do not adapt to individual user exploration patterns in real-time.
+The knowledge discovery community has extensively studied measures for identifying interesting patterns in data. Hilderman and Hamilton \cite{robertj.hildermanKnowledgeDiscoveryMeasures2001} provide a comprehensive taxonomy distinguishing between measures that operate on mined patterns versus those that operate on summarized data. Their framework reveals fundamental tensions between different notions of interestingness that our work directly addresses.
 
-\textbf{Implicit Feedback in Recommendation Systems.} While implicit feedback has been extensively studied in traditional recommendation systems, its application to Exploratory Data Analysis (EDA) remains unexplored. Early work by Oh et al. \cite{oh2008user} proposed multi-criteria rating systems using implicit feedback for e-commerce applications, relying on ID3 decision trees for attribute importance determination with predefined product attributes. Recent advances have tackled exposure bias and missing data problems: Wang et al. \cite{wang2018modeling} introduced H4MF using Hidden Markov Models to capture temporal dependencies in user behavior for dynamic missingness modeling; Lin et al. \cite{lin2024recrec} proposed ReCRec, which reasons about causes behind implicit feedback by categorizing unclicked data into unexposed, dislike, or combination scenarios; and Wang et al. \cite{wang2021denoising} focused on denoising implicit feedback through Adaptive Denoising Training (ADT), achieving 15-21\% performance improvements by removing false positives. Wu et al. \cite{wu2022adapting} introduced Triplet Importance Learning (TIL) with bilevel optimization to adaptively weight training triplets in pairwise ranking, addressing the limitation that traditional methods treat all triplets equally. Guo and Huang \cite{guo2023implicit} developed sequence recommendation using Transformers for interactive interest modeling to capture real-time user interests through behavior sequences. Li et al. \cite{li2025beyond} identified "intentional implicit feedback" through user studies on social media platforms, revealing that users strategically employ behaviors to influence algorithmic recommendations.
+% Geng and Hamilton \cite{geng2006interestingness} survey over 30 different interestingness measures, demonstrating the substantial disagreement about what constitutes an "interesting" pattern. Their analysis reveals that different measures capture different aspects of pattern significance—syntactic novelty, semantic significance, and pragmatic usefulness—supporting our argument for multi-dimensional interest modeling.
 
-All existing implicit feedback approaches focus on recommendation scenarios with predefined item catalogs, stable user preferences, consumption-oriented goals, and satisfaction-based success metrics—assumptions that are differnt to EDA, where the "item space" is dynamically generated through analytical operations, user interests evolve rapidly based on discovered insights, success is measured by knowledge discovery rather than satisfaction, and recommendations target analytical operations rather than content items. Our approach fundamentally differs from these explicit feedback paradigms by leveraging implicit signals from users' natural exploration behavior—specifically the sequence and characteristics of follow-up queries—eliminating the need for disruptive explicit feedback while maintaining exploration momentum. To the best of our knowledge, no prior work has addressed implicit recommendation specifically for EDA or SQL-based data exploration.
+Recent work has attempted to learn interestingness measures from data. This data can be user studies \cite{das2018learning} or customised rules for specific domains \cite{ruiz2014learning}. However, these approaches still rely on manual interaction and fail to capture the dynamic, contextual nature of analytical interest evolution.
 
-\section{Conclusion and Future Work}
+\subsection{Recommendation Systems and Implicit Feedback}
 
-This proof of concept system is limited in that it only looks at tuples the user looks at. This makes it very effective for drill-down or zooming like workloads but not as helpful for more general exploration. Future work will look at automated exploration of the database and modelling potential query trajectories.
+The recommendation systems community has extensively studied implicit feedback mechanisms, providing crucial insights for our vision. Collaborative filtering approaches \cite{hu2008collaborative, koren2009matrix} demonstrate the superiority of implicit signals over explicit ratings for understanding user preferences in traditional domains like movie recommendation and e-commerce.
+
+Recent advances address fundamental challenges in implicit feedback systems. When capturing temporal dependencies in user behaviour Hidden markov models have been applied \cite{wang2018modeling},  addressing the dynamic nature of preferences that parallels our analytical interest modeling challenge. Another approach is ReCRec \cite{lin2024recrec} for reasoning about causes behind implicit feedback, providing approaches for distinguishing genuine disinterest from lack of exposure—crucial for analytical contexts where data coverage is paramount.
+
+Denoising implicit feedback represents another important research direction. One approach is Adaptive Denoising Training (ADT) \cite{wang2021denoising}  to remove false positives from implicit signals, achieving 15-21\% performance improvements in traditional recommendation domains. Another approach is Triplet Importance Learning (TIL) \cite{wu2022adapting} with bilevel optimization for adaptively weighting training triplets, addressing the challenge that implicit signals vary significantly in reliability and relevance.
+
+However, all existing implicit feedback approaches focus on recommendation scenarios with predefined item catalogs, stable user preferences, and satisfaction-based success metrics. EDA presents fundamentally different challenges: the "item space" (potential tuples of interest) is dynamically generated through analytical operations, user interests evolve rapidly based on discovered insights, and success is measured by knowledge discovery rather than user satisfaction.
+
+\subsection{Cognitive Models of Analytical Reasoning}
+
+Understanding how analysts actually think and reason about data provides crucial insights for designing effective recommendation systems. Pirolli and Card's information foraging theory \cite{pirolli2005information} describes how analysts navigate information spaces, predicting that users will follow information scent gradients toward increasingly valuable information sources. This theory provides a cognitive foundation for implicit feedback approaches by explaining why behavioral signals reliably indicate information value.
+
+Cognitive load theory \cite{sweller1988cognitive} explains why explicit feedback requirements are problematic in analytical contexts. Exploratory analysis already imposes substantial intrinsic cognitive load through complex reasoning about multidimensional data relationships. Adding extraneous cognitive load through explicit feedback requirements can overwhelm working memory and degrade analytical performance.
+
+Recent work in visual analytics provides additional insights into analytical reasoning patterns such as studying how analysts transition between different visualisation types during exploration \cite{liu2018bridging} showing systematic patterns in attention and strategy evolution. These findings support our behavioral modeling approach by demonstrating that analyst interactions contain rich signals about underlying reasoning processes.
+
+\subsection{Active Learning and Database Applications}
+
+Active learning approaches in database contexts attempt to minimize labeling effort while maximizing learning outcomes. Traditional active learning assumes small datasets or negligible sample extraction costs—assumptions that break down with large-scale data exploration where both dataset size and query evaluation costs matter significantly.
+
+Relevance feedback techniques from information retrieval \cite{rocchio1971relevance} provide related approaches for iteratively refining search results based on user feedback. However, these techniques are designed for specific data types (typically text) and do not optimize for efficient exploration of structured, multidimensional data spaces characteristic of database applications.
+
+\subsection{Collaborative Query Systems and Intent Understanding}
+
+Collaborative approaches to query formulation and optimization represent another relevant research direction. One approach is collaborative query optimsion based on past query patterns \cite{khoussainova2009perfxact}, while other works provide query recommendations based on collaborative filtering principles \cite{stefanidis2009you}.
+
+Query intent understanding represents a related challenge in web search and database contexts. Some examples include studing study query intent diversification for web search \cite{agrawal2009diversifying} and personalized query optimization based on user preference models \cite{koutrika2005constrained}. However, these approaches assume relatively stable information needs rather than the dynamic, evolving analytical goals characteristic of exploratory data analysis.
+
+\subsection{Systems for Large-Scale Analytics}
+
+Modern analytical systems like Spark \cite{zaharia2016apache}, Dremel \cite{melnik2010dremel}, and F1 \cite{shute2013f1} demonstrate the scalability requirements for next-generation EDA systems. These systems provide the computational foundation necessary for real-time pattern mining and behavioral modeling at scale.
+
+Progressive analytics approaches \cite{fisher2012user, rahman2017i} offer insights into balancing exploration speed with result accuracy, crucial considerations for implicit recommendation systems that must provide timely suggestions while maintaining analytical rigor. Our vision builds on these systems-level innovations while adding the intelligence necessary for understanding and predicting analytical interest.
+
+To the best of our knowledge, no prior work has systematically addressed implicit recommendation specifically for exploratory data analysis or developed comprehensive frameworks for understanding analytical interest evolution through behavioral modeling. Our vision represents the first attempt to bridge recommendation systems research with database systems and cognitive modeling to create a unified framework for implicit EDA recommendation.
+
+\section{Conclusion}
+
+\textbf{Note: This section was also llm assisted, I wrote a sketch of what I thought the conclusion and future work would be then asked it to fill in the blanks. Happy to cut or rewrite.}
+
+This paper presents a fundamental reimagining of how database systems should support exploratory data analysis through implicit recommendation rather than explicit feedback mechanisms. Our vision addresses a critical gap in current EDA systems: their reliance on cognitively disruptive explicit feedback paradigms that interrupt analytical flow while optimizing for similarity rather than genuine analytical interest.
+
+We have demonstrated that implicit feedback approaches, successfully deployed in other recommendation domains, offer superior alignment with the cognitive demands and behavioral patterns of exploratory analysis. Our proposed interestingness contribution scheme provides a concrete framework for operationalizing multi-dimensional interest prediction, while our identification of key research challenges establishes a roadmap for future investigation.
+
+The implications of this vision extend far beyond incremental improvements to existing EDA tools. By eliminating explicit feedback requirements and developing sophisticated implicit interest models, we can fundamentally transform how analysts interact with large-scale datasets. This transformation promises to democratize advanced analytics by reducing the cognitive overhead associated with data exploration, enabling domain experts to focus on analytical reasoning rather than system interaction complexities.
+
+The research challenges we have identified—real-time interest model adaptation, interpretability in analytical contexts, evaluation methodology development, and cross-domain interest transfer—represent exciting opportunities for the database systems community to lead innovation at the intersection of data management, machine learning, and human-computer interaction.
+
+As data volumes continue their exponential growth and analytical complexity increases across all domains, the need for intelligent, adaptive EDA systems becomes increasingly critical. Our vision provides a foundation for developing these next-generation systems, positioning the database community to address one of the most significant challenges in modern data science: enabling humans to effectively explore and understand large-scale, complex datasets.
+
+The future of exploratory data analysis lies not in forcing analysts to provide explicit feedback, but in building systems intelligent enough to understand analytical intent through natural exploration behavior. This vision represents a paradigm shift that could fundamentally change how we approach data-driven discovery across scientific, business, and social domains.
+
+\section{Future Work}
+
+\textbf{This section has a bunch of leftovers}
+
+Our current framework focuses primarily on tuple-level recommendations within existing query results. Future research should extend this approach to encompass automated exploration beyond user-initiated queries, potentially identifying entirely new analytical directions that users might not have considered. This extension would require sophisticated techniques for modeling the complete analytical landscape of a dataset while balancing computational feasibility with discovery potential.
+
+Additionally, the integration of our implicit recommendation framework with modern visual analytics platforms presents significant opportunities for enhancing analytical workflows. Understanding how implicit behavioral signals from interactive visualizations can inform database-level exploration recommendations represents a crucial direction for creating truly integrated analytical environments that support the full spectrum of exploratory data analysis tasks.
+
+\textbf{Behavioral Pattern Integration.} A critical area for future research involves developing sophisticated models for dynamic behavioral signals that capture the temporal evolution of analytical interest. We envision three classes of behavioral indicators that require further investigation:
+
+\textit{Attention Patterns}: Future systems should model time spent analyzing different result sets, scroll patterns within large result sets, and repeated access to specific tuples to indicate varying levels of analytical interest. These micro-behaviors could provide fine-grained signals about which data characteristics capture analyst attention, requiring advances in user interface instrumentation and attention modeling.
+
+\textit{Investigation Trajectories}: The sequence of follow-up queries provides crucial information about analytical goals and interest evolution. Future work should develop methods to identify when analysts consistently drill down into specific attribute ranges or filter conditions, revealing systematic preferences that can inform recommendations. This requires sophisticated sequence modeling and pattern recognition techniques.
+
+\textit{Contextual Adaptations}: Understanding changes in query formulation patterns, result set interaction strategies, and investigation depth could indicate shifts in analytical strategy or evolving understanding of the dataset. Future research should explore how these macro-behavioral changes can help systems adapt to new analytical goals or discovery phases through meta-learning approaches.
+
+Beyond prediction accuracy, we propose longitudinal user studies that track analytical discovery patterns over extended exploration sessions. These studies will evaluate whether implicit recommendation systems enhance or constrain analytical discovery compared to traditional query-driven exploration. 
 
 \begin{acks}
 \end{acks}
