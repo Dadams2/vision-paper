@@ -356,7 +356,7 @@ Figure~\ref{fig:workload_comparison} presents the central result of this paper: 
 \label{fig:decay_sensitivity}
 \end{figure}
 
-Figure~\ref{fig:decay_sensitivity} shows the sensitivity to the temporal decay rate $\lambda_r$ for association rules on the adversarial benchmark. Without decay ($\lambda_r=0$), performance degrades as the system over-weights distant patterns. Very high decay ($\lambda_r \geq 0.3$) also hurts performance by discarding useful medium-term patterns.
+Figure~\ref{fig:decay_sensitivity} shows the sensitivity to the temporal decay rate $\lambda_r$ for association rules on the adversarial benchmark. Without decay ($\lambda_r=0$), F1 is 0.246; introducing even modest decay improves performance, with F1 rising to 0.267 at $\lambda_r = 0.20$ and plateauing through $\lambda_r = 0.30$. This confirms that temporal weighting helps MDI focus on recently relevant patterns, though the system is robust to the exact decay rate across a wide range ($\lambda_r \in [0.05, 0.30]$).
 
 \subsection{Discussion}
 
