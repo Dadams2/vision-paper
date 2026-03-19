@@ -338,38 +338,7 @@ In contrast, on the SIMBA drilldown benchmark, all six recommenders achieve simi
 \label{fig:gap_analysis}
 \end{figure}
 
-Figure~\ref{fig:gap_analysis} illustrates how performance varies with prediction gap $g$. All methods degrade as the gap increases, reflecting the decreasing correlation between temporally distant queries. MDI maintains a consistent advantage across all prediction horizons. At gap=6, the benefit of temporal decay is most pronounced: MDI's decay mechanism down-weights older patterns, preventing the system from over-relying on distant historical signal.
-
-% \begin{equation}
-% w(t) = e^{-\lambda \cdot \text{age}(t)}
-% \label{eq:temporal_decay}
-% \end{equation}
-
-% \subsubsection{Component Contribution Analysis}
-
-
-\begin{table}[t]
-\centering
-\caption{Ablation study: contribution of MDI components (SDSS, gap=1, k=10)}
-% example below
-% \label{tab:ablation}
-% \begin{tabular}{lcccc}
-% \toprule
-% \textbf{Configuration} & \textbf{Precision} & \textbf{Recall} & \textbf{F1} & \textbf{Time (ms)} \\
-% \midrule
-% MDI (full) & \textbf{0.847} & \textbf{0.692} & \textbf{0.761} & 127.3 \\
-% \midrule
-% No novelty ($\gamma=0$) & 0.841 & 0.686 & 0.755 & 118.6 \\
-% No diversity ($\beta=0$) & 0.829 & 0.675 & 0.743 & 89.4 \\
-% No rules ($\alpha=0$) & 0.818 & 0.667 & 0.735 & 52.1 \\
-% Rules only ($\beta=\gamma=0$) & 0.823 & 0.671 & 0.739 & 68.2 \\
-% \midrule
-% Random & 0.782 & 0.638 & 0.703 & 2.1 \\
-% \bottomrule
-% \end{tabular}
-\end{table}
-
-% \subsubsection{SIMBA Benchmark Results}
+Figure~\ref{fig:gap_analysis} illustrates how performance varies with prediction gap $g$ on the adversarial benchmark. MDI's advantage is most pronounced at gap=1 (F1=0.260 vs.\ 0.191 for random, a 36\% improvement) and gap=2 (44\% improvement). At larger gaps, performance converges as the overlap between current and future results decreases for all methods. This pattern is consistent with Corollary~\ref{cor:gap}: MDI's association component accumulates signal across queries regardless of gap, while baselines rely on superficial features of the current result that become less predictive at larger temporal distances.
 
 \begin{figure}[t]
 \centering
@@ -389,7 +358,7 @@ Figure~\ref{fig:workload_comparison} presents the central result of this paper: 
 \label{fig:decay_sensitivity}
 \end{figure}
 
-Figure~\ref{fig:decay_sensitivity} analyzes sensitivity to the temporal decay rate $\lambda_r$ for association rules. Without decay ($\lambda_r=0$), performance degrades by 3.2\% in F1 as the system over-weights distant patterns. Conversely, very high decay ($\lambda_r \geq 0.3$) discards useful medium-term patterns. The optimal range $\lambda_r \in [0.05, 0.15]$ balances recency bias against historical pattern retention.
+Figure~\ref{fig:decay_sensitivity} shows the sensitivity to the temporal decay rate $\lambda_r$ for association rules on the adversarial benchmark. Without decay ($\lambda_r=0$), F1 is 0.246; introducing even modest decay improves performance, with F1 rising to 0.267 at $\lambda_r = 0.20$ and plateauing through $\lambda_r = 0.30$. This confirms that temporal weighting helps MDI focus on recently relevant patterns, though the system is robust to the exact decay rate across a wide range ($\lambda_r \in [0.05, 0.30]$).
 
 \subsection{Discussion}
 
@@ -397,7 +366,9 @@ Our experiments demonstrate three key findings that motivate the need for princi
 
 First, \textit{realistic visualization-driven workloads cannot differentiate recommenders}. On SIMBA drilldown sessions, all six methods---from simple random selection to our multi-component MDI approach---achieve statistically indistinguishable F1 scores. This occurs because progressive drill-down produces high inter-query overlap, making any sample from current results likely to appear in future results. This finding has important implications for the database community: prior work evaluating recommenders exclusively on realistic workloads may overstate the effectiveness of simple baselines while undervaluing sophisticated approaches.
 
-Despite the computational overhead of multiple scoring components, MDI maintains sub-second response times (127ms average), making it suitable for interactive applications where users issue sequential queries and benefit from recommendations during result browsing.
+Second, \textit{controlled adversarial benchmarks reveal genuine recommender capabilities}. When workload parameters are tuned to satisfy the failure conditions identified in Section~\ref{sec:theory:failures}---sparse rule signal ($\rho \approx 0.22$), high frequency skew ($\xi = 4$), and homogeneous noise ($\sigma^2_{\text{noise}} \leq 0.11$)---MDI's temporal accumulation mechanism produces a clear 36\% F1 improvement over random at gap=1. This validates the theoretical framework and demonstrates that MDI genuinely learns association patterns rather than exploiting workload-inherent overlap.
+
+Third, \textit{the prediction task is fundamentally hard}. Even on the adversarial benchmark where MDI has a clear advantage, absolute F1 remains at 0.26---far from perfect prediction. This reflects the inherent difficulty of predicting which tuples an analyst will access next from implicit behavioral signals alone, and motivates continued research into more expressive interest models.
 
 
 \section{Related Work}
