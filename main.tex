@@ -198,7 +198,7 @@ Our vision requires addressing scalability challenges that emerge when applying 
 
 \textbf{Multi-Scale Temporal Modeling.} Our architecture explicitly models interest at multiple temporal scales through hierarchical exponential smoothing: immediate attention (seconds to minutes) with decay parameter $\lambda_{immediate} = 0.1$, session-level goals (minutes to hours) with $\lambda_{session} = 0.01$, and long-term analytical objectives (hours to days) with $\lambda_{longterm} = 0.001$. Interest prediction at time $t$ combines these scales as $I_{total}(t) = \lambda_1 I_{immediate}(t) + \lambda_2 I_{session}(t) + \lambda_3 I_{longterm}(t)$ with learned weights $\lambda_i$ optimized via gradient descent on historical prediction accuracy.
 
-\input{workload_theory}
+% \input{workload_theory}
 
 \section{Research Challenges and Opportunities}
 
