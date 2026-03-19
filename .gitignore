@@ -1,7 +1,6 @@
 # Created by https://gitignore.org
 # TeX.gitignore
 
-*.pdf
 reference/*
 
 ## Core latex/pdflatex auxiliary files:
