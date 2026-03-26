@@ -1,0 +1,438 @@
+% ─────────────────────────────────────────────────────────────────────────────
+% Workload–Recommender Alignment: A Theoretical Framework
+% To include in the main paper: \input{workload_theory}
+% Place between the framework description and the Research Challenges section.
+% ─────────────────────────────────────────────────────────────────────────────
+
+\section{Theoretical Analysis: Workload--Recommender Alignment}
+\label{sec:theory}
+
+The purpose of this section is to give the benchmark results a principled
+foundation: we first construct a formal
+model of EDA sessions and define precisely what each recommender optimises, then
+derive conditions on the \emph{workload} under which each recommender succeeds
+or fails.  The analysis yields both an explanation of the benchmark design and a
+prescriptive recipe for constructing controlled evaluations targeted at any
+recommender.
+
+%─────────────────────────────────────────
+\subsection{Formal Session Model}
+\label{sec:theory:model}
+
+\paragraph{Schema and tuples.}
+Let $\mathcal{A} = \{A_1, \ldots, A_d\}$ be a fixed relational schema.  Each
+attribute $A_i$ has a finite domain $\text{dom}(A_i)$.  A \emph{tuple}
+$t \in \mathcal{T}$ is a complete assignment $t : \mathcal{A} \to
+\bigcup_i \text{dom}(A_i)$ such that $t(A_i) \in \text{dom}(A_i)$.  The
+\emph{fact table} $\mathcal{T}$ is a finite multiset of such tuples.
+
+\paragraph{Association rules.}
+An \emph{association rule} $r = (X \Rightarrow Y)$ is a pair of attribute–value
+sets $X, Y \subset \{A_i = v \mid A_i \in \mathcal{A},\, v \in \text{dom}(A_i)\}$
+with $X \cap Y = \emptyset$.  A tuple $t$ \emph{satisfies the antecedent} $X$
+if $t(A_i) = v$ for all $(A_i = v) \in X$, and similarly for $Y$.  Standard
+interestingness measures are:
+\begin{align}
+  \text{supp}(r) &= \frac{|\{t \in \mathcal{T} \mid t \models X \cup Y\}|}{|\mathcal{T}|},
+  \label{eq:support}\\
+  \text{conf}(r) &= \frac{\text{supp}(r)}{\text{supp}(X)},
+  \label{eq:confidence}\\
+  \text{lift}(r) &= \frac{\text{conf}(r)}{\text{supp}(Y)},
+  \label{eq:lift}
+\end{align}
+where $\text{supp}(X)$ (resp. $\text{supp}(Y)$) denotes the fraction of tuples
+satisfying $X$ (resp. $Y$) alone.  The \emph{J-measure}~\cite{smyth1992rule}
+is a mutual-information proxy:
+\begin{equation}
+  J(r) = \text{supp}(r)\log\frac{\text{conf}(r)}{\text{supp}(Y)}
+        + (1-\text{supp}(r))\log\frac{1-\text{conf}(r)}{1-\text{supp}(Y)}.
+  \label{eq:jmeasure}
+\end{equation}
+
+\paragraph{EDA session and prediction task.}
+An \emph{EDA session} of length $Q$ is an ordered sequence of query results
+$\mathcal{S} = (R_0, R_1, \ldots, R_{Q-1})$ where each $R_q \subseteq \mathcal{T}$
+is a finite multiset.  The \emph{history} at step $q$ is
+$\mathcal{H}_q = (R_0, \ldots, R_{q-1})$.
+
+At each step $q$ with \emph{prediction gap} $g \geq 1$, a recommender is given
+$(R_q, \mathcal{H}_q)$ and must rank the tuples of $R_q$.  The ground-truth
+relevance label for a tuple $t \in R_q$ is
+\begin{equation}
+  \text{rel}(t,q,g) = \mathbf{1}\bigl[t \in R_{q+g}\bigr].
+  \label{eq:relevance}
+\end{equation}
+That is, a tuple is relevant if it \emph{reappears} in the result set $g$ steps
+into the future --- a natural formalisation of ``the analyst will want to see
+this again soon''.
+
+%─────────────────────────────────────────
+\subsection{Evaluation: nDCG as the Quality Criterion}
+\label{sec:theory:ndcg}
+
+Let $\pi$ be the ranking of $R_q$ produced by a recommender and let $k$ be the
+recommendation budget.  The normalised discounted cumulative gain at rank $k$
+is
+\begin{equation}
+  \text{nDCG}_k(\pi, q, g)
+  = \frac{1}{Z_k}
+    \sum_{i=1}^{k}
+    \frac{\text{rel}(\pi(i), q, g)}{\log_2(i+1)},
+  \label{eq:ndcg}
+\end{equation}
+where $Z_k$ is the ideal DCG (all relevant tuples at the top).  We write
+$\text{nDCG}_k(B, \mathcal{S})$ for the mean over all valid $(q, g)$ pairs in
+session $\mathcal{S}$ for recommender $B$.
+
+\paragraph{Overlap concentration.}
+Define the \emph{rule-conforming overlap fraction} of a query pair $(q, q+g)$
+as
+\begin{equation}
+  \rho(q,g)
+  = \frac{|R_q \cap R_{q+g} \cap \mathcal{T}^*|}{|R_q \cap R_{q+g}|},
+  \label{eq:rho}
+\end{equation}
+where $\mathcal{T}^* = \{t \in \mathcal{T} \mid \exists r : t \models X_r
+\cup Y_r\}$ is the set of rule-conforming tuples.  When $\rho(q,g) \approx 1$,
+predicting overlap is essentially the same as identifying rule tuples inside
+$R_q$.
+
+%─────────────────────────────────────────
+\subsection{Recommender Scoring Functions}
+\label{sec:theory:scorers}
+
+We model each recommender as a \emph{scoring function}
+$s_B : R_q \times \mathcal{H}_q \to \mathbb{R}$ that induces a ranking $\pi_B$
+over $R_q$.
+
+\paragraph{Random.}
+$s_{\mathrm{rand}}(t) \sim \mathrm{Uniform}(0,1)$, independent of everything.
+
+\paragraph{Frequency.}
+Let $\text{freq}_q(A_i = v) = |\{(s, u) \mid s < q,\, u \in R_s,\, u(A_i) = v\}|$
+be the historical count of value $v$ in attribute $A_i$ across past results.
+\begin{equation}
+  s_{\mathrm{freq}}(t) = \frac{1}{d}\sum_{i=1}^d \text{freq}_q\bigl(A_i = t(A_i)\bigr).
+  \label{eq:freq-score}
+\end{equation}
+
+\paragraph{Clustering.}
+One-hot encode each tuple in $R_q$ to a vector $\phi(t) \in \{0,1\}^D$.  Run
+$K$-means on $\{\phi(t) \mid t \in R_q\}$ to obtain centroids
+$\{\mu_1, \ldots, \mu_K\}$.  Score each tuple by proximity to its assigned
+centroid's \emph{neighbourhood density}:
+\begin{equation}
+  s_{\mathrm{clust}}(t) = -\|\phi(t) - \mu_{k(t)}\|^2,
+  \label{eq:clust-score}
+\end{equation}
+where $k(t) = \arg\min_k \|\phi(t) - \mu_k\|$.  Tuples near a centroid score
+high; outliers score low.
+
+\paragraph{Similarity.}
+Let $\bar{\phi}_q = \frac{1}{|R_q|}\sum_{t \in R_q}\phi(t)$ be the mean
+encoding of the current result.  Rank by cosine similarity to this centroid:
+\begin{equation}
+  s_{\mathrm{sim}}(t) = \frac{\phi(t) \cdot \bar{\phi}_q}{\|\phi(t)\|\,\|\bar{\phi}_q\|}.
+  \label{eq:sim-score}
+\end{equation}
+
+\paragraph{Sampling.}
+A stratified random sample of $k$ tuples from $R_q \cup \mathcal{H}_{q}^{\rm flat}$
+(the union of current and past results), with each tuple weighted by its
+historical frequency.  This interpolates between Random and Frequency depending
+on the history length.
+
+\paragraph{MDI.}
+The MDI score accumulates three components across the history:
+\begin{equation}
+  s_{\mathrm{MDI}}(t, q)
+  = \alpha \cdot A(t, q) + \beta \cdot D(t, q) + \gamma \cdot N(t, q),
+  \label{eq:mdi-score}
+\end{equation}
+where $\alpha + \beta + \gamma = 1$.
+
+\begin{description}
+  \item[Association component $A(t,q)$:]
+    Let $\mathcal{R}_q$ be association rules mined from the history up to step
+    $q$.  For rule $r \in \mathcal{R}_q$, let
+    $w_r(q) = e^{-\lambda_r (q - q_r)}$ be an exponential decay weight
+    ($\lambda_r$ is the decay rate, $q_r$ the query at which $r$ was mined).
+    The composite rule score is
+    \begin{equation}
+      I_{\mathrm{assoc}}(r)
+      = \lambda_1\,\mathrm{conf}(r) + \lambda_2\,\mathrm{supp}(r)
+      + \lambda_3\,\mathrm{lift}(r) + \lambda_4\,J(r),
+      \label{eq:Iassoc}
+    \end{equation}
+    and the association component for tuple $t$ is
+    \begin{equation}
+      A(t,q)
+      = \sum_{r \in \mathcal{R}_q}
+        w_r(q)\,\frac{I_{\mathrm{assoc}}(r)}{|X_r \cup Y_r|}\,
+        \mathbf{1}[t \models X_r \cup Y_r].
+      \label{eq:Acomponent}
+    \end{equation}
+
+  \item[Diversity component $D(t,q)$:]
+    Measures how much adding $t$ to a candidate summary would increase the
+    entropy of attribute-value distributions in $\mathcal{H}_q$ (combining
+    Shannon, Simpson, Gini, Berger--Parker, and McIntosh indices with weights
+    $\mu_1, \ldots, \mu_5$).
+
+  \item[Novelty component $N(t,q)$:]
+    Penalises tuples whose attribute values are over-represented in
+    $\mathcal{H}_q$, favouring attribute–value combinations that have appeared
+    sparsely in the session history.
+\end{description}
+
+%─────────────────────────────────────────
+\subsection{Four Workload Parameters}
+\label{sec:theory:params}
+
+The behaviour of each recommender is controlled by four workload parameters
+that can be tuned independently in a synthetic benchmark:
+
+\begin{description}
+  \item[$\rho$ --- signal fraction:]
+    The fraction of tuples in typical large query results that are
+    rule-conforming:
+    $\rho = \mathbb{E}[|R_q \cap \mathcal{T}^*| / |R_q|]$.
+    In our benchmark, $\rho \approx 0.20$--$0.30$ for large queries.
+
+  \item[$\xi$ --- frequency skew:]
+    The ratio of the empirical count of common values to the count of rare
+    (rule-antecedent) values in $\mathcal{H}_q$:
+    $\xi = \text{freq}_q(\text{common}) / \text{freq}_q(\text{rare})$.
+    Controlled by the bias probability $p_{\mathrm{common}}$ (set to $0.80$).
+
+  \item[$\sigma^2_{\mathrm{noise}}$ --- noise cluster variance:]
+    The mean intra-cluster variance of noise tuples in encoded feature space.
+    When $p_{\mathrm{common}}$ is high, the noise distribution concentrates on
+    $2$--$3$ values per attribute, making $\sigma^2_{\mathrm{noise}}$ small.
+
+  \item[$Q^*$ --- required memory depth:]
+    The minimum session length (number of queries before the evaluation gap)
+    needed for MDI to mine association rules with sufficient frequency to
+    produce reliable confidence estimates.  Depends on $\text{supp}(r)$ and
+    the minimum support threshold $\theta_s$.
+\end{description}
+
+%─────────────────────────────────────────
+\subsection{Failure Conditions for Baseline Recommenders}
+\label{sec:theory:failures}
+
+We now state conditions under which each baseline fails to identify
+rule-conforming overlap tuples, giving MDI a ranking advantage.
+
+\begin{proposition}[Frequency failure]
+\label{prop:freq}
+Let $f_c = \text{freq}_q(\text{common})$ and $f_r = \text{freq}_q(\text{rare})$
+be the mean historical counts of common and rare attribute values respectively.
+Fix a query result $R_q$ containing noise tuples $R_q^{\rm noise}$ biased toward
+common values and rule tuples $R_q^* \subseteq \mathcal{T}^*$.
+If $\xi = f_c / f_r > 1$, then for every rule tuple $t^* \in R_q^*$ and typical
+noise tuple $t^n \in R_q^{\rm noise}$,
+\[
+  s_{\mathrm{freq}}(t^n) > s_{\mathrm{freq}}(t^*).
+\]
+\textit{Proof sketch.}
+By construction, each component $\text{freq}_q(A_i = t^n(A_i)) = f_c$ (biased
+toward common values) while $\text{freq}_q(A_i = t^*(A_i)) = f_r$ for the
+rule-specific attributes.  The inequality follows directly from Eq.~\eqref{eq:freq-score}
+and $\xi > 1$.
+\end{proposition}
+
+\begin{proposition}[Clustering failure]
+\label{prop:clust}
+Suppose the noise distribution concentrates on $c$ values per attribute
+($c \ll |\text{dom}(A_i)|$) so that $\sigma^2_{\mathrm{noise}} \leq \delta$
+for a small $\delta > 0$, and let rule tuples scatter uniformly across
+$|\text{dom}(A_i)|$ values.  Then for any $K$-means solution with $K$ clusters,
+at least $K - O(\sqrt{\delta})$ centroids coincide with noise cluster means, and
+every rule tuple $t^*$ receives an assignment distance
+$\|{\phi}(t^*) - \mu_{k(t^*)}\|^2 \geq \Omega(1/c)$, while
+$\|{\phi}(t^n) - \mu_{k(t^n)}\|^2 \leq \delta$ for noise tuples.
+By Eq.~\eqref{eq:clust-score}, $s_{\mathrm{clust}}(t^n) > s_{\mathrm{clust}}(t^*)$.
+\end{proposition}
+
+\begin{proposition}[Similarity failure]
+\label{prop:sim}
+When $|R_q^{\rm noise}| \gg |R_q^*|$, the result centroid
+$\bar{\phi}_q$ is dominated by noise encodings.  Since rule tuples use
+attribute values orthogonal to common values in the one-hot representation,
+$\phi(t^*) \cdot \bar{\phi}_q \approx \rho\,\|\phi(t^*)\|$, whereas
+$\phi(t^n) \cdot \bar{\phi}_q \approx (1-\rho)\,\|\phi(t^n)\|$.  For
+$\rho < 1/2$, the cosine score satisfies $s_{\mathrm{sim}}(t^n) > s_{\mathrm{sim}}(t^*)$.
+\end{proposition}
+
+\begin{proposition}[Random failure]
+\label{prop:rand}
+An unbiased random ranking of $n = |R_q|$ tuples, of which $m = |R_q^*|$ are
+relevant (ground truth), achieves expected nDCG
+\[
+  \mathbb{E}[\text{nDCG}_k] \leq \frac{m/n \cdot H_k}{Z_k},
+\]
+where $H_k = \sum_{i=1}^k 1/\log_2(i+1)$ is the un-normalised ideal DCG.
+This equals the ideal nDCG only when $m/n = 1$; for $\rho = m/n \ll 1$
+(sparse ground truth), random performance degrades proportionally to $\rho$.
+\end{proposition}
+
+\paragraph{Remark on Sampling.}
+Sampling interpolates between Random and Frequency: with sufficient history it
+converges to the Frequency scorer.  Therefore Propositions~\ref{prop:freq}
+and~\ref{prop:rand} bound its performance from above and below respectively,
+and it fails for the same structural reason as Frequency once $\xi > 1$.
+
+%─────────────────────────────────────────
+\subsection{MDI's Temporal Accumulation Advantage}
+\label{sec:theory:mdi}
+
+The key distinction of MDI is that its association component $A(t,q)$
+(Eq.~\ref{eq:Acomponent}) \emph{grows} with session history while the baselines
+remain stationary or degrade.
+
+\begin{proposition}[Temporal accumulation]
+\label{prop:temporal}
+Let $r^* = (X^* \Rightarrow Y^*)$ be a ground-truth embedded rule with
+confidence $c^* = \text{conf}(r^*)$ and support $s^* = \text{supp}(r^*)$.
+Suppose each large query in the session contains a \emph{persistent core} of
+$m_c$ rule-conforming tuples drawn i.i.d. from $\mathcal{T}^*$, and MDI mines
+$r^*$ from accumulated data at step $q$ with estimated confidence
+$\hat{c}_q(r^*) \to c^*$ as $q \to \infty$.  Then the association component
+for any tuple $t^* \models X^* \cup Y^*$ satisfies
+\[
+  A(t^*, q) \xrightarrow{q \to \infty}
+  \frac{c^*\,(\lambda_1 + \lambda_3 \cdot c^*/s_Y^* + \lambda_4 \cdot J^*)}{|X^* \cup Y^*|},
+\]
+where $s_Y^* = \text{supp}(Y^*)$ and $J^*$ is the J-measure of $r^*$.
+Moreover, since the rule decay weight $w_{r^*}(q) = e^{-\lambda_r(q - q_{r^*})}$
+is refreshed every time $r^*$ is re-mined (i.e., at every large query), the
+effective decay does not erode the signal over the session.
+\end{proposition}
+
+\begin{corollary}[Gap advantage]
+\label{cor:gap}
+Because $A(t^*, q)$ accumulates across queries regardless of the prediction gap
+$g$, while $s_{\mathrm{freq}}(t)$, $s_{\mathrm{clust}}(t)$, and
+$s_{\mathrm{sim}}(t)$ are memoryless (computed from $R_q$ and recent history
+only), MDI's advantage over these baselines is \emph{non-decreasing} in session
+length $q$ and \emph{independent} of $g$.  This means that at large gaps
+($g = 5, 10$), MDI retains its advantage while memoryless baselines degrade
+because the current result $R_{q+g}$ drifts from $R_q$ in ways that cannot be
+predicted from $R_q$ alone.
+\end{corollary}
+
+%─────────────────────────────────────────
+\subsection{Benchmark Construction: A Prescriptive Recipe}
+\label{sec:theory:recipe}
+
+The preceding propositions jointly characterise when MDI wins, but the
+framework also prescribes how to \emph{deliberately construct workloads that
+favour any given recommender}.  We state this as a theorem and summarise the
+parameter regimes in Table~\ref{tab:recipe}.
+
+\begin{theorem}[Workload-determined advantage]
+\label{thm:recipe}
+Let $\mathcal{B} = \{\text{MDI, Frequency, Clustering, Similarity, Random,
+Sampling}\}$ be the recommender set.  For each $B \in \mathcal{B}$ there
+exists a workload characterised by parameters $(\rho, \xi, \sigma^2_{\rm noise},
+Q^*)$ such that $\text{nDCG}_k(B, \mathcal{S}) > \text{nDCG}_k(B', \mathcal{S})$
+for all $B' \neq B$.  The dominating regime for each recommender is:
+\begin{itemize}
+  \item \textbf{MDI:} $\rho < 1/2$, $\xi \gg 1$,
+        $\sigma^2_{\rm noise} \ll 1$, $Q \geq Q^*(s^*, \theta_s)$.
+        Rule-conforming overlap tuples are rare, noise is homogeneous, and
+        the session is long enough for rule accumulation.
+
+  \item \textbf{Frequency:} $\rho \approx 1$ and $\xi < 1$ (rare values carry the
+        overlap signal, but all overlap tuples have above-average frequency).
+
+  \item \textbf{Clustering:} Overlap tuples form a tight, distinct cluster
+        ($\sigma^2_{\rm overlap} \ll \sigma^2_{\rm noise}$) separated from noise
+        in encoded space; $K \geq 2$.
+
+  \item \textbf{Similarity:} The future result $R_{q+g}$ is \emph{more similar}
+        to the current result centroid than any novel tuple; queries are
+        monotonic refinements of the same analytical theme.
+
+  \item \textbf{Random / Sampling:} $\rho \approx 1/2$ and the session is short
+        ($Q < Q^*$); association rules are not yet reliable, so memory provides
+        no signal and random selection is near-optimal.
+\end{itemize}
+\end{theorem}
+
+\begin{table}[t!]
+  \centering
+  \caption{%
+    Workload parameter regimes that favour each recommender.
+    $\checkmark$ = condition required; $\times$ = not required
+    (or reversed).
+  }
+  \label{tab:recipe}
+  \footnotesize
+  \setlength{\tabcolsep}{3pt}
+  \begin{tabular}{l c c c c}
+    \toprule
+    \textbf{Rec.}
+      & \makecell{$\rho \!\ll\! 1$\\[-2pt]\scriptsize sparse sig.}
+      & \makecell{$\xi \!\gg\! 1$\\[-2pt]\scriptsize freq.\ skew}
+      & \makecell{$\sigma^2_{\rm n} \!\ll\! 1$\\[-2pt]\scriptsize noise hom.}
+      & \makecell{$Q \!\geq\! Q^*$\\[-2pt]\scriptsize deep hist.} \\
+    \midrule
+    MDI        & \checkmark & \checkmark & \checkmark & \checkmark \\
+    Frequency  & $\times$   & $\times$   & $\times$   & \checkmark \\
+    Clustering & $\times$   & $\times$   & $\times$\textsuperscript{a}  & $\times$ \\
+    Similarity & $\times$   & $\times$   & $\times$\textsuperscript{b}  & $\times$ \\
+    Random     & $\times$   & $\times$   & $\times$   & $\times$   \\
+    Sampling   & $\times$   & $\times$   & $\times$   & $\times$   \\
+    \bottomrule
+    \multicolumn{5}{l}{\scriptsize \textsuperscript{a}distinct clusters \quad \textsuperscript{b}centroid-aligned}
+  \end{tabular}
+\end{table}
+
+\paragraph{Instantiation in the benchmark generator.}
+Table~\ref{tab:benchmark-params} shows how the parameters of
+\texttt{generate\_benchmark.py} map to the theoretical quantities.  All four
+conditions in Theorem~\ref{thm:recipe} for MDI are satisfied by construction:
+$\rho \approx 0.22$ for large queries; $\xi = p_{\rm common}/(1 - p_{\rm common}) = 4$
+($p_{\rm common} = 0.80$); noise rows concentrate on 2 values per attribute in a
+9-attribute schema so $\sigma^2_{\rm noise} \leq 0.11$; and with $Q = 30$ queries
+per session (each large query contributing $\sim 150$ tuples) the expected
+antecedent support count after 10 large queries is
+$10 \times 150 \times \text{supp}(r^*) \approx 90 > 1/\theta_s = 12.5$,
+satisfying $Q \geq Q^*$.
+
+\begin{table}[t!]
+  \centering
+  \caption{%
+    Mapping from \texttt{generate\_benchmark.py} parameters to theoretical
+    quantities.
+  }
+  \label{tab:benchmark-params}
+  \footnotesize
+  \setlength{\tabcolsep}{3pt}
+  \begin{tabular}{l l l}
+    \toprule
+    \textbf{Theory param.} & \textbf{Generator param.} & \textbf{Value} \\
+    \midrule
+    $\rho$ (signal frac.)     & rule rows / lg.\ query sz.       & $\approx 0.22$ \\
+    $\xi$ (freq.\ skew)       & $p_{\rm common} = 0.80$ bias     & $4.0$ \\
+    $\sigma^2_{\rm noise}$    & 2 common vals / 9 attrs           & $\leq 0.11$ \\
+    $\text{supp}(r^*)$        & 12\% rule rows; conf $= 0.85$    & $\approx 0.10$ \\
+    $Q^*$                     & min\_supp $= 0.08$, 3000 rows    & $\approx 3$ lg.\ queries \\
+    Core overlap $m_c$        & 20 persistent rule tuples         & $20$ \\
+    Sm.\ query overlap        & 24--30 of 40--50 tuples           & $\approx 0.60$--$0.70$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\paragraph{Implications for real-world workloads.}
+Real EDA sessions over operational databases frequently exhibit high $\xi$ simply
+because data skew is ubiquitous, but they rarely satisfy $\rho \ll 1$ unless the
+analyst is explicitly drilling into a rare sub-population.  This means MDI's
+advantage is most pronounced in \emph{drill-down} scenarios --- exactly the kind
+of session studied in the SDSS and SIMBA benchmarks --- and shrinks toward the
+level of simpler baselines in broad exploratory sweeps where overlap is spread
+uniformly across result rows.  The framework thus not only explains the benchmark
+results but also signals where MDI deployment will deliver the greatest practical
+benefit.
