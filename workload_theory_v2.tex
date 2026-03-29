@@ -1,0 +1,135 @@
+\section{Workload--Recommender Alignment: A Conceptual Framework}
+\label{sec:theory}
+
+The empirical results in Section~\ref{sec:evaluation} show that realistic workloads like SIMBA drill-down sessions cannot meaningfully distinguish between recommenders. In this section we provide a conceptual framework that explains why, and that guides the construction of \emph{diagnostic} benchmarks which do test specific recommender capabilities. The key idea is to view evaluation not only as a property of the model, but as a joint property of the \emph{model} and the \emph{workload}.
+
+\vspace{-0.5em}
+\subsection{EDA Sessions and Implicit Prediction Task}
+\label{sec:theory:model}
+
+We model an EDA session as an ordered sequence of query results
+\(
+  \mathcal{S} = (R_0, R_1, \ldots, R_{Q-1}),
+\)
+where each $R_q$ is a set of tuples returned by a query at step $q$. The session history at step $q$ is
+\(
+  \mathcal{H}_q = (R_0, \ldots, R_{q-1}).
+\)
+
+Our implicit recommendation task is: given the current result $R_q$ and history $\mathcal{H}_q$, rank tuples in $R_q$ according to how likely they are to remain relevant to the analyst in the near future. We operationalise this using a simple temporal-overlap proxy: a tuple is considered \emph{relevant} if it reappears in a future result $R_{q+g}$ at gap $g$:
+\vspace{-0.5em}
+\begin{equation}
+  \text{rel}(t, q, g) = \mathbf{1}[t \in R_{q+g}].
+  \label{eq:relevance}
+\end{equation}
+%\vspace{-0.5em}
+This overlap-based notion is a conservative but convenient formalisation of ``the analyst will want to see this again soon'', and allows us to compare recommenders under controlled conditions. In all experiments we use standard ranking metrics such as $precision$, $recall$, $F1$, and $nDCG@k$ to summarise performance.
+
+\vspace{-0.5em}
+\subsection{Workload Parameters: A Lens on Recommendation Behaviour}
+\label{sec:theory:params}
+
+To reason about \emph{when} a recommender should be expected to succeed or fail, we characterise workloads along four intuitive dimensions:
+
+\begin{description}
+  \item[Signal fraction $\rho$.]
+    The fraction of tuples in a typical result that belong to the ``signal'' we want the recommender to detect. In our association-focused setting, signal tuples are those that satisfy embedded association rules. When $\rho$ is high, almost any selection from the current result is likely to hit signal; when $\rho$ is low, signal is sparse and harder to find.
+
+  \item[Frequency skew $\xi$.]
+    The degree to which common attribute values dominate the data relative to rare values that carry the signal. High $\xi$ corresponds to heavily skewed data, where noise concentrates on a few high-frequency values while signal resides in rarer combinations.
+
+  \item[Noise homogeneity $\sigma^2_{\text{noise}}$.]
+    How concentrated the ''noise'' part of the workload is in feature space. Low $\sigma^2_{\text{noise}}$ means noise tuples are very similar to one another (forming a tight cluster), while signal tuples may be more scattered.
+
+  \item[History depth $Q^*$.]
+    The amount of session history required before temporal models (such as MDI) can reliably accumulate evidence, for example to mine association rules with sufficient support. When sessions are shorter than $Q^*$, memory-based methods have little advantage over shallow baselines.
+\end{description}
+
+These parameters are not tied to any particular recommender; they describe structural properties of the workload that can be tuned in synthetic benchmarks or measured in real logs.
+
+\vspace{-0.5em}
+\subsection{How Different Recommenders Behave Across Workloads}
+\label{sec:theory:behaviour}
+
+Different recommender classes exploit different structural cues, and therefore thrive in different regions of the workload space:
+
+\begin{itemize} [leftmargin=1em, topsep=0pt, itemsep=0pt, parsep=0pt]
+  \item \textbf{Frequency-based methods} perform well when relevant tuples use high-frequency attribute values. When data are heavily skewed and signal resides in rare combinations, they tend to over-rank noise because common values dominate their scores.
+
+  \item \textbf{Similarity-to-centroid methods} (e.g., our Similarity baseline) work best when future results are small refinements of the current one and overlap tuples resemble the current centroid. When signal tuples use attribute combinations that are atypical relative to the bulk of the result, these methods under-rank them.
+
+  \item \textbf{Clustering-based methods} succeed when overlap tuples form a distinct, dense cluster separated from noise. When noise itself forms tight clusters and signal is scattered, cluster centroids align with noise and signal tuples appear as outliers.
+
+  \item \textbf{Random and simple sampling} are competitive when signal is dense (large $\rho$) or when sessions are too short for more complex models to accumulate reliable evidence.
+
+  \item \textbf{Temporally accumulating models} like MDI gain an advantage when signal is sparse but consistent over time, frequency skew is high (so naive frequency and similarity are misled), and the session is long enough to aggregate patterns across queries.
+\end{itemize}
+
+
+
+\begin{table}[t!]
+  \centering
+  \caption{%
+    Workload parameter regimes that favour each recommender class.
+    $\checkmark$ = condition required; $\times$ = not required.}
+    \vspace{-1em}
+  
+  \label{tab:recipe}
+  \footnotesize
+  \setlength{\tabcolsep}{3pt}
+  \begin{tabular}{l c c c c}
+    \toprule
+    \textbf{Rec.}
+      & \makecell{$\rho \!\ll\! 1$\\[-2pt]\scriptsize sparse sig.}
+      & \makecell{$\xi \!\gg\! 1$\\[-2pt]\scriptsize freq.\ skew}
+      & \makecell{$\sigma^2_{\rm n} \!\ll\! 1$\\[-2pt]\scriptsize noise hom.}
+      & \makecell{$Q \!\geq\! Q^*$\\[-2pt]\scriptsize deep hist.} \\
+    \midrule
+    MDI        & \checkmark & \checkmark & \checkmark & \checkmark \\
+    Frequency  & $\times$   & $\times$   & $\times$   & \checkmark \\
+    Clustering & $\times$   & $\times$   & $\times$\textsuperscript{a}  & $\times$ \\
+    Similarity & $\times$   & $\times$   & $\times$\textsuperscript{b}  & $\times$ \\
+    Random     & $\times$   & $\times$   & $\times$   & $\times$   \\
+    Sampling   & $\times$   & $\times$   & $\times$   & $\times$   \\
+    \bottomrule
+    \multicolumn{5}{l}{\scriptsize \textsuperscript{a}distinct clusters \quad \textsuperscript{b}centroid-aligned}
+     \vspace{-1.5em}
+  \end{tabular}
+      \vspace{-1.5em}
+\end{table}
+
+
+Table~\ref{tab:recipe} summarises these relationships qualitatively.
+The key message is that there is no uniformly best recommender: each class is favoured by particular workload structures. This motivates evaluation schemes that \emph{control} workload parameters to probe specific capabilities, rather than relying only on whatever structure happens to appear in a given realistic log.
+
+\vspace{-0.5em}
+\subsection{A Recipe for Construct-Valid Benchmarks}
+\label{sec:theory:recipe}
+
+The workload-recommender alignment view suggests a general recipe for designing diagnostic benchmarks:
+
+\begin{enumerate}
+  \item \textbf{Choose a capability to test.}
+    For example, association detection, robustness to skew, or long-range temporal prediction.
+
+  \item \textbf{Identify workload parameters that stress this capability.}
+    For association-aware recommenders, we want sparse signal ($\rho$ small), strong frequency skew ($\xi$ large), and homogeneous noise (low $\sigma^2_{\text{noise}}$) so that superficial heuristics (frequency, similarity, clustering) are systematically misled.
+
+  \item \textbf{Construct workloads that instantiate these regimes.}
+    This can be done synthetically (by embedding rules with controlled support and confidence) or semi-synthetically (by injecting structured signal into real datasets), while ensuring sessions are long enough ($Q \geq Q^*$) for temporal models. %to operate.
+
+  \item \textbf{Pair diagnostic benchmarks with realistic ones.}
+    Use realistic workloads (high ecological validity) to ensure that methods do not overfit to synthetic artefacts, and diagnostic benchmarks (high construct validity) to reveal specific strengths and weaknesses.
+\end{enumerate}
+
+Our adversarial benchmark in Section~\ref{sec:experiments} instantiates this recipe for association detection. The same framework can be applied to design benchmarks that favour, or challenge, other recommender classes, including neural and language model-based approaches.
+
+\vspace{-0.5em}
+\subsection{Implications for Real-World Workloads}
+\label{sec:theory:implications}
+
+%Real EDA sessions over operational databases often exhibit strong frequency skew simply because data skew is ubiquitous, but they may not always feature sparse association-rule signal. The alignment framework therefore explains both why SIMBA-style workloads fail to distinguish recommenders (high overlap and relatively dense signal) and where models like MDI are expected to deliver the greatest benefit: drill-down scenarios targeting rare sub-populations, where signal is sparse but temporally coherent.
+
+%More broadly, the framework encourages the community to treat evaluation workloads as first-class design choices. By articulating how workload parameters interact with recommender mechanisms, we can move from one-off benchmarks to a principled suite of diagnostic tests for future EDA recommenders.
+
+Real EDA sessions over operational databases often exhibit strong frequency skew but not always sparse association-rule signal. The alignment framework thus explains both why SIMBA-style workloads fail to distinguish recommenders (high overlap and relatively dense signal) and where models like MDI are expected to be most beneficial: drill-down scenarios targeting rare sub-populations, where signal is sparse but temporally coherent. More broadly, it encourages treating evaluation workloads as first-class design choices rather than fixed artefacts.
