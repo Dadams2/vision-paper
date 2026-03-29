@@ -353,8 +353,7 @@ We evaluate on two complementary benchmarks:
   \item \textbf{Controlled adversarial benchmark.} Synthetic sessions constructed using the workload--recommender alignment recipe from Section~\ref{sec:theory:recipe}. A 9-column categorical fact table embeds five association rules at 85\% confidence, with noise rows biased toward common values. Query sequences alternate between large (${\sim}150$ rows, noise-dominated) and small (${\sim}45$ rows, rule-dominated) results, yielding sparse signal, strong frequency skew, homogeneous noise, and sufficiently long sessions for temporal accumulation, conditions under which our framework predicts association-aware, history-based methods are most informative.
 
 \end{itemize}
-\\
-The SIMBA benchmark produced one session of 20~queries with an average result size of 156~rows; the adversarial benchmark comprised three session averaging 28~queries and 109~rows per result.
+\noindent The SIMBA benchmark produced one session of 20~queries with an average result size of 156~rows; the adversarial benchmark comprised three session averaging 28~queries and 109~rows per result.
 
 % \begin{table}[t]
 % \centering
@@ -470,8 +469,7 @@ When workload parameters follow the alignment recipe from Section~\ref{sec:theor
 \noindent \fcirc{3}\textbf{The prediction task is intrinsically hard.}
 Even on the adversarial benchmark where MDI has a clear advantage, absolute F1 remains around 0.26, far from perfect. This underlines the difficulty of predicting tuple-level analyst focus from implicit structural signals and motivates further research into richer implicit-interest models and hybrid implicit/explicit approaches.
 
-
-\emph{Addressing the ``custom benchmark'' concern.}
+\noindent \fcirc{3}\textbf{Adversarial Construction is Advantageous to MDI}
 A natural question is whether the adversarial benchmark is overly tailored to MDI. Our position, grounded in the workload-recommender alignment framework, is that it is one principled instantiation of a broader design pattern, not a special case. First, the same framework can be used to construct workloads that favour other recommender classes (e.g., by increasing signal density, reducing skew, or making overlap clusters more distinct), providing a family of diagnostic tests rather than a single task. Second, the benchmark is defined in terms of a \emph{capability}(detecting embedded associations under skew and sparsity) not in terms of any particular implementation. Any association-aware recommender with temporal memory should, in principle, excel on such workloads. Third, the SIMBA evaluation provides an ecological complement: MDI performs comparably to other methods on realistic workloads, indicating that it does not sacrifice generality for adversarial performance. Together, the realistic and controlled benchmarks offer a more complete picture of recommender behaviour than either could alone.
 
 
@@ -524,22 +522,40 @@ A natural question is whether the adversarial benchmark is overly tailored to MD
 
 %RBG v3 - really need to trim
 
-\textbf{Interactive Exploration and Active Learning.}
-The database community has long recognised the limitations of traditional query--answer paradigms for exploratory analysis, proposing online aggregation~\cite{hellerstein1999online}, query-by-example and explore-by-example systems~\cite{drosouYmaldbExploringRelational2013,dimitriadouAIDEActiveLearningBased2016,mottin2014exemplar}, interactive join inference~\cite{bonifati2014interactive}, and drill-down and query steering operators~\cite{kalininInteractiveDataExploration2014,ugurcetintemelQuerySteeringInteractive2013}. Relevance feedback in information retrieval~\cite{rocchio1971relevance} offers an analogous iterative refinement mechanism for text.
-Across these approaches, interaction hinges on \emph{explicit} feedback: rankings, labels, or confirmations provided by the analyst. Our work instead explores how systems can infer analytical interest from \emph{implicit} signals in the natural exploration process, reducing cognitive overhead and preserving analytical flow.
+% \textbf{Interactive Exploration and Active Learning.}
+% The database community has long recognised the limitations of traditional query-answer paradigms for exploratory analysis, proposing online aggregation~\cite{hellerstein1999online}, query-by-example and explore-by-example systems~\cite{drosouYmaldbExploringRelational2013,dimitriadouAIDEActiveLearningBased2016,mottin2014exemplar}, interactive join inference~\cite{bonifati2014interactive}, and drill-down and query steering operators~\cite{kalininInteractiveDataExploration2014,ugurcetintemelQuerySteeringInteractive2013}. Relevance feedback in information retrieval~\cite{rocchio1971relevance} offers an analogous iterative refinement mechanism for text.
+% Across these approaches, interaction hinges on \emph{explicit} feedback: rankings, labels, or confirmations provided by the analyst. Our work instead explores how systems can infer analytical interest from \emph{implicit} signals in the natural exploration process, reducing cognitive overhead and preserving analytical flow.
 
-\noindent \textbf{Interestingness Measures and Pattern Mining.}
-Hilderman and Hamilton~\cite{robertj.hildermanKnowledgeDiscoveryMeasures2001} provide a foundational taxonomy of interestingness measures, distinguishing pattern-based from summary-based criteria. Somech et al.~\cite{somechPredictingWhatInteresting2019} show empirically that no single measure consistently predicts analyst interest across tasks and domains, motivating multi-dimensional approaches. Other work learns interestingness from user studies~\cite{das2018learning} or domain-specific rules~\cite{ruiz2014learning}, but typically treats interest as static and depends on manual interaction.
-MDI builds on this line of work by combining multiple interestingness dimensions (structural, distributional, temporal, compositional) and updating them over time from implicit signals in the session history.
+% \noindent \textbf{Interestingness Measures and Pattern Mining.}
+% Hilderman and Hamilton~\cite{robertj.hildermanKnowledgeDiscoveryMeasures2001} provide a foundational taxonomy of interestingness measures, distinguishing pattern-based from summary-based criteria. Somech et al.~\cite{somechPredictingWhatInteresting2019} show empirically that no single measure consistently predicts analyst interest across tasks and domains, motivating multi-dimensional approaches. Other work learns interestingness from user studies~\cite{das2018learning} or domain-specific rules~\cite{ruiz2014learning}, but typically treats interest as static and depends on manual interaction.
+% MDI builds on this line of work by combining multiple interestingness dimensions (structural, distributional, temporal, compositional) and updating them over time from implicit signals in the session history.
 
-\noindent \textbf{Implicit Feedback in Recommendation Systems.}
-In traditional recommender systems, collaborative filtering with implicit feedback~\cite{hu2008collaborative, koren2009matrix} has shown that passively observed behaviour can outperform explicit ratings, and temporal models~\cite{koren2009collaborative, wang2018modeling} account for evolving preferences. Recent work such as ReCRec~\cite{lin2024recrec} reasons about the causes of implicit feedback, distinguishing disinterest from non-exposure.
-These methods, however, assume a predefined item catalogue and relatively stable preference structure. In EDA, the ``items'' are dynamically generated tuples or query results, and interests can shift rapidly as new patterns are discovered. Our work adapts the spirit of implicit-feedback recommendation to this more fluid, data-centric setting, focusing on tuple-level interest within exploratory sessions.
+% \noindent \textbf{Implicit Feedback in Recommendation Systems.}
+% In traditional recommender systems, collaborative filtering with implicit feedback~\cite{hu2008collaborative, koren2009matrix} has shown that passively observed behaviour can outperform explicit ratings, and temporal models~\cite{koren2009collaborative, wang2018modeling} account for evolving preferences. Recent work such as ReCRec~\cite{lin2024recrec} reasons about the causes of implicit feedback, distinguishing disinterest from non-exposure.
+% These methods, however, assume a predefined item catalogue and relatively stable preference structure. In EDA, the ``items'' are dynamically generated tuples or query results, and interests can shift rapidly as new patterns are discovered. Our work adapts the spirit of implicit-feedback recommendation to this more fluid, data-centric setting, focusing on tuple-level interest within exploratory sessions.
 
-\noindent \textbf{Benchmarks for Data Exploration.}
-Existing EDA benchmarks primarily target system performance. IDEBench~\cite{eichmannIDEBenchBenchmarkInteractive2020} evaluates DBMS responsiveness under interactive workloads. SIMBA~\cite{lenzi2019simba} generates realistic visualisation-driven sessions, but as shown in Section~\ref{sec:evaluation}, its high inter-query overlap makes it ill-suited for differentiating recommender quality.
-Our proposal to complement realistic workloads with diagnostic benchmarks follows established practice in other areas. CLEVR~\cite{johnson2017clevr} uses synthetic scenes to diagnose compositional reasoning in visual QA. CheckList~\cite{ribeiro2020beyond} probes specific linguistic capabilities in NLP through behavioural tests, and adversarial NLI benchmarks~\cite{nie2020adversarial} expose reliance on annotation artefacts. We apply the same principle to EDA: our adversarial benchmark tests whether recommenders can detect embedded associations when simple heuristics based on frequency or similarity are systematically neutralised.
+% \noindent \textbf{Benchmarks for Data Exploration.}
+% Existing EDA benchmarks primarily target system performance. IDEBench~\cite{eichmannIDEBenchBenchmarkInteractive2020} evaluates DBMS responsiveness under interactive workloads. SIMBA~\cite{lenzi2019simba} generates realistic visualisation-driven sessions, but as shown in Section~\ref{sec:evaluation}, its high inter-query overlap makes it ill-suited for differentiating recommender quality.
+% Our proposal to complement realistic workloads with diagnostic benchmarks follows established practice in other areas. CLEVR~\cite{johnson2017clevr} uses synthetic scenes to diagnose compositional reasoning in visual QA. CheckList~\cite{ribeiro2020beyond} probes specific linguistic capabilities in NLP through behavioural tests, and adversarial NLI benchmarks~\cite{nie2020adversarial} expose reliance on annotation artefacts. We apply the same principle to EDA: our adversarial benchmark tests whether recommenders can detect embedded associations when simple heuristics based on frequency or similarity are systematically neutralised.
 
+% DA rewrite to make shorter
+
+The database community has proposed many alternatives to the traditional query-answer paradigm: online aggregation~\cite{hellerstein1999online},
+query-by-example and explore-by-example systems~\cite{drosouYmaldbExploringRelational2013,dimitriadouAIDEActiveLearningBased2016,mottin2014exemplar}, interactive join inference~\cite{bonifati2014interactive}, drill-down and query steering~\cite{kalininInteractiveDataExploration2014,ugurcetintemelQuerySteeringInteractive2013}, and relevance feedback from information retrieval~\cite{rocchio1971relevance}. All hinge on \emph{explicit} feedback rankings, labels, or confirmations that interrupts analytical flow. Our work instead infers interest from \emph{implicit} signals in natural exploration behaviour.
+
+\noindent\textbf{Interestingness Measures and Pattern Mining.}
+
+Hilderman and Hamilton~\cite{robertj.hildermanKnowledgeDiscoveryMeasures2001} provide a foundational taxonomy of interestingness measures. Somech et al.~\cite{somechPredictingWhatInteresting2019} show that no single measure consistently predicts analyst interest, motivating multi-dimensional approaches; other work learns interestingness from user studies~\cite{das2018learning} or domain rules~\cite{ruiz2014learning} but treats interest as static. MDI instead combines multiple dimensions and updates them continuously from implicit session signals.
+
+\noindent\textbf{Implicit Feedback in Recommendation Systems.}
+
+Collaborative filtering with implicit feedback~\cite{hu2008collaborative,koren2009matrix} shows that passively observed behavior can outperform explicit ratings; temporal models~\cite{koren2009collaborative,wang2018modeling} and ReCRec~\cite{lin2024recrec} further account for preference drift and the causes of non-interaction. These methods assume a predefined item catalogue and stable preferences assumptions that break down in EDA, where tuples are dynamically generated and interests shift as new patterns emerge.
+
+\noindent\textbf{Benchmarks for Data Exploration.}
+
+IDEBench~\cite{eichmannIDEBenchBenchmarkInteractive2020} and SIMBA~\cite{lenzi2019simba} target system performance and realistic session generation respectively, but high inter-query overlap in such workloads
+prevents recommender differentiation (Section~\ref{sec:evaluation}). We complement them with diagnostic benchmarks following practice in other
+fields CLEVR~\cite{johnson2017clevr}, CheckList~\cite{ribeiro2020beyond}, and adversarial NLI~\cite{nie2020adversarial} applying the same principle  to EDA to test whether recommenders detect embedded associations when frequency and similarity shortcuts are removed.
 
 %=============================================================================
 % SECTION 8: RESEARCH CHALLENGES AND FUTURE DIRECTIONS
