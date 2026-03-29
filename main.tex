@@ -2,7 +2,7 @@
 % https://www.acm.org/publications/proceedings-template
 % The ACM Latex guide provides further information about the ACM template
 
-\documentclass[sigconf, authordraft]{acmart}
+\documentclass[sigconf, nonacm]{acmart}
 
 \usepackage{algorithm,algpseudocode}
 \usepackage{multirow}
@@ -28,7 +28,7 @@
 \newcommand\vldbauthors{\authors}
 \newcommand\vldbtitle{\shorttitle}
 % leave empty if no availability url should be set
-\newcommand\vldbavailabilityurl{URL_TO_YOUR_ARTIFACTS}
+\newcommand\vldbavailabilityurl{https://github.com/Dadams2/query-data-predictor.git}
 % whether page numbers should be shown or not, use 'plain' for review versions, 'empty' for camera ready
 \newcommand\vldbpagestyle{plain}
 
@@ -84,18 +84,18 @@ We formalise a workload-recommender alignment framework that characterises when 
 
 %%% do not modify the following VLDB block %%
 %%% VLDB block start %%%
-%\pagestyle{\vldbpagestyle}
-%\begingroup\small\noindent\raggedright\textbf{PVLDB Reference Format:}\\
-%\vldbauthors. \vldbtitle. PVLDB, \vldbvolume(\vldbissue): \vldbpages, \vldbyear.\\
-%\href{https://doi.org/\vldbdoi}{doi:\vldbdoi}
-%\endgroup
-%\begingroup
-%\renewcommand\thefootnote{}\footnote{\noindent
-%This work is licensed under the Creative Commons BY-NC-ND 4.0 International License. Visit \url{https://creativecommons.org/licenses/by-nc-nd/4.0/} to view a copy of this license. For any use beyond those covered by this license, obtain permission by emailing \href{mailto:info@vldb.org}{info@vldb.org}. Copyright is held by the owner/author(s). Publication rights licensed to the VLDB Endowment. \\
-%\raggedright Proceedings of the VLDB Endowment, Vol. \vldbvolume, No. \vldbissue\ %
-%ISSN 2150-8097. \\
-%\href{https://doi.org/\vldbdoi}{doi:\vldbdoi} \\
-%}\addtocounter{footnote}{-1}\endgroup
+\pagestyle{\vldbpagestyle}
+\begingroup\small\noindent\raggedright\textbf{PVLDB Reference Format:}\\
+\vldbauthors. \vldbtitle. PVLDB, \vldbvolume(\vldbissue): \vldbpages, \vldbyear.\\
+\href{https://doi.org/\vldbdoi}{doi:\vldbdoi}
+\endgroup
+\begingroup
+\renewcommand\thefootnote{}\footnote{\noindent
+This work is licensed under the Creative Commons BY-NC-ND 4.0 International License. Visit \url{https://creativecommons.org/licenses/by-nc-nd/4.0/} to view a copy of this license. For any use beyond those covered by this license, obtain permission by emailing \href{mailto:info@vldb.org}{info@vldb.org}. Copyright is held by the owner/author(s). Publication rights licensed to the VLDB Endowment. \\
+\raggedright Proceedings of the VLDB Endowment, Vol. \vldbvolume, No. \vldbissue\ %
+ISSN 2150-8097. \\
+\href{https://doi.org/\vldbdoi}{doi:\vldbdoi} \\
+}\addtocounter{footnote}{-1}\endgroup
 %%% VLDB block end %%%
 
 %%% do not modify the following VLDB block %%
@@ -103,7 +103,7 @@ We formalise a workload-recommender alignment framework that characterises when 
 \ifdefempty{\vldbavailabilityurl}{}{
 \vspace{.3cm}
 \begingroup\small\noindent\raggedright\textbf{PVLDB Artifact Availability:}\\
-The source code, data, and/or other artifacts have been made available at \url{https://github.com/Dadams2/query-data-predictor.git}.
+The source code, data, and/or other artifacts have been made available at \url{\vldbavailabilityurl}.
 \endgroup
 }
 %%% VLDB block end %%%
@@ -215,22 +215,22 @@ In this paper, we operationalise implicit interest using structural signals read
 
 Developing implicit recommenders for EDA raises a critical question: how should we evaluate whether a recommender genuinely learns analytical patterns, rather than exploiting structural artefacts of the workload?
 
-\vspace{-0.5em}
-\subsection{The Overlap Problem in Realistic Workloads}
+% \vspace{-0.5em}
+% \subsection{The Overlap Problem in Realistic Workloads}
 
-\begin{figure}[t]
-\centering
-\label{fig:overlap-analysis}
-\includegraphics[scale=0.6]{figures/overlap_analysis.pdf} 
-\vspace{-1em}
-\caption{Tuple overlap between consecutive query results in SIMBA-based exploration sessions. High overlap makes many recommendation strategies appear equally effective.}
-\vspace{-2em}
-\end{figure}
+% \begin{figure}[t]
+% \centering
+% \label{fig:overlap-analysis}
+% \includegraphics[scale=0.6]{figures/overlap_analysis.pdf} 
+% \vspace{-1em}
+% \caption{Tuple overlap between consecutive query results in SIMBA-based exploration sessions. High overlap makes many recommendation strategies appear equally effective.}
+% \vspace{-2em}
+% \end{figure}
 
 %We use the SIMBA benchmark~\cite{lenzi2019simba} to generate realistic visualization-driven exploration sessions over the Sloan Digital Sky Survey (SDSS) dataset~\cite{york_sloan_2000}. SIMBA produces SQL queries through a configurable action loop with progressive drill-down, filter, and link operations that narrow result ranges by a factor of $0.60$-$0.85$ per step.
 We use the SIMBA benchmark~\cite{lenzi2019simba} to generate realistic visualisation-driven exploration sessions over the Sloan Digital Sky Survey (SDSS) dataset~\cite{york_sloan_2000}. SIMBA produces SQL queries through a configurable action loop with progressive drill-down, filter, and link operations that narrow result ranges over time.
 
-Figure~\ref{fig:overlap-analysis} shows that these realistic sessions exhibit high inter-query overlap: a large fraction of tuples in each result also appear in neighbouring results. Table~\ref{tab:simba-results} shows the consequence for evaluation. When we assess six recommenders on SIMBA sessions, all achieve similar F1 scores (range: 0.266--0.335), with no clear winner; a simple similarity baseline achieves the highest score. This is not a failure of any particular recommender, but a property of the workload: when overlap is high, any reasonable sample from current results has a high probability of appearing in future results, making the prediction task \emph{non-discriminative}. Under such conditions, evaluation cannot meaningfully distinguish between simple and sophisticated methods.
+SIMBA-generated sessions exhibit high inter-query tuple overlap: progressive drill-down narrows result ranges by a factor of $0.60$--$0.85$ per step, meaning any reasonable sample from the current result has a high probability of appearing in the next query's result. Table~\ref{tab:simba-results} shows the consequence for evaluation. When we assess six recommenders on SIMBA sessions, all achieve similar F1 scores (range: 0.266--0.335), with no clear winner; a simple similarity baseline achieves the highest score. This is not a failure of any particular recommender, but a property of the workload: when overlap is high, any reasonable sample from current results has a high probability of appearing in future results, making the prediction task \emph{non-discriminative}. Under such conditions, evaluation cannot meaningfully distinguish between simple and sophisticated methods.
 
 \begin{table}[t]
 \centering
@@ -353,24 +353,26 @@ We evaluate on two complementary benchmarks:
   \item \textbf{Controlled adversarial benchmark.} Synthetic sessions constructed using the workload--recommender alignment recipe from Section~\ref{sec:theory:recipe}. A 9-column categorical fact table embeds five association rules at 85\% confidence, with noise rows biased toward common values. Query sequences alternate between large (${\sim}150$ rows, noise-dominated) and small (${\sim}45$ rows, rule-dominated) results, yielding sparse signal, strong frequency skew, homogeneous noise, and sufficiently long sessions for temporal accumulation, conditions under which our framework predicts association-aware, history-based methods are most informative.
 
 \end{itemize}
+\\
+The SIMBA benchmark produced one session of 20~queries with an average result size of 156~rows; the adversarial benchmark comprised three session averaging 28~queries and 109~rows per result.
 
-\begin{table}[t]
-\centering
-\caption{Datasets used for experimental evaluation.}
-\label{tab:datasets}
-\vspace{-1em}
-\footnotesize
-\begin{tabular}{lrrr}
-\toprule
-\textbf{Dataset} & \textbf{Sessions} & \textbf{Avg.\ Queries} & \textbf{Avg.\ Result Sz.} \\
-\midrule
-SIMBA Drilldown & 1 & 20 & 156.2 \\
-Adversarial Benchmark & 3 & 28 & 109.3 \\
-\bottomrule
-\vspace{-1em}
-\end{tabular}
-\vspace{-1em}
-\end{table}
+% \begin{table}[t]
+% \centering
+% \caption{Datasets used for experimental evaluation.}
+% \label{tab:datasets}
+% \vspace{-1em}
+% \footnotesize
+% \begin{tabular}{lrrr}
+% \toprule
+% \textbf{Dataset} & \textbf{Sessions} & \textbf{Avg.\ Queries} & \textbf{Avg.\ Result Sz.} \\
+% \midrule
+% SIMBA Drilldown & 1 & 20 & 156.2 \\
+% Adversarial Benchmark & 3 & 28 & 109.3 \\
+% \bottomrule
+% \vspace{-1em}
+% \end{tabular}
+% \vspace{-1em}
+% \end{table}
 
 We compare six recommendation approaches, all operating in a memory-based setting where they select tuples from current query results to predict future results. The recommendation budget at each step is set to the size of the future result to ensure fair comparison:
 
