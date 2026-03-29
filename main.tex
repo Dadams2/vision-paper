@@ -345,15 +345,17 @@ From the alignment perspective, MDI exemplifies a broader class of recommenders 
 \textbf{Temporal prediction task.}
 Given an analyst's query history $Q_1, Q_2, \ldots, Q_t$, we aim to predict which tuples the analyst will focus on in query $Q_{t+g}$ for prediction gaps $g \in \{1, 2, 3, 5, 10\}$. Operationally, we treat tuples that reappear in $Q_{t+g}$ as relevant (Eq.~\eqref{eq:relevance}) and evaluate recommenders by how well their rankings anticipate this future overlap.
 
-We evaluate on two complementary benchmarks:
+We evaluate on three complementary benchmarks:
 
 \begin{itemize} [leftmargin=1em, topsep=0pt, itemsep=0pt, parsep=0pt]
     \item \textbf{SIMBA drill-down benchmark.} Realistic visualisation-driven sessions generated using SIMBA~\cite{lenzi2019simba} over SDSS~\cite{york_sloan_2000}, with progressive drill-down producing high inter-query overlap. Results for this benchmark were presented in Section~\ref{sec:evaluation} (Table~\ref{tab:simba-results}).
 
+  \item \textbf{SkyServer SQL-log benchmark.} Real SQL sessions derived from the SkyServer usage study of Raddick et al.~\cite{raddickTenYearsSkyserver2014}. We sample 10 candidate sessions uniformly at random, and report the completed benchmark outputs (8 sessions across all gaps, plus one short session available only at gap $=1$). To keep experiments reproducible and independent of the live SkyServer backend, we evaluate against pre-materialised query result sets for these sessions rather than reissuing the queries to the full deployment.
+
   \item \textbf{Controlled adversarial benchmark.} Synthetic sessions constructed using the workload--recommender alignment recipe from Section~\ref{sec:theory:recipe}. A 9-column categorical fact table embeds five association rules at 85\% confidence, with noise rows biased toward common values. Query sequences alternate between large (${\sim}150$ rows, noise-dominated) and small (${\sim}45$ rows, rule-dominated) results, yielding sparse signal, strong frequency skew, homogeneous noise, and sufficiently long sessions for temporal accumulation, conditions under which our framework predicts association-aware, history-based methods are most informative.
 
 \end{itemize}
-\noindent The SIMBA benchmark produced one session of 20~queries with an average result size of 156~rows; the adversarial benchmark comprised three session averaging 28~queries and 109~rows per result.
+\noindent The SIMBA benchmark produced one session of 20~queries with an average result size of 156~rows; the sampled SkyServer benchmark contributes 981~queries across the 10 sampled sessions before gap filtering; and the adversarial benchmark comprised three sessions averaging 28~queries and 109~rows per result.
 
 % \begin{table}[t]
 % \centering
@@ -416,6 +418,30 @@ Table~\ref{tab:adversarial-results} shows results on the adversarial benchmark. 
 
 Across prediction gaps $g \in \{1,2,3,5,10\}$ (not shown), MDI's advantage is largest at small gaps and gradually shrinks as overlap across queries decreases, aligning with the framework's intuition that temporal distance makes all methods' predictions harder.
 
+\begin{table}[t]
+\centering
+\caption{Recommendation performance at gap $=1$ on sampled SkyServer SQL sessions. All methods perform poorly, reflecting point-lookup-heavy workloads with weak tuple persistence.}
+\vspace{-1em}
+\label{tab:sdss-results}
+\footnotesize
+\begin{tabular}{l cccc}
+\toprule
+\textbf{Recommender} & \textbf{Prec.} & \textbf{Rec.} & \textbf{F1} & \textbf{Ovlp.} \\
+\midrule
+Clustering & .037 & .033 & .033 & .037 \\
+Frequency  & .037 & .033 & .033 & .037 \\
+Random     & .037 & .033 & .033 & .037 \\
+Sampling   & .037 & .033 & .033 & .037 \\
+Similarity & .019 & .018 & .018 & .019 \\
+MDI (Ours) & .014 & .012 & .013 & .014 \\
+\bottomrule
+\vspace{-1.5em}
+\end{tabular}
+\vspace{-1.5em}
+\end{table}
+
+The sampled SkyServer sessions provide a useful counterpoint to SIMBA. Our exploratory analysis over the first 1{,}000 log-derived sessions (177{,}721 queries) shows that 49.7\% of queries are point lookups and 481 of 1{,}000 sessions are dominated by point lookups (more than 80\% of their queries). Only 1.1\% of all queries satisfy our simple exploratory heuristic. The 10 sampled sessions used for benchmarking are somewhat more exploratory than the corpus as a whole, but still contain 61.1\% point lookups, and only 72 of 981 queries are classified as exploratory. Table~\ref{tab:sdss-results} therefore shows uniformly poor performance: gap-$1$ F1 ranges only from 0.013 to 0.033, with four baselines effectively tied. This is not evidence that the recommenders are interchangeable in general; rather, it shows that a memory-based tuple recommender is badly mismatched to workloads dominated by object-ID fetches and abrupt transitions between entities. In this regime, future results often reflect a jump to a different object rather than a refinement of the current result set, so current-tuple recommendation becomes intrinsically weak.
+
 %RBG it is great, but space is really an issue, did just a summary above
 %\begin{figure}[t]
 %\centering
@@ -430,13 +456,13 @@ Across prediction gaps $g \in \{1,2,3,5,10\}$ (not shown), MDI's advantage is la
 
 
 
-Figure~\ref{fig:workload_comparison} presents the central result: the same recommenders yield indistinguishable performance on realistic SIMBA workloads but clearly differentiated performance on the adversarial benchmark. This illustrates our main methodological claim: \emph{evaluation methodology is as important as recommender design}. Realistic workloads alone cannot reveal which methods exploit deeper structure.
+Figure~\ref{fig:workload_comparison} presents the central result: the same recommenders yield indistinguishable performance on realistic SIMBA workloads, uniformly poor performance on sampled SkyServer logs, and clearly differentiated performance on the adversarial benchmark. This illustrates our main methodological claim: \emph{evaluation methodology is as important as recommender design}. Realistic workloads alone cannot reveal which methods exploit deeper structure.
 
 \begin{figure}[htb]
 \centering
 \includegraphics[width=\linewidth]{figures/workload_comparison.pdf}
 \vspace{-1.5em}
-\caption{Recommender performance (F1 at gap $=1$) on realistic vs.\ adversarial workloads. On SIMBA (left), all methods perform similarly. On the adversarial benchmark (right), MDI clearly separates from baselines.}
+\caption{Recommender performance (F1 at gap $=1$) across three workload types. On SIMBA drill-down sessions (A), all methods perform similarly because progressive refinement preserves high overlap. On sampled SkyServer SQL sessions (C), all methods perform poorly because point-lookups and abrupt task shifts yield little reusable tuple-level signal. On the controlled adversarial benchmark (B), MDI clearly separates from the baselines.}
 \vspace{-2em}
 \label{fig:workload_comparison}
 \end{figure}
@@ -455,21 +481,25 @@ Figure~\ref{fig:workload_comparison} presents the central result: the same recom
 \vspace{-0.5em}
 \subsection{Discussion}
 
-Our experiments support three key observations.
+Our experiments support four key observations.
 
 \noindent \fcirc{1}\textbf{Realistic visualisation-driven workloads cannot differentiate recommenders.}
 On SIMBA drill-down sessions, all six methods achieve similar F1 scores (Table~\ref{tab:simba-results}). Progressive drill-down produces high inter-query overlap, making any sample from current results likely to appear in future results. Evaluating solely on such workloads risks overstating the performance of simple baselines and obscuring advances in interest modelling.
 
 
-\noindent \fcirc{2}\textbf{Controlled benchmarks reveal genuine capabilities.}
+\noindent \fcirc{2}\textbf{Real query logs can be misaligned with the recommendation task.}
+The sampled SkyServer sessions are authentic and historically grounded, but they test a different failure mode: many queries are object-ID lookups rather than open-ended exploration. As a result, tuple-level prediction from current results becomes nearly impossible and all methods collapse toward zero (Table~\ref{tab:sdss-results}). Ecological validity alone is therefore insufficient: realistic logs may be \emph{too} heterogeneous or too weakly aligned with the target recommendation task to yield informative comparisons.
+
+
+\noindent \fcirc{3}\textbf{Controlled benchmarks reveal genuine capabilities.}
 When workload parameters follow the alignment recipe from Section~\ref{sec:theory:recipe}, sparse rule signal (low effective $\rho$), strong frequency skew (high $\xi$), homogeneous noise, and sufficient history, MDI's temporal accumulation yields a clear 36\% F1 improvement over random (Table~\ref{tab:adversarial-results}). This demonstrates that MDI is genuinely exploiting association structure rather than merely benefiting from overlap artefacts. We also observe that MDI's performance is relatively insensitive to the exact choice of temporal decay rate within a broad range, indicating that its qualitative advantage stems from temporal accumulation rather than fine-grained parameter tuning.
 
 
 
-\noindent \fcirc{3}\textbf{The prediction task is intrinsically hard.}
+\noindent \fcirc{4}\textbf{The prediction task is intrinsically hard.}
 Even on the adversarial benchmark where MDI has a clear advantage, absolute F1 remains around 0.26, far from perfect. This underlines the difficulty of predicting tuple-level analyst focus from implicit structural signals and motivates further research into richer implicit-interest models and hybrid implicit/explicit approaches.
 
-\noindent \fcirc{3}\textbf{Adversarial Construction is Advantageous to MDI}
+\noindent \fcirc{5}\textbf{Adversarial Construction is Advantageous to MDI}
 A natural question is whether the adversarial benchmark is overly tailored to MDI. Our position, grounded in the workload-recommender alignment framework, is that it is one principled instantiation of a broader design pattern, not a special case. First, the same framework can be used to construct workloads that favour other recommender classes (e.g., by increasing signal density, reducing skew, or making overlap clusters more distinct), providing a family of diagnostic tests rather than a single task. Second, the benchmark is defined in terms of a \emph{capability}(detecting embedded associations under skew and sparsity) not in terms of any particular implementation. Any association-aware recommender with temporal memory should, in principle, excel on such workloads. Third, the SIMBA evaluation provides an ecological complement: MDI performs comparably to other methods on realistic workloads, indicating that it does not sacrifice generality for adversarial performance. Together, the realistic and controlled benchmarks offer a more complete picture of recommender behaviour than either could alone.
 
 
