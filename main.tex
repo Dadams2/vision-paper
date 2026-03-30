@@ -29,7 +29,7 @@
 \newcommand\vldbauthors{\authors}
 \newcommand\vldbtitle{\shorttitle}
 % leave empty if no availability url should be set
-\newcommand\vldbavailabilityurl{https://github.com/Dadams2/query-data-predictor.git}
+\newcommand\vldbavailabilityurl{https://github.com/Dadams2/query-data-predictor/tree/VLDB_2026}
 % whether page numbers should be shown or not, use 'plain' for review versions, 'empty' for camera ready
 \newcommand\vldbpagestyle{plain}
 
@@ -214,7 +214,7 @@ In this paper, we operationalise implicit interest using structural signals read
 \section{Why Evaluation Method Matters}
 \label{sec:evaluation}
 
-Developing implicit recommenders for EDA raises a critical question: how should we evaluate whether a recommender genuinely learns analytical patterns, rather than exploiting structural artefacts of the workload?
+Developing implicit recommenders for EDA raises a critical question: how should we evaluate whether a recommender genuinely learns analytical patterns, rather than exploiting structural artifacts of the workload?
 
 % \vspace{-0.5em}
 % \subsection{The Overlap Problem in Realistic Workloads}
@@ -330,7 +330,7 @@ Analysts often care about natural groupings or contrasts between sub-populations
 %RBG important for the vision, one instantiation but could be more
 These four dimensions need not be instantiated exactly as in MDI; they define a design space for implicit-interest models combining structural, distributional, temporal, and compositional cues.
 
-\vspace{-1em}
+\vspace{-1.5em}
 \subsection{Combining Components in Practice}
 
 %The MDI score combines association, diversity, and novelty with weights $\alpha$, $\beta$, $\gamma$ (Eq.~\ref{eq:mdi-score}). In our experiments we use $\alpha = 0.5$, $\beta = 0.3$, $\gamma = 0.2$ with temporal decay rate $\lambda_r = 0.05$. These are illustrative values; the theoretical analysis (Proposition~\ref{prop:temporal}) shows that MDI's qualitative advantage temporal accumulation of association evidence holds across a wide range of parameter settings. Association rules are mined from accumulated query history using standard frequent itemset mining~\cite{aggarwalNewApproachOnline2001} with minimum support threshold $\theta_s = 0.08$.
@@ -343,14 +343,14 @@ From the alignment perspective, MDI exemplifies a broader class of recommenders 
 %=============================================================================
 % SECTION 6: COMPLEMENTARY EVALUATION
 %=============================================================================
-\vspace{-0.5em}
+\vspace{-1em}
 \section{Complementary Evaluation}
 \label{sec:experiments}
 
 \subsection{Experimental Setup}
 
 \textbf{Temporal prediction task.}
-Given an analyst's query history $Q_1, Q_2, \ldots, Q_t$, we aim to predict which tuples the analyst will focus on in query $Q_{t+g}$ for prediction gaps $g \in \{1, 2, 3, 5, 10\}$. Operationally, we treat tuples that reappear in $Q_{t+g}$ as relevant (Eq.~\eqref{eq:relevance}) and evaluate recommenders by how well their rankings anticipate this future overlap.
+Given an analyst's query history $Q_1, Q_2, \ldots, Q_t$, we aim to predict tuples the analyst will focus on in query $Q_{t+g}$ for prediction gaps $g \in \{1, 2, 3, 5, 10\}$. We treat tuples that reappear in $Q_{t+g}$ as relevant (Eq.~\eqref{eq:relevance}) and evaluate recommenders by how well their rankings anticipate future overlap.
 
 We evaluate on three complementary benchmarks:
 
@@ -359,7 +359,7 @@ We evaluate on three complementary benchmarks:
 
   \item \textbf{SkyServer SQL-log benchmark.} Real SQL sessions derived from the SkyServer usage study of Raddick et al.~\cite{raddickTenYearsSkyserver2014}. We sample 10 candidate sessions uniformly at random, and report the completed benchmark outputs (8 sessions across all gaps, plus one short session available only at gap $=1$). To keep experiments reproducible and independent of the live SkyServer backend, we evaluate against pre-materialised query result sets for these sessions rather than reissuing the queries to the full deployment.
 
-  \item \textbf{Controlled adversarial benchmark.} Synthetic sessions constructed using the workload--recommender alignment recipe from Section~\ref{sec:theory:recipe}. A 9-column categorical fact table embeds five association rules at 85\% confidence, with noise rows biased toward common values. Query sequences alternate between large (${\sim}150$ rows, noise-dominated) and small (${\sim}45$ rows, rule-dominated) results, yielding sparse signal, strong frequency skew, homogeneous noise, and sufficiently long sessions for temporal accumulation, conditions under which our framework predicts association-aware, history-based methods are most informative.
+  \item \textbf{Controlled adversarial benchmark.} Synthetic sessions constructed using the workload-recommender alignment recipe from Section~\ref{sec:theory:recipe}. A 9-column categorical fact table embeds five association rules at 85\% confidence, with noise rows biased toward common values. Query sequences alternate between large (${\sim}150$ rows, noise-dominated) and small (${\sim}45$ rows, rule-dominated) results, yielding sparse signal, strong frequency skew, homogeneous noise, and sufficiently long sessions for temporal accumulation, conditions under which our framework predicts association-aware, history-based methods are informative.
 
 \end{itemize}
 \noindent The SIMBA benchmark produced one session of 20~queries with an average result size of 156~rows; the sampled SkyServer benchmark contributes 981~queries across the 10 sampled sessions before gap filtering; and the adversarial benchmark comprised three sessions averaging 28~queries and 109~rows per result.
@@ -396,7 +396,7 @@ We compare six recommendation approaches, all operating in a memory-based settin
 
 \noindent We evaluate using precision, recall, F1, and overlap (fraction of recommended tuples in future results), all with exact tuple matching.
 
-\vspace{-0.5em}
+\vspace{-0.8em}
 \subsection{Experimental Results}
 
 \begin{table}[t]
@@ -416,9 +416,9 @@ Sampling   & .239 & .176 & .191 & .243 \\
 Similarity & .208 & .145 & .160 & .212 \\
 Frequency  & .198 & .135 & .150 & .202 \\
 \bottomrule
-\vspace{-1.5em}
+\vspace{-2em}
 \end{tabular}
-\vspace{-1.5em}
+\vspace{-2.4em}
 \end{table}
 
 Table~\ref{tab:adversarial-results} shows results on the adversarial benchmark. MDI attains an F1 of 0.260 at gap $=1$, outperforming the random baseline by 36\%. This advantage arises because MDI accumulates association evidence across queries, allowing it to recognise rule-conforming tuples that baseline methods systematically under-rank. Frequency and similarity perform worst (F1 of 0.150 and 0.160), consistent with the alignment framework: the benchmark's biased noise rows concentrate common values and dominate the centroid, causing these methods to prioritise noise over signal under high skew and homogeneous noise.
@@ -470,23 +470,24 @@ The sampled SkyServer sessions~\cite{raddickTenYearsSkyserver2014} provide a use
 Figure~\ref{fig:workload_comparison} presents the central result: the same recommenders yield indistinguishable performance on realistic SIMBA workloads, uniformly poor performance on sampled SkyServer logs, and clearly differentiated performance on the adversarial benchmark. This illustrates our main methodological claim: \emph{evaluation methodology is as important as recommender design}. Realistic workloads alone cannot reveal which methods exploit deeper structure.
 
 \begin{figure*}[t]
+\vspace{-1em}
 \centering
-\begin{subfigure}[t]{0.24\textwidth}
+\begin{subfigure}[t]{0.2\textwidth}
   \centering
   \includegraphics[width=\linewidth]{figures/workload_comparison_simba.pdf}
   \caption{SIMBA drill-down}
 \end{subfigure}\hfill
-\begin{subfigure}[t]{0.24\textwidth}
+\begin{subfigure}[t]{0.2\textwidth}
   \centering
   \includegraphics[width=\linewidth]{figures/workload_comparison_adversarial.pdf}
   \caption{Adversarial benchmark}
 \end{subfigure}\hfill
-\begin{subfigure}[t]{0.24\textwidth}
+\begin{subfigure}[t]{0.2\textwidth}
   \centering
   \includegraphics[width=\linewidth]{figures/workload_comparison_sdss.pdf}
   \caption{SkyServer SQL logs}
 \end{subfigure}\hfill
-\begin{minipage}[t]{0.19\textwidth}
+\begin{minipage}[t]{0.17\textwidth}
   \centering
   \includegraphics[width=\linewidth]{figures/workload_comparison_legend.pdf}
 \end{minipage}
@@ -507,13 +508,13 @@ Figure~\ref{fig:workload_comparison} presents the central result: the same recom
 
 %Figure~\ref{fig:decay_sensitivity} examines sensitivity to the temporal decay rate. Without decay ($\lambda_r = 0$), F1 is 0.246; modest decay improves performance, with F1 rising to 0.267 at $\lambda_r = 0.20$ and plateauing through $\lambda_r = 0.30$. MDI is thus robust to the exact decay rate over a broad range, suggesting its advantage stems from temporal accumulation rather than fine-grained tuning.
 
-\vspace{-0.5em}
+\vspace{-0.8em}
 \subsection{Discussion}
 
 Our experiments support three key observations.
 
 \noindent \fcirc{1}\textbf{Realistic visualisation-driven workloads cannot differentiate recommenders.}
-On SIMBA drill-down sessions, all six methods achieve similar F1 scores (Table~\ref{tab:simba-results}). Progressive drill-down produces high inter-query overlap, making any sample from current results likely to appear in future results. Evaluating solely on such workloads risks overstating the performance of simple baselines and obscuring advances in interest modelling.
+On SIMBA drill-down sessions, all six methods achieve similar F1 scores (Table~\ref{tab:simba-results}). Progressive drill-down produces high inter-query overlap, making any sample from current results likely to appear in future results. Evaluating solely on such workloads risks overstating the performance of simple baselines and obscuring advances in interest modeling.
 
 
 \noindent \fcirc{2}\textbf{Real query logs can be misaligned with the recommendation task.}
@@ -521,7 +522,7 @@ The sampled SkyServer sessions are authentic and historically grounded, but they
 
 
 \noindent \fcirc{3}\textbf{Controlled benchmarks reveal genuine capabilities.}
-When workload parameters follow the alignment recipe from Section~\ref{sec:theory:recipe}, sparse rule signal (low effective $\rho$), strong frequency skew (high $\xi$), homogeneous noise, and sufficient history, MDI's temporal accumulation yields a clear 36\% F1 improvement over random (Table~\ref{tab:adversarial-results}). This demonstrates that MDI is genuinely exploiting association structure rather than merely benefiting from overlap artefacts.
+When workload parameters follow the alignment recipe from Section~\ref{sec:theory:recipe}, sparse rule signal (low effective $\rho$), strong frequency skew (high $\xi$), homogeneous noise, and sufficient history, MDI's temporal accumulation yields a clear 36\% F1 improvement over random (Table~\ref{tab:adversarial-results}). This demonstrates that MDI is genuinely exploiting association structure rather than merely benefiting from overlap artifacts.
 
 % Da not menioned:
 % We also observe that MDI's performance is relatively insensitive to the exact choice of temporal decay rate within a broad range, indicating that its qualitative advantage stems from temporal accumulation rather than fine-grained parameter tuning.
@@ -539,9 +540,9 @@ When workload parameters follow the alignment recipe from Section~\ref{sec:theor
 % SECTION 7: RELATED WORK
 %=============================================================================
 %RBG sorry need to trim a bit, too long 
-\vspace{-0.5em}
+\vspace{-1em}
 \section{Related Work}
-
+\vspace{-0.4em}
 %\subsection{Interactive Exploration and Active Learning}
 
 %The database community has long recognised limitations of traditional query-answer paradigms for exploratory analysis. Online aggregation~\cite{hellerstein1999online} established the principle that exploration systems must balance accuracy with responsiveness. Query-by-example systems such as YMALDB~\cite{drosouYmaldbExploringRelational2013} recommend similar data based on explicit preferences. Explore-by-example approaches~\cite{dimitriadouAIDEActiveLearningBased2016} use active learning to refine understanding through tuple rankings. Query discovery systems~\cite{shen2014discovering} find project-join queries from example tuples. Exemplar query systems~\cite{mottin2014exemplar} use queries as examples of desired results. Interactive join inference~\cite{bonifati2014interactive} discovers join predicates through Boolean membership queries. Drill-down operators~\cite{kalininInteractiveDataExploration2014} and query steering~\cite{ugurcetintemelQuerySteeringInteractive2013} provide structured navigation. Relevance feedback techniques from information retrieval~\cite{rocchio1971relevance} offer iterative refinement but are designed for text, not structured multidimensional data.
@@ -606,7 +607,7 @@ The database community has proposed many alternatives to the traditional query-a
 query-by-example and explore-by-example systems~\cite{drosouYmaldbExploringRelational2013,dimitriadouAIDEActiveLearningBased2016,mottin2014exemplar}, interactive join inference~\cite{bonifati2014interactive}, drill-down and query steering~\cite{kalininInteractiveDataExploration2014,ugurcetintemelQuerySteeringInteractive2013}, and relevance feedback from information retrieval~\cite{rocchio1971relevance}. All hinge on \emph{explicit} feedback rankings, labels, or confirmations that interrupts analytical flow. Our work instead infers interest from \emph{implicit} signals in natural exploration behaviour.
 
 \noindent\textbf{Interestingness Measures and Pattern Mining.}
-Hilderman and Hamilton~\cite{robertj.hildermanKnowledgeDiscoveryMeasures2001} provide a foundational taxonomy of interestingness measures. Somech et al.~\cite{somechPredictingWhatInteresting2019} show that no single measure consistently predicts analyst interest, motivating multi-dimensional approaches; other work learns interestingness from user studies~\cite{das2018learning} or domain rules~\cite{ruiz2014learning} but treats interest as static. MDI instead combines multiple dimensions and updates them continuously from implicit session signals.
+Hilderman and Hamilton~\cite{robertj.hildermanKnowledgeDiscoveryMeasures2001} provide a foundational taxonomy of interestingness measures,  Somech et al.~\cite{somechPredictingWhatInteresting2019} show that no single measure consistently predicts analyst interest, motivating multi-dimensional approaches; other work learns interestingness from user studies~\cite{das2018learning} or domain rules~\cite{ruiz2014learning} but treats interest as static. MDI instead combines multiple dimensions and updates them continuously from implicit session signals.
 
 \noindent\textbf{Implicit Feedback in Recommendation Systems.}
 Collaborative filtering with implicit feedback~\cite{hu2008collaborative,koren2009matrix} shows that passively observed behavior can outperform explicit ratings; temporal models~\cite{koren2009collaborative,wang2018modeling} and ReCRec~\cite{lin2024recrec} further account for preference drift and the causes of non-interaction. These methods assume a predefined item catalogue and stable preferences assumptions that break down in EDA, where tuples are dynamically generated and interests shift as new patterns emerge.
@@ -619,9 +620,9 @@ fields CLEVR~\cite{johnson2017clevr}, CheckList~\cite{ribeiro2020beyond}, and ad
 %=============================================================================
 % SECTION 8: RESEARCH CHALLENGES AND FUTURE DIRECTIONS
 %=============================================================================
-\vspace{-1em}
+\vspace{-0.7em}
 \section{Challenges and Future Directions}
-
+\vspace{-0.4em}
 The vision outlined in this paper, opens several research directions. % for the database and HCI communities.
 
 %\textbf{Real-time interest model adaptation.}
@@ -652,9 +653,9 @@ Extending the workload-recommender alignment framework to neural and language mo
 %=============================================================================
 % SECTION 9: CONCLUSION
 %=============================================================================
-\vspace{-0.5em}
+\vspace{-0.8em}
 \section{Conclusion}
-
+\vspace{-0.4em}
 %This paper argues for two paradigm shifts in how database systems support exploratory data analysis. The first is a shift from explicit to implicit feedback: rather than interrupting analysts with ranking requests, systems should infer interest from natural exploration behaviour. The second is a shift from ecological-only to construct-valid evaluation: realistic workloads are necessary but not sufficient for assessing recommender quality, and controlled benchmarks that test specific capabilities are essential.
 
 %Our workload-recommender alignment theory provides a general tool for reasoning about when and why different recommenders succeed, yielding a prescriptive recipe for benchmark construction applicable beyond the specific recommenders studied here. The MDI recommender and complementary evaluation demonstrate one instantiation of this approach, achieving a 36\% F1 improvement over random on the adversarial benchmark while performing comparably on realistic workloads.
@@ -663,6 +664,7 @@ Extending the workload-recommender alignment framework to neural and language mo
 
 
 We advocated two paradigm shifts for database support of exploratory data analysis: from \emph{explicit} to \emph{implicit} feedback, and from purely \emph{ecological} to \emph{construct-valid} evaluation. Rather than eliciting ratings or labels, systems should infer analytical interest from exploration behaviour, and rather than relying on realistic workloads, they should include benchmarks that probe specific capabilities.
+ 
 
 Our workload-recommender alignment framework provides a way to reason about when different recommenders succeed or fail, and to design such diagnostic benchmarks by controlling workload parameters. The Multi-Dimensional Interestingness (MDI) recommender and our complementary evaluation illustrate one instantiation of this idea: MDI yields clear gains on a controlled association-focused benchmark while matching baselines on realistic SIMBA workloads. We hope this combination of implicit interest modelling and alignment-driven benchmarking will guide future work on human-in-the-loop data systems.
 
