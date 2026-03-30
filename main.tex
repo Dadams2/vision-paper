@@ -141,7 +141,7 @@ Existing exploration systems ask analysts to rank tuples, validate examples, or 
 
 We instead envision EDA systems that \emph{infer} analytical interest from \emph{implicit} behavioural signals: the queries analysts write, the results they inspect, and the sequences in which they follow up on emerging patterns. Implicit feedback has proved powerful in other recommendation domains~\cite{hu2008collaborative, kelly2003implicit, koren2009collaborative}, and the temporal structure of exploration sessions provides a natural basis for modelling evolving analytical goals without interrupting the analyst.
 
-However, shifting to implicit recommenders raises a second, equally important question: \emph{how should we evaluate whether a recommender genuinely understands analytical patterns, rather than exploiting artefacts of the workload?} We show that realistic visualisation-driven workloads, such as SIMBA-style drill-down sessions, exhibit high inter-query overlap due to progressive refinement. Under such overlap, a wide range of recommenders, from simple random selection to more sophisticated models, achieve statistically similar scores, making them effectively indistinguishable. Evaluating solely on realistic workloads can therefore overstate the effectiveness of simple baselines while obscuring genuine methodological advances. In this setting, principled evaluation methodology is as important as recommender design.
+However, shifting to implicit recommenders raises a second, equally important question: \emph{how should we evaluate whether a recommender understands analytical patterns, rather than exploiting artifacts of the workload?} We show that realistic visualisation-driven workloads, such as SIMBA-style drill-down sessions, exhibit high inter-query overlap due to progressive refinement. Under such overlap, a wide range of recommenders achieve statistically similar scores, making them effectively indistinguishable. Evaluating solely on realistic workloads can therefore overstate the effectiveness of simple baselines while obscuring methodological advances. In this setting, principled evaluation methodology is as important as recommender design.
 
 We argue for two paradigm shifts in how DBMSs support EDA:
 \begin{itemize}[leftmargin=1em, topsep=0pt, itemsep=0pt, parsep=0pt]
@@ -191,7 +191,7 @@ Despite their differences, these systems rely on explicit feedback in various fo
 \vspace{-0.5em}
 \subsection{Implicit Signals as a Richer Alternative}
 
-In this vision paper, we argue that implicit feedback derived from natural exploration behaviour provides a richer and more reliable basis for modelling interest than explicit rankings or ratings. This view rests on three observations:
+We argue that implicit feedback derived from natural exploration behaviour provides a richer and more reliable basis for modelling interest than explicit rankings or ratings. This view rests on three observations:
 
 \noindent \fcirc{1} \textbf{Cognitive flow preservation.}
 Explicit feedback interleaves exploration and evaluation, increasing extraneous cognitive load. Cognitive load theory~\cite{sweller1988cognitive} explains that exploratory analysis already imposes substantial intrinsic load; additional rating or labelling tasks can overwhelm working memory. Implicit feedback, by contrast, preserves flow by inferring interest from behaviours analysts exhibit, such as follow-up queries or drill-down operations.
@@ -228,9 +228,15 @@ Developing implicit recommenders for EDA raises a critical question: how should 
 % \end{figure}
 
 %We use the SIMBA benchmark~\cite{lenzi2019simba} to generate realistic visualization-driven exploration sessions over the Sloan Digital Sky Survey (SDSS) dataset~\cite{york_sloan_2000}. SIMBA produces SQL queries through a configurable action loop with progressive drill-down, filter, and link operations that narrow result ranges by a factor of $0.60$-$0.85$ per step.
-We use the SIMBA benchmark~\cite{lenzi2019simba} to generate realistic visualisation-driven exploration sessions over the Sloan Digital Sky Survey (SDSS) dataset~\cite{york_sloan_2000}. SIMBA produces SQL queries through a configurable action loop with progressive drill-down, filter, and link operations that narrow result ranges over time.
 
-SIMBA-generated sessions exhibit high inter-query tuple overlap: progressive drill-down narrows result ranges by a factor of $0.60$--$0.85$ per step, meaning any reasonable sample from the current result has a high probability of appearing in the next query's result. Table~\ref{tab:simba-results} shows the consequence for evaluation. When we assess six recommenders on SIMBA sessions, all achieve similar F1 scores (range: 0.266--0.335), with no clear winner; a simple similarity baseline achieves the highest score. This is not a failure of any particular recommender, but a property of the workload: when overlap is high, any reasonable sample from current results has a high probability of appearing in future results, making the prediction task \emph{non-discriminative}. Under such conditions, evaluation cannot meaningfully distinguish between simple and sophisticated methods.
+% DA too long in paper
+
+% We use the SIMBA benchmark~\cite{lenzi2019simba} to generate realistic visualisation-driven exploration sessions over the Sloan Digital Sky Survey (SDSS) dataset~\cite{york_sloan_2000}. SIMBA produces SQL queries through a configurable action loop with progressive drill-down, filter, and link operations that narrow result ranges over time.
+% SIMBA-generated sessions exhibit high inter-query tuple overlap: progressive drill-down narrows result ranges by a factor of $0.60$--$0.85$ per step, meaning any reasonable sample from the current result has a high probability of appearing in the next query's result. Table~\ref{tab:simba-results} shows the consequence for evaluation. When we assess six recommenders on SIMBA sessions, all achieve similar F1 scores (range: 0.266--0.335), with no clear winner; a simple similarity baseline achieves the highest score. This is not a failure of any particular recommender, but a property of the workload: when overlap is high, any reasonable sample from current results has a high probability of appearing in future results, making the prediction task \emph{non-discriminative}. Under such conditions, evaluation cannot meaningfully distinguish between simple and sophisticated methods.
+
+% se condensed below
+
+We use the SIMBA benchmark~\cite{lenzi2019simba} to generate realistic visualisation-driven exploration sessions over the Sloan Digital Sky Survey (SDSS) dataset~\cite{york_sloan_2000}. SIMBA produces SQL queries through progressive drill-down, filter, and link operations that narrow result ranges by a factor of $0.60$--$0.85$ per step, producing high inter-query tuple overlap. Table~\ref{tab:simba-results} shows the consequence: all six recommenders achieve similar F1 scores (range: 0.266--0.335), with no clear winner. This is not a failure of any particular recommender but a property of the workload --- when overlap is high, any reasonable sample from current results has a high probability of appearing in future results, making the prediction task \emph{non-discriminative}.
 
 \begin{table}[t]
 \centering
@@ -269,7 +275,7 @@ To reason about benchmark adequacy, we distinguish two complementary notions of 
 
 Other fields address this tension by complementing naturalistic datasets with \emph{diagnostic} benchmarks that test specific properties. In computer vision, CLEVR~\cite{johnson2017clevr} uses synthetic scenes to diagnose whether visual question-answering models perform compositional reasoning or exploit dataset biases. In NLP, CheckList~\cite{ribeiro2020beyond} provides behavioural tests that probe specific linguistic capabilities, and adversarial NLI benchmarks~\cite{nie2020adversarial} test whether entailment models rely on annotation artefacts.
 
-We adopt the same principle for EDA recommender evaluation. Our controlled benchmark (detailed in Section~\ref{sec:theory:recipe}) tests a specific, method-agnostic property: \emph{can the recommender detect association rules embedded in the data when superficial shortcuts are removed?} The benchmark is constructed by deriving conditions under which each baseline class provably fails, then instantiating a workload that simultaneously satisfies all these conditions. The derivation yields a general workload-recommender alignment framework, which we present in the next section as a blueprint for designing construct-valid benchmarks beyond our specific instantiation.
+We adopt the same principle for EDA recommender evaluation. Our controlled benchmark (detailed in Section~\ref{sec:theory:recipe}) tests a specific, method-agnostic property: \emph{can the recommender detect association rules embedded in the data when superficial shortcuts are removed?} The benchmark is constructed by deriving conditions where each baseline class provably fails, then instantiating workloads that satisfies all these conditions. The derivation yields a general alignment framework, which we present as a blueprint for designing construct-valid benchmarks beyond our specific instantiation.
 
 
 %=============================================================================
@@ -418,29 +424,33 @@ Table~\ref{tab:adversarial-results} shows results on the adversarial benchmark. 
 
 Across prediction gaps $g \in \{1,2,3,5,10\}$ (not shown), MDI's advantage is largest at small gaps and gradually shrinks as overlap across queries decreases, aligning with the framework's intuition that temporal distance makes all methods' predictions harder.
 
-\begin{table}[t]
-\centering
-\caption{Recommendation performance at gap $=1$ on sampled SkyServer SQL sessions. All methods perform poorly, reflecting point-lookup-heavy workloads with weak tuple persistence.}
-\vspace{-1em}
-\label{tab:sdss-results}
-\footnotesize
-\begin{tabular}{l cccc}
-\toprule
-\textbf{Recommender} & \textbf{Prec.} & \textbf{Rec.} & \textbf{F1} & \textbf{Ovlp.} \\
-\midrule
-Clustering & .037 & .033 & .033 & .037 \\
-Frequency  & .037 & .033 & .033 & .037 \\
-Random     & .037 & .033 & .033 & .037 \\
-Sampling   & .037 & .033 & .033 & .037 \\
-Similarity & .019 & .018 & .018 & .019 \\
-MDI (Ours) & .014 & .012 & .013 & .014 \\
-\bottomrule
-\vspace{-1.5em}
-\end{tabular}
-\vspace{-1.5em}
-\end{table}
+% DA Cut full SDSS results section as too long and not interesting
 
-The sampled SkyServer sessions provide a useful counterpoint to SIMBA. Our exploratory analysis over the first 1{,}000 log-derived sessions (177{,}721 queries) shows that 49.7\% of queries are point lookups and 481 of 1{,}000 sessions are dominated by point lookups (more than 80\% of their queries). Only 1.1\% of all queries satisfy our simple exploratory heuristic. The 10 sampled sessions used for benchmarking are somewhat more exploratory than the corpus as a whole, but still contain 61.1\% point lookups, and only 72 of 981 queries are classified as exploratory. Table~\ref{tab:sdss-results} therefore shows uniformly poor performance: gap-$1$ F1 ranges only from 0.013 to 0.033, with four baselines effectively tied. This is not evidence that the recommenders are interchangeable in general; rather, it shows that a memory-based tuple recommender is badly mismatched to workloads dominated by object-ID fetches and abrupt transitions between entities. In this regime, future results often reflect a jump to a different object rather than a refinement of the current result set, so current-tuple recommendation becomes intrinsically weak.
+% \begin{table}[t]
+% \centering
+% \caption{Recommendation performance at gap $=1$ on sampled SkyServer SQL sessions. All methods perform poorly, reflecting point-lookup-heavy workloads with weak tuple persistence.}
+% \vspace{-1em}
+% \label{tab:sdss-results}
+% \footnotesize
+% \begin{tabular}{l cccc}
+% \toprule
+% \textbf{Recommender} & \textbf{Prec.} & \textbf{Rec.} & \textbf{F1} & \textbf{Ovlp.} \\
+% \midrule
+% Clustering & .037 & .033 & .033 & .037 \\
+% Frequency  & .037 & .033 & .033 & .037 \\
+% Random     & .037 & .033 & .033 & .037 \\
+% Sampling   & .037 & .033 & .033 & .037 \\
+% Similarity & .019 & .018 & .018 & .019 \\
+% MDI (Ours) & .014 & .012 & .013 & .014 \\
+% \bottomrule
+% \vspace{-1.5em}
+% \end{tabular}
+% \vspace{-1.5em}
+% \end{table}
+
+% The sampled SkyServer sessions provide a useful counterpoint to SIMBA. Our exploratory analysis over the first 1{,}000 log-derived sessions (177{,}721 queries) shows that 49.7\% of queries are point lookups and 481 of 1{,}000 sessions are dominated by point lookups (more than 80\% of their queries). Only 1.1\% of all queries satisfy our simple exploratory heuristic. The 10 sampled sessions used for benchmarking are somewhat more exploratory than the corpus as a whole, but still contain 61.1\% point lookups, and only 72 of 981 queries are classified as exploratory. Table~\ref{tab:sdss-results} therefore shows uniformly poor performance: gap-$1$ F1 ranges only from 0.013 to 0.033, with four baselines effectively tied. This is not evidence that the recommenders are interchangeable in general; rather, it shows that a memory-based tuple recommender is badly mismatched to workloads dominated by object-ID fetches and abrupt transitions between entities. In this regime, future results often reflect a jump to a different object rather than a refinement of the current result set, so current-tuple recommendation becomes intrinsically weak.
+
+The sampled SkyServer sessions~\cite{raddickTenYearsSkyserver2014} provide a useful counterpoint: 49.7\% of queries are point lookups, and only 1.1\% satisfy our exploratory heuristic across the full log. Even the 10 sampled sessions, which are more exploratory than average, yield gap-$1$ F1 scores ranging only from 0.013 to 0.033 with four baselines effectively tied and MDI performing worst. This is not evidence that the recommenders are interchangeable; rather, it shows that tuple-level recommendation is intrinsically mismatched to workloads dominated by object-ID fetches and abrupt entity transitions, where future results reflect a jump to a different object rather than a refinement of the current result set. Ecological validity alone is therefore insufficient: realistic logs may be too heterogeneous or too weakly aligned with the target task to yield informative comparisons.
 
 %RBG it is great, but space is really an issue, did just a summary above
 %\begin{figure}[t]
@@ -481,26 +491,29 @@ Figure~\ref{fig:workload_comparison} presents the central result: the same recom
 \vspace{-0.5em}
 \subsection{Discussion}
 
-Our experiments support four key observations.
+Our experiments support three key observations.
 
 \noindent \fcirc{1}\textbf{Realistic visualisation-driven workloads cannot differentiate recommenders.}
 On SIMBA drill-down sessions, all six methods achieve similar F1 scores (Table~\ref{tab:simba-results}). Progressive drill-down produces high inter-query overlap, making any sample from current results likely to appear in future results. Evaluating solely on such workloads risks overstating the performance of simple baselines and obscuring advances in interest modelling.
 
 
 \noindent \fcirc{2}\textbf{Real query logs can be misaligned with the recommendation task.}
-The sampled SkyServer sessions are authentic and historically grounded, but they test a different failure mode: many queries are object-ID lookups rather than open-ended exploration. As a result, tuple-level prediction from current results becomes nearly impossible and all methods collapse toward zero (Table~\ref{tab:sdss-results}). Ecological validity alone is therefore insufficient: realistic logs may be \emph{too} heterogeneous or too weakly aligned with the target recommendation task to yield informative comparisons.
+The sampled SkyServer sessions are authentic and historically grounded, but they test a different failure mode: many queries are object-ID lookups rather than open-ended exploration. As a result, tuple-level prediction from current results becomes nearly impossible and all methods collapse toward zero. Ecological validity alone is therefore insufficient: realistic logs may be \emph{too} heterogeneous or too weakly aligned with the target recommendation task to yield informative comparisons.
 
 
 \noindent \fcirc{3}\textbf{Controlled benchmarks reveal genuine capabilities.}
-When workload parameters follow the alignment recipe from Section~\ref{sec:theory:recipe}, sparse rule signal (low effective $\rho$), strong frequency skew (high $\xi$), homogeneous noise, and sufficient history, MDI's temporal accumulation yields a clear 36\% F1 improvement over random (Table~\ref{tab:adversarial-results}). This demonstrates that MDI is genuinely exploiting association structure rather than merely benefiting from overlap artefacts. We also observe that MDI's performance is relatively insensitive to the exact choice of temporal decay rate within a broad range, indicating that its qualitative advantage stems from temporal accumulation rather than fine-grained parameter tuning.
+When workload parameters follow the alignment recipe from Section~\ref{sec:theory:recipe}, sparse rule signal (low effective $\rho$), strong frequency skew (high $\xi$), homogeneous noise, and sufficient history, MDI's temporal accumulation yields a clear 36\% F1 improvement over random (Table~\ref{tab:adversarial-results}). This demonstrates that MDI is genuinely exploiting association structure rather than merely benefiting from overlap artefacts.
 
+% Da not menioned:
+% We also observe that MDI's performance is relatively insensitive to the exact choice of temporal decay rate within a broad range, indicating that its qualitative advantage stems from temporal accumulation rather than fine-grained parameter tuning.
 
+% DA the following I think are useful points but have been cut for space
 
-\noindent \fcirc{4}\textbf{The prediction task is intrinsically hard.}
-Even on the adversarial benchmark where MDI has a clear advantage, absolute F1 remains around 0.26, far from perfect. This underlines the difficulty of predicting tuple-level analyst focus from implicit structural signals and motivates further research into richer implicit-interest models and hybrid implicit/explicit approaches.
+% \noindent \fcirc{4}\textbf{The prediction task is intrinsically hard.}
+% Even on the adversarial benchmark where MDI has a clear advantage, absolute F1 remains around 0.26, far from perfect. This underlines the difficulty of predicting tuple-level analyst focus from implicit structural signals and motivates further research into richer implicit-interest models and hybrid implicit/explicit approaches.
 
-\noindent \fcirc{5}\textbf{Adversarial Construction is Advantageous to MDI}
-A natural question is whether the adversarial benchmark is overly tailored to MDI. Our position, grounded in the workload-recommender alignment framework, is that it is one principled instantiation of a broader design pattern, not a special case. First, the same framework can be used to construct workloads that favour other recommender classes (e.g., by increasing signal density, reducing skew, or making overlap clusters more distinct), providing a family of diagnostic tests rather than a single task. Second, the benchmark is defined in terms of a \emph{capability}(detecting embedded associations under skew and sparsity) not in terms of any particular implementation. Any association-aware recommender with temporal memory should, in principle, excel on such workloads. Third, the SIMBA evaluation provides an ecological complement: MDI performs comparably to other methods on realistic workloads, indicating that it does not sacrifice generality for adversarial performance. Together, the realistic and controlled benchmarks offer a more complete picture of recommender behaviour than either could alone.
+% \noindent \fcirc{5}\textbf{Adversarial Construction is Advantageous to MDI}
+% A natural question is whether the adversarial benchmark is overly tailored to MDI. Our position, grounded in the workload-recommender alignment framework, is that it is one principled instantiation of a broader design pattern, not a special case. First, the same framework can be used to construct workloads that favour other recommender classes (e.g., by increasing signal density, reducing skew, or making overlap clusters more distinct), providing a family of diagnostic tests rather than a single task. Second, the benchmark is defined in terms of a \emph{capability}(detecting embedded associations under skew and sparsity) not in terms of any particular implementation. Any association-aware recommender with temporal memory should, in principle, excel on such workloads. Third, the SIMBA evaluation provides an ecological complement: MDI performs comparably to other methods on realistic workloads, indicating that it does not sacrifice generality for adversarial performance. Together, the realistic and controlled benchmarks offer a more complete picture of recommender behaviour than either could alone.
 
 
 %=============================================================================
@@ -574,15 +587,12 @@ The database community has proposed many alternatives to the traditional query-a
 query-by-example and explore-by-example systems~\cite{drosouYmaldbExploringRelational2013,dimitriadouAIDEActiveLearningBased2016,mottin2014exemplar}, interactive join inference~\cite{bonifati2014interactive}, drill-down and query steering~\cite{kalininInteractiveDataExploration2014,ugurcetintemelQuerySteeringInteractive2013}, and relevance feedback from information retrieval~\cite{rocchio1971relevance}. All hinge on \emph{explicit} feedback rankings, labels, or confirmations that interrupts analytical flow. Our work instead infers interest from \emph{implicit} signals in natural exploration behaviour.
 
 \noindent\textbf{Interestingness Measures and Pattern Mining.}
-
 Hilderman and Hamilton~\cite{robertj.hildermanKnowledgeDiscoveryMeasures2001} provide a foundational taxonomy of interestingness measures. Somech et al.~\cite{somechPredictingWhatInteresting2019} show that no single measure consistently predicts analyst interest, motivating multi-dimensional approaches; other work learns interestingness from user studies~\cite{das2018learning} or domain rules~\cite{ruiz2014learning} but treats interest as static. MDI instead combines multiple dimensions and updates them continuously from implicit session signals.
 
 \noindent\textbf{Implicit Feedback in Recommendation Systems.}
-
 Collaborative filtering with implicit feedback~\cite{hu2008collaborative,koren2009matrix} shows that passively observed behavior can outperform explicit ratings; temporal models~\cite{koren2009collaborative,wang2018modeling} and ReCRec~\cite{lin2024recrec} further account for preference drift and the causes of non-interaction. These methods assume a predefined item catalogue and stable preferences assumptions that break down in EDA, where tuples are dynamically generated and interests shift as new patterns emerge.
 
 \noindent\textbf{Benchmarks for Data Exploration.}
-
 IDEBench~\cite{eichmannIDEBenchBenchmarkInteractive2020} and SIMBA~\cite{lenzi2019simba} target system performance and realistic session generation respectively, but high inter-query overlap in such workloads
 prevents recommender differentiation (Section~\ref{sec:evaluation}). We complement them with diagnostic benchmarks following practice in other
 fields CLEVR~\cite{johnson2017clevr}, CheckList~\cite{ribeiro2020beyond}, and adversarial NLI~\cite{nie2020adversarial} applying the same principle  to EDA to test whether recommenders detect embedded associations when frequency and similarity shortcuts are removed.
@@ -611,7 +621,7 @@ The vision outlined in this paper, opens several research directions. % for the 
 %Finally, longitudinal user studies are needed to assess whether implicit recommendation systems enhance or constrain analytical discovery compared to explicit-feedback baselines. Such studies should examine not only task performance, but also trust, sense-making, and the diversity of insights uncovered over extended exploration sessions.
 
 \textbf{Adaptive interest models and richer signals.}
-EDA interests can shift dramatically within a single session as new patterns are discovered. Developing online algorithms that adapt in real time, while integrating richer implicit signals from visual interfaces (e.g., clicks, hovers, dwell times) with structural signals from query logs, is a key technical challenge.
+EDA interests can shift dramatically within a single session as new patterns are discovered. Developing online algorithms that adapt in real time, while integrating richer implicit signals from visual interfaces (e.g., clicks, hovers, dwell times) with structural signals from query logs, is a key challenge.
 
 \textbf{Interpretability, trust, and transfer.}
 Because EDA recommendations directly influence analytical conclusions, systems must provide transparent explanations of why specific tuples or regions are recommended and how they might bias exploration. At the same time, analysts often work across multiple datasets and domains, raising questions about how exploration patterns transfer and how to mitigate cold-start effects through transfer or meta-learning.
@@ -633,7 +643,7 @@ Extending the workload-recommender alignment framework to neural and language mo
 %The research challenges we identify real-time adaptation, interpretability, cross-domain transfer, and theoretical extensions represent opportunities for the database community at the intersection of data management, machine learning, and human-computer interaction. As data volumes grow and analytical complexity increases, building systems intelligent enough to understand analytical intent from natural exploration behaviour becomes increasingly critical.
 
 
-We advocated two paradigm shifts for database support of exploratory data analysis: from \emph{explicit} to \emph{implicit} feedback, and from purely \emph{ecological} to \emph{construct-valid} evaluation. Rather than eliciting ratings or labels, systems should infer analytical interest from natural exploration behaviour, and rather than relying solely on realistic workloads, they should include diagnostic benchmarks that probe specific recommender capabilities.
+We advocated two paradigm shifts for database support of exploratory data analysis: from \emph{explicit} to \emph{implicit} feedback, and from purely \emph{ecological} to \emph{construct-valid} evaluation. Rather than eliciting ratings or labels, systems should infer analytical interest from exploration behaviour, and rather than relying on realistic workloads, they should include benchmarks that probe specific capabilities.
 
 Our workload-recommender alignment framework provides a way to reason about when different recommenders succeed or fail, and to design such diagnostic benchmarks by controlling workload parameters. The Multi-Dimensional Interestingness (MDI) recommender and our complementary evaluation illustrate one instantiation of this idea: MDI yields clear gains on a controlled association-focused benchmark while matching baselines on realistic SIMBA workloads. We hope this combination of implicit interest modelling and alignment-driven benchmarking will guide future work on human-in-the-loop data systems.
 
