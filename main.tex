@@ -8,6 +8,7 @@
 \usepackage{multirow}
 \usepackage{makecell}
 \usepackage{enumitem}
+\usepackage{subcaption}
 %\usepackage{pifont}
 
 \usepackage{tikz}
@@ -468,14 +469,32 @@ The sampled SkyServer sessions~\cite{raddickTenYearsSkyserver2014} provide a use
 
 Figure~\ref{fig:workload_comparison} presents the central result: the same recommenders yield indistinguishable performance on realistic SIMBA workloads, uniformly poor performance on sampled SkyServer logs, and clearly differentiated performance on the adversarial benchmark. This illustrates our main methodological claim: \emph{evaluation methodology is as important as recommender design}. Realistic workloads alone cannot reveal which methods exploit deeper structure.
 
-\begin{figure}[htb]
+\begin{figure*}[t]
 \centering
-\includegraphics[width=\linewidth]{figures/workload_comparison.pdf}
+\begin{subfigure}[t]{0.24\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{figures/workload_comparison_simba.pdf}
+  \caption{SIMBA drill-down}
+\end{subfigure}\hfill
+\begin{subfigure}[t]{0.24\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{figures/workload_comparison_adversarial.pdf}
+  \caption{Adversarial benchmark}
+\end{subfigure}\hfill
+\begin{subfigure}[t]{0.24\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{figures/workload_comparison_sdss.pdf}
+  \caption{SkyServer SQL logs}
+\end{subfigure}\hfill
+\begin{minipage}[t]{0.19\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{figures/workload_comparison_legend.pdf}
+\end{minipage}
+\vspace{-0.7em}
+\caption{Recommender performance (F1 at gap $=1$) across three workload types. On SIMBA drill-down sessions, all methods perform similarly because progressive refinement preserves high overlap. On sampled SkyServer SQL sessions, all methods perform poorly because point-lookups and abrupt task shifts yield little reusable tuple-level signal. On the controlled adversarial benchmark, MDI clearly separates from the baselines.}
 \vspace{-1.5em}
-\caption{Recommender performance (F1 at gap $=1$) across three workload types. On SIMBA drill-down sessions (A), all methods perform similarly because progressive refinement preserves high overlap. On sampled SkyServer SQL sessions (C), all methods perform poorly because point-lookups and abrupt task shifts yield little reusable tuple-level signal. On the controlled adversarial benchmark (B), MDI clearly separates from the baselines.}
-\vspace{-2em}
 \label{fig:workload_comparison}
-\end{figure}
+\end{figure*}
 
 %\begin{figure}[t]
 %\centering
