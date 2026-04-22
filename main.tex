@@ -159,7 +159,7 @@ These instantiations are examples of how implicit interest modelling and diagnos
 %=============================================================================
 % SECTION 2: FROM EXPLICIT FEEDBACK TO IMPLICIT SIGNALS
 %=============================================================================
-\vspace{-0.5em}
+% \vspace{-0.5em}
 \section{From Explicit to Implicit Signals}
 \label{sec:implicit}
 %\vspace{-0.5em}
@@ -266,19 +266,29 @@ This matters for evaluation. Prior work that evaluates recommenders exclusively 
 \vspace{-0.5em}
 \subsection{The Need for Construct Validity in EDA Benchmarks}
 
-To reason about benchmark adequacy, we distinguish two complementary notions of validity~\cite{shadish2002experimental}:
+% To reason about benchmark adequacy, we distinguish two complementary notions of validity~\cite{shadish2002experimental}:
+
+% \begin{itemize}[leftmargin=1em, topsep=0pt, itemsep=0pt, parsep=0pt]
+%   \item \textbf{Ecological validity}: Do benchmark sessions resemble real analyst behaviour? SIMBA provides this: its progressive drill-down and visualisation-driven queries are representative of common analytical workflows.
+%   \item \textbf{Construct validity}: Does the benchmark actually test the capability it claims to measure? SIMBA \emph{lacks} this for recommender evaluation, because high overlap means strong scores can arise from tuple persistence alone rather than from inferring the analyst's focus. For example, if a drill-down query retains most of the previous result, then even a recommender that simply resamples current tuples can look accurate without identifying which subpopulation, attribute interaction, or investigative thread the analyst is actually pursuing.
+% \end{itemize}
+
+
+% Other fields address this tension by complementing realistic datasets with \emph{diagnostic} benchmarks that test specific properties. In computer vision, CLEVR~\cite{johnson2017clevr} uses synthetic scenes to test whether visual question-answering models reason over multiple attributes or exploit dataset biases. In NLP, CheckList~\cite{ribeiro2020beyond} provides targeted test suites, and adversarial NLI benchmarks~\cite{nie2020adversarial} test whether entailment models rely on annotation shortcuts.
+
+% We adopt the same principle for EDA recommender evaluation. Our controlled benchmark (detailed in Section~\ref{sec:theory:recipe}) tests a specific, method-agnostic property: \emph{can the recommender detect association rules embedded in the data when simple shortcuts are removed?} The benchmark is constructed by identifying conditions under which each baseline class is expected to fail, then instantiating workloads that satisfy those conditions. The derivation yields a general alignment framework, which we present as a guide for designing construct-valid benchmarks beyond our specific instantiation.
+
+We distinguish two complementary notions of validity~\cite{shadish2002experimental}:
 
 \begin{itemize}[leftmargin=1em, topsep=0pt, itemsep=0pt, parsep=0pt]
-  \item \textbf{Ecological validity}: Do benchmark sessions resemble real analyst behaviour? SIMBA provides this: its progressive drill-down and visualisation-driven queries are representative of common analytical workflows.
-  \item \textbf{Construct validity}: Does the benchmark actually test the capability it claims to measure? SIMBA \emph{lacks} this for recommender evaluation, because high overlap means strong scores can arise from tuple persistence alone rather than from inferring the analyst's focus. For example, if a drill-down query retains most of the previous result, then even a recommender that simply resamples current tuples can look accurate without identifying which subpopulation, attribute interaction, or investigative thread the analyst is actually pursuing.
+  \item \textbf{Ecological validity}: Do benchmark sessions resemble real analyst behaviour? SIMBA does: its progressive drill-down and visualisation-driven queries are representative of common workflows.
+  \item \textbf{Construct validity}: Does the benchmark test the capability it claims to measure? SIMBA \emph{lacks} this for recommender evaluation, because high overlap lets strong scores arise from tuple persistence alone rather than from inferring analyst focus. If a drill-down query retains most of the previous result, then even a recommender that simply resamples current tuples can look accurate without identifying the analyst's actual target.
 \end{itemize}
 
 
-Other fields address this tension by complementing realistic datasets with \emph{diagnostic} benchmarks that test specific properties. In computer vision, CLEVR~\cite{johnson2017clevr} uses synthetic scenes to test whether visual question-answering models reason over multiple attributes or exploit dataset biases. In NLP, CheckList~\cite{ribeiro2020beyond} provides targeted test suites, and adversarial NLI benchmarks~\cite{nie2020adversarial} test whether entailment models rely on annotation shortcuts.
+Other fields address this tension with \emph{diagnostic} benchmarks that test specific properties. In computer vision, CLEVR~\cite{johnson2017clevr} probes compositional reasoning; in NLP, CheckList~\cite{ribeiro2020beyond} and adversarial NLI~\cite{nie2020adversarial} test whether models rely on shortcuts.
 
-We adopt the same principle for EDA recommender evaluation. Our controlled benchmark (detailed in Section~\ref{sec:theory:recipe}) tests a specific, method-agnostic property: \emph{can the recommender detect association rules embedded in the data when simple shortcuts are removed?} The benchmark is constructed by identifying conditions under which each baseline class is expected to fail, then instantiating workloads that satisfy those conditions. The derivation yields a general alignment framework, which we present as a guide for designing construct-valid benchmarks beyond our specific instantiation.
-
-
+We apply the same principle to EDA. Our controlled benchmark (Section~\ref{sec:theory:recipe}) tests a method-agnostic capability: \emph{can a recommender detect embedded association rules once simple shortcuts are removed?} We construct it by identifying where each baseline should fail and then instantiating workloads that satisfy those conditions. The result is a general alignment framework for designing construct-valid benchmarks.
 %=============================================================================
 % SECTION 4: WORKLOAD-RECOMMENDER ALIGNMENT THEORY
 %=============================================================================
@@ -326,11 +336,8 @@ Analytical goals evolve over the course of a session. Temporal cohesion measures
 %Analysts often care about natural groupings or contrasts between sub-populations. Cluster validity measures such as the silhouette coefficient and Calinski–Harabasz index~\cite{kaufman2009finding} inform MDI's novelty component $N(t,q)$, which promotes tuples whose attribute combinations are under-represented in the session history, following the inverse-frequency principle~\cite{sparckjones1972statistical}. This encourages exploration of complementary or surprising regions of the data space.
 Analysts often care about natural groupings or contrasts between sub-populations. Inspired by cluster validity measures, MDI's novelty component $N(t,q)$ promotes tuples whose attribute combinations are under-represented in the session history, following the inverse-frequency principle~\cite{sparckjones1972statistical}.
 
-
 %RBG important for the vision, one instantiation but could be more
 These four dimensions need not be instantiated exactly as in MDI; they define a design space for implicit-interest models combining structural, distributional, temporal, and compositional cues.
-
-\vspace{-1.5em}
 \subsection{Combining Components in Practice}
 
 %The MDI score combines association, diversity, and novelty with weights $\alpha$, $\beta$, $\gamma$ (Eq.~\ref{eq:mdi-score}). In our experiments we use $\alpha = 0.5$, $\beta = 0.3$, $\gamma = 0.2$ with temporal decay rate $\lambda_r = 0.05$. These are illustrative values; the theoretical analysis (Proposition~\ref{prop:temporal}) shows that MDI's qualitative advantage temporal accumulation of association evidence holds across a wide range of parameter settings. Association rules are mined from accumulated query history using standard frequent itemset mining~\cite{aggarwalNewApproachOnline2001} with minimum support threshold $\theta_s = 0.08$.
@@ -338,8 +345,6 @@ These four dimensions need not be instantiated exactly as in MDI; they define a 
 In our experiments, we use fixed weights $\alpha = 0.5$, $\beta = 0.3$, and $\gamma = 0.2$ in Eq.~\eqref{eq:mdi-score}, with a temporal decay rate $\lambda_r = 0.05$ applied within the association component rather than as a separate additive term. These settings are illustrative rather than optimised; our goal is to demonstrate that even a simple instantiation of the multi-dimensional design can exploit temporal accumulation under suitable workloads.
 Association rules are mined incrementally from accumulated query history using standard frequent itemset mining techniques~\cite{aggarwalNewApproachOnline2001}, with a minimum support threshold $\theta_s = 0.08$ to balance sensitivity to emerging patterns against robustness to noise. Diversity and novelty scores are updated from summary statistics over past results, allowing MDI to operate in a streaming, session-based setting.
 From the alignment perspective, MDI exemplifies a broader class of recommenders whose strength grows with history length and whose advantage is most pronounced when signal is sparse, data are skewed, and noise is homogeneous. Other instantiations (e.g., neural or language model-based variants that approximate the same four dimensions) could be evaluated within the same framework.
-
-
 %=============================================================================
 % SECTION 6: COMPLEMENTARY EVALUATION
 %=============================================================================
@@ -421,7 +426,7 @@ Frequency & .199 & .135 & .151 & .203 \\
 \vspace{-2.4em}
 \end{table}
 
-Table~\ref{tab:adversarial-results} shows results on the adversarial benchmark. MDI attains an F1 of 0.260 at gap $=1$, outperforming the random baseline by 36\%. This advantage arises because MDI accumulates association evidence across queries, allowing it to recognise rule-conforming tuples that baseline methods systematically under-rank. Frequency and similarity perform worst (F1 of 0.150 and 0.160), consistent with the alignment framework: the benchmark's biased noise rows concentrate common values and dominate the centroid, causing these methods to prioritise noise over signal under high skew and homogeneous noise.
+Table~\ref{tab:adversarial-results} shows results on the adversarial benchmark. MDI attains an F1 of 0.299 at gap $=1$, outperforming the random baseline by 36\%. This advantage arises because MDI accumulates association evidence across queries, allowing it to recognise rule-conforming tuples that baseline methods systematically under-rank. Frequency and similarity perform worst (F1 of 0.150 and 0.160), consistent with the alignment framework: the benchmark's biased noise rows concentrate common values and dominate the centroid, causing these methods to prioritise noise over signal under high skew and homogeneous noise.
 
 Across prediction gaps $g \in \{1,2,3,5,10\}$ (not shown), MDI's advantage is largest at small gaps and gradually shrinks as overlap across queries decreases, aligning with the framework's intuition that temporal distance makes all methods' predictions harder.
 
@@ -508,7 +513,7 @@ Figure~\ref{fig:workload_comparison} shows the overall pattern: the same recomme
 
 %Figure~\ref{fig:decay_sensitivity} examines sensitivity to the temporal decay rate. Without decay ($\lambda_r = 0$), F1 is 0.246; modest decay improves performance, with F1 rising to 0.267 at $\lambda_r = 0.20$ and plateauing through $\lambda_r = 0.30$. MDI is thus robust to the exact decay rate over a broad range, suggesting its advantage stems from temporal accumulation rather than fine-grained tuning.
 
-\vspace{-0.8em}
+% \vspace{-0.8em}
 \subsection{Discussion}
 
 Our experiments support three key observations.
@@ -540,9 +545,9 @@ When workload parameters follow the alignment recipe from Section~\ref{sec:theor
 % SECTION 7: RELATED WORK
 %=============================================================================
 %RBG sorry need to trim a bit, too long 
-\vspace{-1em}
+% \vspace{-1em}
 \section{Related Work}
-\vspace{-0.4em}
+% \vspace{-0.4em}
 %\subsection{Interactive Exploration and Active Learning}
 
 %The database community has long recognised limitations of traditional query-answer paradigms for exploratory analysis. Online aggregation~\cite{hellerstein1999online} established the principle that exploration systems must balance accuracy with responsiveness. Query-by-example systems such as YMALDB~\cite{drosouYmaldbExploringRelational2013} recommend similar data based on explicit preferences. Explore-by-example approaches~\cite{dimitriadouAIDEActiveLearningBased2016} use active learning to refine understanding through tuple rankings. Query discovery systems~\cite{shen2014discovering} find project-join queries from example tuples. Exemplar query systems~\cite{mottin2014exemplar} use queries as examples of desired results. Interactive join inference~\cite{bonifati2014interactive} discovers join predicates through Boolean membership queries. Drill-down operators~\cite{kalininInteractiveDataExploration2014} and query steering~\cite{ugurcetintemelQuerySteeringInteractive2013} provide structured navigation. Relevance feedback techniques from information retrieval~\cite{rocchio1971relevance} offer iterative refinement but are designed for text, not structured multidimensional data.
@@ -620,11 +625,10 @@ fields such as CLEVR~\cite{johnson2017clevr}, CheckList~\cite{ribeiro2020beyond}
 %=============================================================================
 % SECTION 8: RESEARCH CHALLENGES AND FUTURE DIRECTIONS
 %=============================================================================
-\vspace{-0.7em}
+% \vspace{-0.7em}
 \section{Challenges and Future Directions}
-\vspace{-0.4em}
+% \vspace{-0.4em}
 The argument outlined in this paper opens several research directions. % for the database and HCI communities.
-
 %\textbf{Real-time interest model adaptation.}
 %EDA presents a fundamentally different challenge from traditional recommendation: user interests can shift dramatically within a single session as new patterns are discovered. Developing online learning algorithms that adapt rapidly while maintaining computational efficiency calls for advances in incremental pattern mining, streaming summarisation, and principled strategies for balancing exploration and exploitation.
 
@@ -653,9 +657,9 @@ Extending the workload-recommender alignment framework to neural and language mo
 %=============================================================================
 % SECTION 9: CONCLUSION
 %=============================================================================
-\vspace{-0.8em}
+% \vspace{-0.8em}
 \section{Conclusion}
-\vspace{-0.4em}
+% \vspace{-0.4em}
 %This paper argues for two paradigm shifts in how database systems support exploratory data analysis. The first is a shift from explicit to implicit feedback: rather than interrupting analysts with ranking requests, systems should infer interest from natural exploration behaviour. The second is a shift from ecological-only to construct-valid evaluation: realistic workloads are necessary but not sufficient for assessing recommender quality, and controlled benchmarks that test specific capabilities are essential.
 
 %Our workload-recommender alignment theory provides a general tool for reasoning about when and why different recommenders succeed, yielding a prescriptive recipe for benchmark construction applicable beyond the specific recommenders studied here. The MDI recommender and complementary evaluation demonstrate one instantiation of this approach, achieving a 36\% F1 improvement over random on the adversarial benchmark while performing comparably on realistic workloads.

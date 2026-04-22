@@ -1,7 +1,7 @@
 \section{Workload-Recommender Alignment: A Conceptual Framework}
 \label{sec:theory}
 
-The empirical results in Section~\ref{sec:evaluation} show that realistic workloads like SIMBA drill-down sessions cannot meaningfully distinguish between recommenders. In this section we provide a conceptual framework that explains this phenomenon, and guides the construction of \emph{diagnostic} benchmarks which do test specific recommender capabilities. The key idea is to view evaluation not only as a property of the model, but as a joint property of the \emph{model} and the \emph{workload}.
+Section~\ref{sec:evaluation} showed that realistic workloads such as SIMBA drill-down sessions do not meaningfully distinguish recommenders. Here we provide a conceptual framework for explaining this and for constructing \emph{diagnostic} benchmarks. Evaluation is a joint property of the \emph{model} and the \emph{workload}.
 
 \vspace{-0.5em}
 \subsection{EDA Sessions and Implicit Prediction Task}
@@ -16,14 +16,8 @@ where each $R_q$ is a set of tuples returned by a query at step $q$. The session
   \mathcal{H}_q = (R_0, \ldots, R_{q-1}).
 \)
 
-Our implicit recommendation task is: given the current result $R_q$ and history $\mathcal{H}_q$, rank tuples in $R_q$ according to how likely they are to remain relevant to the analyst in the near future. We operationalise this using a simple temporal-overlap proxy: a tuple is considered \emph{relevant} if it reappears in a future result $R_{q+g}$ at gap $g$:
-\vspace{-0.5em}
-\begin{equation}
-  \text{rel}(t, q, g) = \mathbf{1}[t \in R_{q+g}].
-  \label{eq:relevance}
-\end{equation}
-%\vspace{-0.5em}
-This overlap-based notion is a conservative but convenient formalisation of ``the analyst will want to see this again soon'', and allows us to compare recommenders under controlled conditions. In all experiments we use standard ranking metrics such as $precision$, $recall$, $F1$, and $nDCG@k$ to summarise performance.
+Our implicit recommendation task is simple: given the current result $R_q$ and history $\mathcal{H}_q$, rank tuples in $R_q$ by how likely they are to remain relevant in the near future. We operationalise this with a temporal-overlap proxy: a tuple is \emph{relevant} if it reappears in a future result $R_{q+g}$ at gap $g$:
+\begingroup\refstepcounter{equation}\label{eq:relevance}\(\text{rel}(t, q, g) = \mathbf{1}[t \in R_{q+g}]\)\,\textup{(\theequation)}\endgroup. This is a conservative proxy for ``the analyst will want to see this again soon'' and supports standard ranking metrics such as $precision$, $recall$, $F1$, and $nDCG@k$.
 
 \vspace{-0.5em}
 \subsection{Workload Parameters: A Lens on Recommendation Behaviour}
@@ -33,13 +27,13 @@ To reason about \emph{when} a recommender should be expected to succeed or fail,
 
 \begin{description}
   \item[Signal fraction $\rho$.]
-    The fraction of tuples in a typical result that belong to the ``signal'' we want the recommender to detect. In our association-focused setting, signal tuples are those that satisfy embedded association rules. When $\rho$ is high, almost any selection from the current result is likely to hit signal; when $\rho$ is low, signal is sparse and harder to find.
+    The fraction of tuples in a typical result that belong to the target signal. In our association-focused setting, these are the tuples that satisfy embedded association rules. High $\rho$ makes signal easy to hit; low $\rho$ makes it sparse.
 
   \item[Frequency skew $\xi$.]
     The degree to which common attribute values dominate the data relative to rare values that carry the signal. High $\xi$ corresponds to heavily skewed data, where noise concentrates on a few high-frequency values while signal resides in rarer combinations.
 
   \item[Noise homogeneity $\sigma^2_{\text{noise}}$.]
-    How concentrated the ''noise'' part of the workload is in feature space. Low $\sigma^2_{\text{noise}}$ means noise tuples are very similar to one another (forming a tight cluster), while signal tuples may be more scattered.
+    How concentrated the noise is in feature space. Low $\sigma^2_{\text{noise}}$ means noise forms a tight cluster, while signal may be more scattered.
 
   \item[History depth $Q^*$.]
     The amount of session history required before temporal models (such as MDI) can reliably accumulate evidence, for example to mine association rules with sufficient support. When sessions are shorter than $Q^*$, memory-based methods have little advantage over shallow baselines.
