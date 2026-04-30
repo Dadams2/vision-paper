@@ -497,7 +497,7 @@ Figure~\ref{fig:workload_comparison} shows the overall pattern: the same recomme
   \includegraphics[width=\linewidth]{figures/workload_comparison_legend.pdf}
 \end{minipage}
 \vspace{-0.7em}
-\caption{Recommender performance (F1 at gap $=1$) across three workload types. On SIMBA drill-down sessions, all methods perform similarly because progressive refinement preserves high overlap. On sampled SkyServer SQL sessions, all methods perform poorly because point-lookups and abrupt task shifts yield little reusable tuple-level signal. On the controlled adversarial benchmark, MDI separates from the baselines.}
+\caption{Recommender performance (F1 at gap $=1$) across three workload types. Error bars show one standard deviation over gap-$1$ prediction steps. Under exact tuple matching, any step with no overlap between consecutive results will fail to reccomend any tuples. SkyServer is dominated by such transitions, largely due to point-lookups, so mean F1 stays near zero. SIMBA is similar in that progressive drill-down preserves enough overlap to keep F1 higher, but still compresses differences across methods. On the adversarial benchmark, overlap is more consistently informative and MDI separates from the baselines.}
 \vspace{-1.5em}
 \label{fig:workload_comparison}
 \end{figure*}
