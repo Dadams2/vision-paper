@@ -11,30 +11,29 @@
 \usepackage{subcaption}
 %\usepackage{pifont}
 
+%% copied from acmart.cls, but modified to a4paper
+\geometry{twoside=true, head=13pt,
+     a4paper, % for EDBT: use A4 paper
+%     paperwidth=8.5in, paperheight=11in,
+     includeheadfoot, columnsep=2pc,
+     top=57pt, bottom=73pt, inner=54pt, outer=54pt,
+     marginparwidth=2pc,heightrounded
+     }%
+
+\AtBeginMaketitle{%
+\input{edbt-macros}
+}% \AtBeginMaketitle
+
 \usepackage{tikz}
 \newcommand{\fcirc}[1]{%
   \tikz[baseline=(char.base)]{
     \node[shape=circle, fill=black, text=white, inner sep=1pt] (char) {\scriptsize #1};
   }
 }
-%% The following content must be adapted for the final version
-% paper-specific
-\newcommand\vldbdoi{XX.XX/XXX.XX}
-\newcommand\vldbpages{XXX-XXX}
-% issue-specific
-\newcommand\vldbvolume{14}
-\newcommand\vldbissue{1}
-\newcommand\vldbyear{2027}
-% should be fine as it is
-\newcommand\vldbauthors{\authors}
-\newcommand\vldbtitle{\shorttitle}
-% leave empty if no availability url should be set
-\newcommand\vldbavailabilityurl{https://github.com/Dadams2/query-data-predictor/tree/VLDB_2026}
-% whether page numbers should be shown or not, use 'plain' for review versions, 'empty' for camera ready
-\newcommand\vldbpagestyle{plain}
+
 
 \begin{document}
-\title{Beyond Active Learning: Implicit Recommendation and Diagnostic Benchmarks for Exploratory Data Analysis [Vision]}
+\title{Beyond Active Learning: Implicit Recommendation and Diagnostic Benchmarks for Exploratory Data Analysis [Vision Paper]}
 
 %%
 %% The "author" command and its associated commands are used to define the authors and their affiliations.
@@ -45,6 +44,7 @@
   \city{Melbourne}
   \state{Victoria}
   \postcode{3010}
+  \country{Australia}
 }
 \email{david.adams1@student.unimelb.edu.au}
 
@@ -57,6 +57,7 @@
   \city{Melbourne}
   \state{Victoria}
   \postcode{3010}
+  \country{Australia}
 }
 \email{nir.lipovetzky@unimelb.edu.au}
 
@@ -67,8 +68,12 @@
   \city{Melbourne}
   \state{Victoria}
   \postcode{3010}
+  \country{Australia}
 }
 \email{renata.borovica@unimelb.edu.au}
+
+\renewcommand{\shortauthors}{First Author et al.} %%MS: removed contents
+%\renewcommand{\shorttitle}{} %%MS: added this one
 
 %%
 %% The abstract is a short summary of the work to be presented in the
@@ -81,33 +86,13 @@ We formalise a workload-recommender alignment framework that characterises when 
 
 \end{abstract}
 
+%% Keywords. The author(s) should pick words that accurately describe
+%% the work being presented. Separate the keywords with commas.
+ \keywords{Do, Not, Us, This, Code, Put, the, Correct, Terms, for,
+  Your, Paper}
+
 \maketitle
 
-%%% do not modify the following VLDB block %%
-%%% VLDB block start %%%
-\pagestyle{\vldbpagestyle}
-\begingroup\small\noindent\raggedright\textbf{PVLDB Reference Format:}\\
-\vldbauthors. \vldbtitle. PVLDB, \vldbvolume(\vldbissue): \vldbpages, \vldbyear.\\
-\href{https://doi.org/\vldbdoi}{doi:\vldbdoi}
-\endgroup
-\begingroup
-\renewcommand\thefootnote{}\footnote{\noindent
-This work is licensed under the Creative Commons BY-NC-ND 4.0 International License. Visit \url{https://creativecommons.org/licenses/by-nc-nd/4.0/} to view a copy of this license. For any use beyond those covered by this license, obtain permission by emailing \href{mailto:info@vldb.org}{info@vldb.org}. Copyright is held by the owner/author(s). Publication rights licensed to the VLDB Endowment. \\
-\raggedright Proceedings of the VLDB Endowment, Vol. \vldbvolume, No. \vldbissue\ %
-ISSN 2150-8097. \\
-\href{https://doi.org/\vldbdoi}{doi:\vldbdoi} \\
-}\addtocounter{footnote}{-1}\endgroup
-%%% VLDB block end %%%
-
-%%% do not modify the following VLDB block %%
-%%% VLDB block start %%%
-\ifdefempty{\vldbavailabilityurl}{}{
-\vspace{.3cm}
-\begingroup\small\noindent\raggedright\textbf{PVLDB Artifact Availability:}\\
-The source code, data, and/or other artifacts have been made available at \url{\vldbavailabilityurl}.
-\endgroup
-}
-%%% VLDB block end %%%
 
 %=============================================================================
 % SECTION 1: INTRODUCTION
