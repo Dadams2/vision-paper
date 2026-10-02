@@ -874,7 +874,7 @@
   title = {Interestingness {{Measures}} for~{{Exploratory Data Analysis}}: A~{{Survey}}},
   shorttitle = {Interestingness {{Measures}} for~{{Exploratory Data Analysis}}},
   booktitle = {New {{Trends}} in {{Database}} and {{Information Systems}}},
-  author = {Chanson, Alexandre and Labroche, Nicolas and Marcel, Patrick and Perlata, Ver{\'o}nika and Vassiliadis, Panos},
+  author = {Chanson, Alexandre and Labroche, Nicolas and Marcel, Patrick and Peralta, Ver{\'o}nika and Vassiliadis, Panos},
   editor = {Tekli, Joe and Gamper, Johann and Chbeir, Richard and Manolopoulos, Yannis and Sassi, Salma and Ivanovic, Mirjana and {Vargas-Solar}, Genoveva and Zumpano, Ester},
   year = {2025},
   pages = {14--24},
@@ -1269,17 +1269,18 @@
   file = {/Users/DAADAMS/Zotero/storage/7VLVT28C/Deutch et al. - 2020 - ExplainED explanations for EDA notebooks.pdf}
 }
 
-@misc{deutchFEDEXExplainabilityFramework2022,
+@article{deutchFEDEXExplainabilityFramework2022,
   title = {{{FEDEX}}: {{An Explainability Framework}} for {{Data Exploration Steps}}},
   shorttitle = {{{FEDEX}}},
   author = {Deutch, Daniel and Gilad, Amir and Milo, Tova and Mualem, Amit and Somech, Amit},
   year = {2022},
   month = sep,
-  number = {arXiv:2209.06260},
-  eprint = {2209.06260},
-  primaryclass = {cs},
-  publisher = {arXiv},
-  doi = {10.48550/arXiv.2209.06260},
+  journal = {Proceedings of the VLDB Endowment},
+  volume = {15},
+  number = {13},
+  pages = {3854--3868},
+  publisher = {VLDB Endowment},
+  doi = {10.14778/3565838.3565841},
   urldate = {2024-12-08},
   abstract = {When exploring a new dataset, Data Scientists often apply analysis queries, look for insights in the resulting dataframe, and repeat to apply further queries. We propose in this paper a novel solution that assists data scientists in this laborious process. In a nutshell, our solution pinpoints the most interesting (sets of) rows in each obtained dataframe. Uniquely, our definition of interest is based on the contribution of each row to the interestingness of different columns of the entire dataframe, which, in turn, is defined using standard measures such as diversity and exceptionality. Intuitively, interesting rows are ones that explain why (some column of) the analysis query result is interesting as a whole. Rows are correlated in their contribution and so the interesting score for a set of rows may not be directly computed based on that of individual rows. We address the resulting computational challenge by restricting attention to semantically-related sets, based on multiple notions of semantic relatedness; these sets serve as more informative explanations. Our experimental study across multiple real-world datasets shows the usefulness of our system in various scenarios.},
   archiveprefix = {arXiv},
@@ -1590,11 +1591,12 @@
 }
 
 @article{eirinakiQuerieCollaborativeDatabase2013,
-  title = {Querie: {{Collaborative}} Database Exploration},
+  title = {{QueRIE}: Collaborative Database Exploration},
   shorttitle = {Querie},
   author = {Eirinaki, Magdalini and Abraham, Suju and Polyzotis, Neoklis and Shaikh, Naushin},
-  year = {2013},
-  journal = {IEEE Transactions on knowledge and data engineering},
+  year = {2014},
+  journal = {IEEE Transactions on Knowledge and Data Engineering},
+  doi = {10.1109/TKDE.2013.79},
   volume = {26},
   number = {7},
   pages = {1778--1790},
@@ -3178,11 +3180,32 @@ Read\_Status\_Date: 2025-01-13T05:40:49.695Z},
   file = {/Users/DAADAMS/Zotero/storage/IIPN3GLR/Orvalho et al. - SQUARES  A SQL Synthesizer Using Query Reverse Engineering.pdf}
 }
 
+% Unrelated to the database SIMBA benchmark; retained for library compatibility.
+% The manuscript cites purichAdaptiveBenchmarkModeling2025 instead.
 @article{lenzi2019simba,
   title={SIMBA: systematic clustering-based methodology to support built environment analysis},
   author={LENZI, EMILIA},
   year={2019},
   publisher={Politecnico di Milano}
+}
+
+@article{wongsuphasawat2016voyager,
+  title = {Voyager: Exploratory Analysis via Faceted Browsing of Visualization Recommendations},
+  author = {Wongsuphasawat, Kanit and Moritz, Dominik and Anand, Anushka and Mackinlay, Jock and Howe, Bill and Heer, Jeffrey},
+  journal = {IEEE Transactions on Visualization and Computer Graphics},
+  volume = {22},
+  number = {1},
+  pages = {649--658},
+  year = {2016},
+  doi = {10.1109/TVCG.2015.2467191}
+}
+
+@article{wongsuphasawat2019edagoals,
+  title = {Goals, Process, and Challenges of Exploratory Data Analysis: An Interview Study},
+  author = {Wongsuphasawat, Kanit and Liu, Yang and Heer, Jeffrey},
+  journal = {arXiv preprint arXiv:1911.00568},
+  year = {2019},
+  doi = {10.48550/arXiv.1911.00568}
 }
 
 
@@ -3761,11 +3784,12 @@ S2ID: 0f64ccff1c1c8ca3a2cd08245305f68a23249c2a}
   annotation = {MAG ID: 48920344}
 }
 
-@article{robertj.hildermanKnowledgeDiscoveryMeasures2001,
+@book{robertj.hildermanKnowledgeDiscoveryMeasures2001,
   title = {Knowledge Discovery and Measures of Interest},
-  author = {{Robert J. Hilderman} and Hilderman, Robert J. and {Howard J. Hamilton} and Hamilton, Howard J.},
+  author = {Hilderman, Robert J. and Hamilton, Howard J.},
   year = {2001},
-  month = jan,
+  publisher = {Springer},
+  doi = {10.1007/978-1-4757-3283-2},
   abstract = {List of Figures. List of Tables. Preface. Acknowledgments. 1. Introduction. 2. Background and Related Work. 3. A Data Mining Technique. 4. Heuristic Measures of Interestingness. 5. An Interestingness Framework. 6. Experimental Analyses. 7. Conclusion. Appendices. Index.},
   annotation = {MAG ID: 1484126642}
 }
@@ -4099,10 +4123,12 @@ Read\_Status\_Date: 2025-01-09T01:54:12.003Z},
   file = {/Users/DAADAMS/Zotero/storage/EKREMI7R/Solanki and Patel - 2015 - A Survey on Association Rule Mining.pdf;/Users/DAADAMS/Zotero/storage/XMXSQS9X/7079081.html}
 }
 
-@misc{somechPredictingWhatInteresting2019,
+@inproceedings{somechPredictingWhatInteresting2019,
   title = {Predicting "{{What}} Is {{Interesting}}" by {{Mining Interactive-Data-Analysis Session Logs}}},
-  author = {Somech, Amit and Milo, Tova and Ozeri, Chai},
+  author = {Milo, Tova and Ozeri, Chai and Somech, Amit},
   year = {2019},
+  booktitle = {Proceedings of the 22nd International Conference on Extending Database Technology},
+  pages = {456--467},
   publisher = {OpenProceedings.org},
   doi = {10.5441/002/EDBT.2019.42},
   urldate = {2024-12-02},
@@ -4286,9 +4312,11 @@ Read\_Status\_Date: 2025-01-09T01:54:12.003Z},
   file = {/Users/DAADAMS/Zotero/storage/48VYB329/Tu et al. - 2023 - Unicorn A Unified Multi-tasking Model for Supporting Matching Tasks in Data Integration.pdf}
 }
 
-@article{ugurcetintemelQuerySteeringInteractive2013,
+@inproceedings{ugurcetintemelQuerySteeringInteractive2013,
   title = {Query {{Steering}} for {{Interactive Data Exploration}}},
-  author = {{U{\v g}ur {\c C}etintemel} and Cetintemel, Ugur and {Mitch Cherniack} and Cherniack, Mitch and {Justin A. DeBrabant} and DeBrabant, Justin and {Yanlei Diao} and Diao, Yanlei and {Kyriaki Dimitriadou} and Dimitriadou, Kyriaki and {Alexander Kalinin} and {Alexander Kalinin} and Kalinin, Alexander and {Olga Papaemmanouil} and Papaemmanouil, Olga and {Stanley B. Zdonik} and Zdonik, Stanley B.},
+  author = {{\c C}etintemel, U{\u g}ur and Cherniack, Mitch and DeBrabant, Justin and Diao, Yanlei and Dimitriadou, Kyriaki and Kalinin, Alex and Papaemmanouil, Olga and Zdonik, Stan},
+  booktitle = {Proceedings of the 6th Biennial Conference on Innovative Data Systems Research (CIDR)},
+  url = {https://datavis.cs.columbia.edu/files/papers/steering.pdf},
   year = {2013},
   month = jan,
   abstract = {{\textpm} ABSTRACT Traditional DBSMs are suited for applications in which the structure, meaning and contents of the database, as well as the questions to be asked are already well understood. There is, however, a class of applications that we will collectively refer to as Interactive Data Exploration (IDE) applications, in which this is not the case. IDE is a key ingredient of a diverse set of discovery-oriented applications we are dealing with, including ones from scientific computing, financial analysis, evidence-based medicine, and genomics. The need for effective IDE will only increase as data are being collected at an unprecedented rate. IDE is fundamentally a multi-step, non-linear process with imprecise end-goals. For example, data-driven scientific discovery through IDE often requires non-expert users to iteratively interact with the system to make sense of and to identify interesting patterns and relationships in large, amorphous data sets. To make the most of the increasingly available complex and big data sets, users would need an "expert assistant" who would be able to effectively and efficiently guide them through the data space. Having a human assistant is not only expensive but also unrealistic. Thus, it is essential that we automate this task. We propose database systems be augmented with an automated "database navigator" (DBNav) service that assists as a "tour guide" to facilitate IDE. Just like a car navigation system that offers advice on the routes to be taken and display points of interest, DBNav would similarly steer the user towards interesting "trajectories" through the data, while highlighting relevant features. Like any good tour guide, DBNav should consider many kinds of information; in particular, it should be sensitive to a user's goals and interests, as well as common navigation patterns that applications exhibit. We sketch a general data navigation framework and discuss some specific components and approaches that we believe belong to any such system.},
@@ -4313,15 +4341,17 @@ Read\_Status\_Date: 2025-01-09T01:54:12.003Z},
   file = {/Users/DAADAMS/Zotero/storage/U63NAKI5/Urban and Binnig - 2024 - Efficient Learned Query Execution over Text and Tables [Technical Report].pdf}
 }
 
-@inproceedings{vartakSeedbEfficientDatadriven2015,
+@article{vartakSeedbEfficientDatadriven2015,
   title = {Seedb: {{Efficient}} Data-Driven Visualization Recommendations to Support Visual Analytics},
   shorttitle = {Seedb},
-  booktitle = {Proceedings of the {{VLDB Endowment International Conference}} on {{Very Large Data Bases}}},
+  journal = {Proceedings of the VLDB Endowment},
   author = {Vartak, Manasi and Rahman, Sajjadur and Madden, Samuel and Parameswaran, Aditya and Polyzotis, Neoklis},
   year = {2015},
   volume = {8},
-  pages = {2182},
-  publisher = {NIH Public Access},
+  number = {13},
+  pages = {2182--2193},
+  doi = {10.14778/2831360.2831371},
+  publisher = {VLDB Endowment},
   urldate = {2025-02-13},
   file = {/Users/DAADAMS/Zotero/storage/XS7ZYQIB/PMC4714568.html}
 }
@@ -4886,12 +4916,14 @@ Read\_Status\_Date: 2025-01-09T01:54:12.003Z},
 }
 
 @article{lin2024recrec,
-  title={ReCRec: Reasoning the causes of implicit feedback for debiased recommendation},
+  title={{ReCRec}: Reasoning the Causes of Implicit Feedback for Debiased Recommendation},
   author={Lin, Siyi and Zhou, Sheng and Chen, Jiawei and Feng, Yan and Shi, Qihao and Chen, Chun and Li, Ying and Wang, Can},
   journal={ACM Transactions on Information Systems},
   volume={42},
   number={6},
-  pages={1--26},
+  articleno={158},
+  numpages={26},
+  doi={10.1145/3672275},
   year={2024},
   publisher={ACM New York, NY, USA}
 }
@@ -4903,6 +4935,72 @@ Read\_Status\_Date: 2025-01-09T01:54:12.003Z},
   pages={427--431},
   year={2023},
   organization={IEEE}
+}
+
+% Literature connections added for the vision revision.
+@inproceedings{chanson2019belief,
+  author = {Chanson, Alexandre and Crulis, Ben and Drushku, Krista and Labroche, Nicolas and Marcel, Patrick},
+  title = {Profiling User Belief in {BI} Exploration for Measuring Subjective Interestingness},
+  booktitle = {Proceedings of the 21st International Workshop on Design, Optimization, Languages and Analytical Processing of Big Data (DOLAP)},
+  series = {CEUR Workshop Proceedings},
+  volume = {2324},
+  year = {2019},
+  url = {https://ceur-ws.org/Vol-2324/Paper08-PMarcel.pdf}
+}
+
+@inproceedings{dezoysa2025exploract,
+  author = {de Zoysa, Dinuka Manohara and Bailey, James and Borovica-Gajic, Renata},
+  title = {{ExplorAct}: Context-Aware Next Action Recommendations for Interactive Data Exploration},
+  booktitle = {Proceedings of the 34th ACM International Conference on Information and Knowledge Management},
+  year = {2025},
+  publisher = {ACM},
+  doi = {10.1145/3746252.3761257}
+}
+
+@inproceedings{rendle2009bpr,
+  author = {Rendle, Steffen and Freudenthaler, Christoph and Gantner, Zeno and Schmidt-Thieme, Lars},
+  title = {{BPR}: Bayesian Personalized Ranking from Implicit Feedback},
+  booktitle = {Proceedings of the 25th Conference on Uncertainty in Artificial Intelligence},
+  year = {2009},
+  url = {https://arxiv.org/abs/1205.2618}
+}
+
+@inproceedings{liang2016exposure,
+  author = {Liang, Dawen and Charlin, Laurent and McInerney, James and Blei, David M.},
+  title = {Modeling User Exposure in Recommendation},
+  booktitle = {Proceedings of the 25th International Conference on World Wide Web},
+  year = {2016},
+  pages = {951--961},
+  doi = {10.1145/2872427.2883090}
+}
+
+@inproceedings{hidasi2016session,
+  author = {Hidasi, Bal{\'a}zs and Karatzoglou, Alexandros and Baltrunas, Linas and Tikk, Domonkos},
+  title = {Session-based Recommendations with Recurrent Neural Networks},
+  booktitle = {International Conference on Learning Representations},
+  year = {2016},
+  url = {https://arxiv.org/abs/1511.06939}
+}
+
+@article{ottley2019clicks,
+  author = {Ottley, Alvitta and Garnett, Roman and Wan, Ran},
+  title = {Follow The Clicks: Learning and Anticipating Mouse Interactions During Exploratory Data Analysis},
+  journal = {Computer Graphics Forum},
+  volume = {38},
+  number = {3},
+  pages = {41--52},
+  year = {2019},
+  doi = {10.1111/cgf.13670}
+}
+
+@inproceedings{endert2012semantic,
+  author = {Endert, Alex and Fiaux, Patrick and North, Chris},
+  title = {Semantic Interaction for Visual Text Analytics},
+  booktitle = {Proceedings of the SIGCHI Conference on Human Factors in Computing Systems},
+  year = {2012},
+  pages = {473--482},
+  publisher = {ACM},
+  doi = {10.1145/2207676.2207741}
 }
 
 % other eda reccomedation systems
@@ -4944,10 +5042,11 @@ Read\_Status\_Date: 2025-01-09T01:54:12.003Z},
 	journal = {IDC White Paper}
 }
 
-@article{hu2008collaborative,
+@inproceedings{hu2008collaborative,
 	title = {Collaborative filtering for implicit feedback datasets},
 	author = {Hu, Yifan and Koren, Yehuda and Volinsky, Chris},
-	journal = {ICDM},
+	booktitle = {2008 Eighth IEEE International Conference on Data Mining},
+	doi = {10.1109/ICDM.2008.22},
 	pages = {263--272},
 	year = {2008},
 	publisher = {IEEE}
@@ -5289,7 +5388,8 @@ Read\_Status\_Date: 2025-01-09T01:54:12.003Z},
   author    = {Ribeiro, Marco Tulio and Wu, Tongshuang and Guestrin, Carlos and Singh, Sameer},
   booktitle = {Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics (ACL)},
   pages     = {4902--4912},
-  year      = {2020}
+  year      = {2020},
+  doi       = {10.18653/v1/2020.acl-main.442}
 }
 
 @inproceedings{nie2020adversarial,

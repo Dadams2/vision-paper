@@ -95,7 +95,7 @@ We formalise a workload-recommender alignment framework that characterises when 
 
 
 %=============================================================================
-% SECTION 1: INTRODUCTION
+% SECTION 1: Introduction
 %=============================================================================
 \section{Introduction}
 
@@ -139,7 +139,7 @@ Two connected research directions follow. The first is to infer evolving analyti
 Our contributions are a design space for implicit interest modelling (Section~\ref{sec:implicit}), a workload--recommender alignment framework for designing diagnostic tests (Section~\ref{sec:theory}), and an illustrative MDI implementation and complementary evaluation (Sections~\ref{sec:mdi} and~\ref{sec:experiments}). These are starting points for the longer-horizon research programme, not a claim that anticipatory assistance or its human benefit has already been demonstrated.
 
 %=============================================================================
-% SECTION 2: RELATED WORK
+% SECTION 2: Related work
 %=============================================================================
 \section{Related Work}
 
@@ -173,24 +173,38 @@ SeeDB ranks visualisations using deviation from a reference dataset~\cite{vartak
 \textbf{History-aware recommendation and longer-horizon interest}
 Using exploration history to recommend a likely next action does not, by itself, establish a model of the analytical interests underlying that action. Query Steering proposed navigation informed by user interests and interaction histories~\cite{ugurcetintemelQuerySteeringInteractive2013}. QueRIE uses collaborative evidence from tuple or query-fragment profiles to recommend queries~\cite{eirinakiQuerieCollaborativeDatabase2013}, while ExplorAct models exploration histories to predict the next action type and column~\cite{dezoysa2025exploract}. These approaches provide valuable context-sensitive assistance. Nevertheless, an immediate action may be an intermediate comparison, a check of data quality, or an attempt to reject a hypothesis, rather than a direct expression of the analyst's underlying interest. The same action can serve several investigative goals, and the same goal can be pursued through different sequences of actions. Moreover, those goals may emerge or change as exploration proceeds.
 
-Our vision is to maintain and update hypotheses about these possible investigative directions, using temporal evidence to anticipate which data or patterns could become relevant several steps ahead. Next-action prediction can contribute to such a model, but accuracy on that task alone does not demonstrate that it captures analytical interest. The distinction is between anticipating the analyst's next observable action and modelling the evolving purposes that may make future data useful. Whether acting on those longer-horizon predictions accelerates insight discovery remains a separate question for human validation.
+Our vision is to maintain and update hypotheses about these possible directions, using temporal evidence to anticipate which data or patterns could become relevant several steps ahead. Next-action prediction can contribute to such a model, but accuracy on that task alone does not demonstrate that it captures long term analytical interest. 
+
+% idk about this one
+% The distinction is between anticipating the analyst's next observable action and modelling the evolving purposes that may make future data useful. Whether acting on those longer-horizon predictions accelerates insight discovery remains a separate question for human validation.
 
 \textbf{Subjective-interest modelling and sequence generation}
-Milo et al. use session logs to predict suitable interestingness measures~\cite{somechPredictingWhatInteresting2019}; Chanson et al. infer beliefs from BI interactions, schema structure, and other users' activity~\cite{chanson2019belief}. The EDA interestingness survey further distinguishes several qualities of useful insights~\cite{chansonInterestingnessMeasuresExploratory2025a}. Thus, history-conditioned and multi-dimensional interest already have substantial foundations. Our proposed extension is to evaluate whether such models anticipate later analytical relevance, not only explain or score the current step. ATENA also goes beyond a single action by generating exploration sessions with deep reinforcement learning~\cite{barelAutomaticallyGeneratingData2020}. Generating a useful sequence from a dataset differs from forecasting a particular analyst's evolving interests from an observed session prefix. A longer prediction horizon alone is therefore insufficient as a novelty claim.
+
+There are several lines of work on subjective-interest modelling and sequence generation. Two broad approaches are using session logs to predict suitable interestingness measures \cite{somechPredictingWhatInteresting2019} and inferring beliefs from BI interactions, schema structure, and other users' activity \cite{chanson2019belief}. The EDA interestingness survey further distinguishes several qualities of useful insights \cite{chansonInterestingnessMeasuresExploratory2025a}. However these works focus on explaining or scoring the current step, rather than anticipating later analytical relevance. ATENA generates exploration sessions with deep reinforcement learning \cite{barelAutomaticallyGeneratingData2020}, but generating a useful sequence from a dataset differs from forecasting a particular analyst's evolving interests from an observed session prefix. 
+
 
 \textbf{Implicit recommendation and temporal modelling}
 Prior work on implicit factorisation and ranking methods, temporal recommendation, and session-based recommendation demonstrates that useful signals can be extracted from ordinary behaviour~\cite{hu2008collaborative,rendle2009bpr,koren2009collaborative,hidasi2016session}. Follow The Clicks and Semantic Interaction show how analytical interactions can inform adaptive models~\cite{ottley2019clicks,endert2012semantic}. However, these works do not address the ambiguity of what those signals imply about future analytical relevance. ExpoMF and ReCRec explicitly model exposure~\cite{liang2016exposure,lin2024recrec}, and dynamic-missingness models distinguish changing intent from static preferences~\cite{wang2018modeling}. In EDA, query semantics reveal why a set was available, but not which rows were inspected or why. Extending such evidence across multiple future steps requires accounting for this ambiguity and reporting uncertainty.
 
-\textbf{Benchmarks and evaluations}
+\textbf{Benchmarks and evaluation.}
 
-IDEBench and SIMBA evaluate database systems under exploration workloads~\cite{eichmannIDEBenchBenchmarkInteractive2020,purichAdaptiveBenchmarkModeling2025}; repurposing their sessions does not supply ground truth for personal interest. Capability-specific testing, as exemplified by CheckList~\cite{ribeiro2020beyond}, motivates complementary controlled tests. Our vision connects implicit temporal evidence, anticipation of future analytical relevance, and evaluation at distinct levels: behavioural prediction, controlled target recovery, and analyst-validated usefulness. Showing that assistance accelerates insight discovery requires the final level, even if a model predicts behaviour accurately.
+Evaluations of exploration assistance differ in both their evidence and their prediction targets. Human studies can assess usefulness and task performance, but an open underlying dataset alone does not provide a reusable benchmark: reproducing the evaluation also requires the tasks, interaction histories, and relevant judgements. Purpose-built tasks and synthetic targets permit controlled comparisons, although their conclusions depend on the particular preferences, patterns, and behaviours represented. Recorded-session benchmarks offer a complementary approach. For example, ExplorAct evaluates next-action recommendation using the REACT benchmark~\cite{dezoysa2025exploract}. Such reuse supports comparison across methods, but agreement with an observed next action does not by itself establish recovery of the analyst's underlying interests.
+
+Operational SQL logs, such as SkyServer~\cite{raddickTenYearsSkyserver2014} from the Sloan Digital Sky Survey (SDSS) \cite{york_sloan_2000}, provide naturally occurring database interactions, but require careful selection and interpretation. In our experience SDSS is dominated by point lookup and templated queries many of which are not exploratory. The resulting sessions are often short, highly repetitive, and dominated by a few common queries. This makes them unsuitable for evaluating interest modelling, which requires longer sessions with more diverse investigative threads.
+
+IDEBench and SIMBA provide more controlled, reusable foundations for evaluating database systems under exploratory workloads~\cite{eichmannIDEBenchBenchmarkInteractive2020,purichAdaptiveBenchmarkModeling2025}. But for the purposes of evaluating analytical interest, IDEBench make it difficult to specifiy the goal of the workload and whilst SIMBA does specify a goal, it does not provide a way to control the investigative threads that lead to that goal. 
+
+We therefore advocate extending workload-based evaluation with controlled, history-conditioned pattern-recovery tests. A benchmark can embed known patterns and identify their associated tuples, then vary the preceding actions to provide evidence for different investigative targets while holding the current candidates fixed. Such tests assess whether a model recovers the stipulated target from session evidence rather than merely detecting globally conspicuous patterns. Our illustrative benchmark takes a step towards this evaluation programme. Its targets provide controlled ground truth for recovery, not proof of human interest. 
+
+%DA Not sure if we need to mention the inevitabilty of human validation here, but it is worth noting that the ultimate goal is to accelerate insight discovery, which requires human validation.
+% Validation with analysts remains necessary to establish whether the resulting assistance accelerates insight discovery.
 
 %=============================================================================
 % SECTION 3: FROM EXPLICIT FEEDBACK TO IMPLICIT SIGNALS
 %=============================================================================
 % \vspace{-0.5em}
-\section{From Explicit to Implicit Signals}
-\label{sec:implicit}
+% \section{From Explicit to Implicit Signals}
+% \label{sec:implicit}
 %\vspace{-0.5em}
 
 %\subsection{Limitations of Explicit Feedback in EDA}
@@ -211,12 +225,12 @@ IDEBench and SIMBA evaluate database systems under exploration workloads~\cite{e
 
 %\textbf{Temporal Richness.} Implicit feedback provides multi-scale temporal information about interest evolution~\cite{koren2009collaborative}. Short-term signals (which tuples are accessed first) reveal immediate priorities, while longer-term patterns (which investigation threads persist across queries) expose analytical goals. Pirolli and Card's information foraging theory~\cite{pirolli2005information} predicts that analysts follow information scent gradients, producing behavioural signals that reliably indicate information value.
 
-\subsection{Limitations of Explicit Feedback in EDA}
-Most current EDA systems share a common assumption: analytical interest can be elicited explicitly and approximated by similarity to previously explored data. Explore-by-example systems~\cite{dimitriadouAIDEActiveLearningBased2016, mottin2014exemplar, bonifati2014interactive} optimise for tuple similarity or pattern matching, conflating feature-space proximity with cognitive relevance. Query-by-example systems such as YMALDB~\cite{drosouYmaldbExploringRelational2013} require users to specify similarity criteria and repeatedly assess recommendation quality, while faceted search systems like DICE~\cite{rezig2021dice, el2016dice} enable structured exploration but still depend on explicit validation of results.
+% \subsection{Limitations of Explicit Feedback in EDA}
+% Most current EDA systems share a common assumption: analytical interest can be elicited explicitly and approximated by similarity to previously explored data. Explore-by-example systems~\cite{dimitriadouAIDEActiveLearningBased2016, mottin2014exemplar, bonifati2014interactive} optimise for tuple similarity or pattern matching, conflating feature-space proximity with cognitive relevance. Query-by-example systems such as YMALDB~\cite{drosouYmaldbExploringRelational2013} require users to specify similarity criteria and repeatedly assess recommendation quality, while faceted search systems like DICE~\cite{rezig2021dice, el2016dice} enable structured exploration but still depend on explicit validation of results.
 
-Empirical studies demonstrate that no single interestingness measure consistently predicts what analysts find interesting across domains and tasks~\cite{somechPredictingWhatInteresting2019}. Experiments on financial, scientific, and social media datasets reveal that correlation-based measures perform well in some contexts, while clustering-based measures excel in others~\cite{chansonInterestingnessMeasuresExploratory2025a}. This heterogeneity suggests that effective EDA systems must embrace \emph{multi-dimensional} interest modelling rather than relying on a single metric.
+% Empirical studies demonstrate that no single interestingness measure consistently predicts what analysts find interesting across domains and tasks~\cite{somechPredictingWhatInteresting2019}. Experiments on financial, scientific, and social media datasets reveal that correlation-based measures perform well in some contexts, while clustering-based measures excel in others~\cite{chansonInterestingnessMeasuresExploratory2025a}. This heterogeneity suggests that effective EDA systems must embrace \emph{multi-dimensional} interest modelling rather than relying on a single metric.
 
-Despite their differences, these systems rely on explicit feedback in various forms: tuple rankings~\cite{dimitriadouAIDEActiveLearningBased2016}, example validation~\cite{rezig2021dice}, Boolean membership queries~\cite{bonifati2014interactive}, or similarity assessments~\cite{mottin2014exemplar}. Each interaction forces analysts to step out of the natural flow of exploration to assess recommendation quality. Cognitive psychology studies show that such context switches impose measurable overhead and degrade problem-solving effectiveness~\cite{monsell2003task, rubinstein2001executive}. As exploration deepens, the cumulative cost of explicit feedback scales poorly, potentially discouraging its use when it is most informative.
+% Despite their differences, these systems rely on explicit feedback in various forms: tuple rankings~\cite{dimitriadouAIDEActiveLearningBased2016}, example validation~\cite{rezig2021dice}, Boolean membership queries~\cite{bonifati2014interactive}, or similarity assessments~\cite{mottin2014exemplar}. Each interaction forces analysts to step out of the natural flow of exploration to assess recommendation quality. Cognitive psychology studies show that such context switches impose measurable overhead and degrade problem-solving effectiveness~\cite{monsell2003task, rubinstein2001executive}. As exploration deepens, the cumulative cost of explicit feedback scales poorly, potentially discouraging its use when it is most informative.
 
 
 
@@ -225,10 +239,10 @@ Despite their differences, these systems rely on explicit feedback in various fo
 % SECTION 3: WHY EVALUATION METHODOLOGY MATTERS
 %=============================================================================
 \vspace{-0.5em}
-\section{Why Evaluation Method Matters}
-\label{sec:evaluation}
+% \section{Why Evaluation Method Matters}
+% \label{sec:evaluation}
 
-Developing implicit recommenders for EDA raises a question: how should we evaluate whether a recommender captures analytical patterns, rather than exploiting structural artifacts of the workload?
+% Developing implicit recommenders for EDA raises a question: how should we evaluate whether a recommender captures analytical patterns, rather than exploiting structural artifacts of the workload?
 
 % \vspace{-0.5em}
 % \subsection{The Overlap Problem in Realistic Workloads}
@@ -251,34 +265,34 @@ Developing implicit recommenders for EDA raises a question: how should we evalua
 
 % se condensed below
 
-We use the SIMBA benchmark~\cite{lenzi2019simba} to generate realistic visualisation driven exploration sessions over the Sloan Digital Sky Survey (SDSS) dataset~\cite{york_sloan_2000}. SIMBA produces SQL queries through progressive drill-down, filter, and link operations that narrow result ranges by a factor of $0.60$--$0.85$ per step, producing high inter-query tuple overlap. Table~\ref{tab:simba-results} shows the consequence: across precision, recall, and F1, all six recommenders fall within about 6\% of each other. We also report exact-match overlap, the fraction of recommended tuples that reappear in the future result. This numerical compression is not a failure of any particular recommender but a property of the workload. When overlap is high, any reasonable sample from current results has a high probability of appearing in future results, making the prediction task \emph{non-discriminative}.
+% We use the SIMBA benchmark~\cite{lenzi2019simba} to generate realistic visualisation driven exploration sessions over the Sloan Digital Sky Survey (SDSS) dataset~\cite{york_sloan_2000}. SIMBA produces SQL queries through progressive drill-down, filter, and link operations that narrow result ranges by a factor of $0.60$--$0.85$ per step, producing high inter-query tuple overlap. Table~\ref{tab:simba-results} shows the consequence: across precision, recall, and F1, all six recommenders fall within about 6\% of each other. We also report exact-match overlap, the fraction of recommended tuples that reappear in the future result. This numerical compression is not a failure of any particular recommender but a property of the workload. When overlap is high, any reasonable sample from current results has a high probability of appearing in future results, making the prediction task \emph{non-discriminative}.
 
-\begin{table}[t]
-\centering
-\caption{Recommendation performance at gap $=1$ on SIMBA drill-down sessions. All methods achieve similar scores.}
-\vspace{-1em}
-\label{tab:simba-results}
-\footnotesize
-\begin{tabular}{l cccc}
-\toprule
-\textbf{Recommender} & \textbf{Prec.} & \textbf{Rec.} & \textbf{F1} & \textbf{Ovlp.} \\
-\midrule
-MDI (Ours) & .292 & .283 & .287 & .292 \\
-Similarity & \textbf{.340} & \textbf{.330} & \textbf{.335} & \textbf{.340} \\
-Frequency & .328 & .319 & .323 & .328 \\
-Random & .302 & .292 & .297 & .302 \\
-Clustering & .292 & .283 & .287 & .000 \\
-Sampling & .278 & .268 & .273 & .278 \\
-\bottomrule
-\vspace{-1.5em}
-\end{tabular}
-\vspace{-2em}
-\end{table}
+% \begin{table}[t]
+% \centering
+% \caption{Recommendation performance at gap $=1$ on SIMBA drill-down sessions. All methods achieve similar scores.}
+% \vspace{-1em}
+% \label{tab:simba-results}
+% \footnotesize
+% \begin{tabular}{l cccc}
+% \toprule
+% \textbf{Recommender} & \textbf{Prec.} & \textbf{Rec.} & \textbf{F1} & \textbf{Ovlp.} \\
+% \midrule
+% MDI (Ours) & .292 & .283 & .287 & .292 \\
+% Similarity & \textbf{.340} & \textbf{.330} & \textbf{.335} & \textbf{.340} \\
+% Frequency & .328 & .319 & .323 & .328 \\
+% Random & .302 & .292 & .297 & .302 \\
+% Clustering & .292 & .283 & .287 & .000 \\
+% Sampling & .278 & .268 & .273 & .278 \\
+% \bottomrule
+% \vspace{-1.5em}
+% \end{tabular}
+% \vspace{-2em}
+% \end{table}
 
-This matters for evaluation. Prior work that evaluates recommenders exclusively on realistic workloads may overstate the effectiveness of simple baselines while undervaluing methods that capture analytical structure not reflected in those baselines. Existing EDA benchmarks such as IDEBench~\cite{eichmannIDEBenchBenchmarkInteractive2020} were designed primarily to measure DBMS performance under interactive workloads, not to differentiate recommender quality; high overlap in such workloads can mask real differences in capability.
+% This matters for evaluation. Prior work that evaluates recommenders exclusively on realistic workloads may overstate the effectiveness of simple baselines while undervaluing methods that capture analytical structure not reflected in those baselines. Existing EDA benchmarks such as IDEBench~\cite{eichmannIDEBenchBenchmarkInteractive2020} were designed primarily to measure DBMS performance under interactive workloads, not to differentiate recommender quality; high overlap in such workloads can mask real differences in capability.
 
-\vspace{-0.5em}
-\subsection{The Need for Construct Validity in EDA Benchmarks}
+% \vspace{-0.5em}
+% \subsection{The Need for Construct Validity in EDA Benchmarks}
 
 % To reason about benchmark adequacy, we distinguish two complementary notions of validity~\cite{shadish2002experimental}:
 
@@ -292,19 +306,21 @@ This matters for evaluation. Prior work that evaluates recommenders exclusively 
 
 % We adopt the same principle for EDA recommender evaluation. Our controlled benchmark (detailed in Section~\ref{sec:theory:recipe}) tests a specific, method-agnostic property: \emph{can the recommender detect association rules embedded in the data when simple shortcuts are removed?} The benchmark is constructed by identifying conditions under which each baseline class is expected to fail, then instantiating workloads that satisfy those conditions. The derivation yields a general alignment framework, which we present as a guide for designing construct-valid benchmarks beyond our specific instantiation.
 
-We distinguish two complementary notions of validity~\cite{shadish2002experimental}:
+% We distinguish two complementary notions of validity~\cite{shadish2002experimental}:
 
-\begin{itemize}[leftmargin=1em, topsep=0pt, itemsep=0pt, parsep=0pt]
-  \item \textbf{Ecological validity}: Do benchmark sessions resemble real analyst behaviour? SIMBA does: its progressive drill-down and visualisation-driven queries are representative of common workflows.
-  \item \textbf{Construct validity}: Does the benchmark test the capability it claims to measure? SIMBA \emph{lacks} this for recommender evaluation, because high overlap lets strong scores arise from tuple persistence alone rather than from inferring analyst focus. If a drill-down query retains most of the previous result, then even a recommender that simply resamples current tuples can look accurate without identifying the analyst's actual target.
-\end{itemize}
+% \begin{itemize}[leftmargin=1em, topsep=0pt, itemsep=0pt, parsep=0pt]
+%   \item \textbf{Ecological validity}: Do benchmark sessions resemble real analyst behaviour? SIMBA does: its progressive drill-down and visualisation-driven queries are representative of common workflows.
+%   \item \textbf{Construct validity}: Does the benchmark test the capability it claims to measure? SIMBA \emph{lacks} this for recommender evaluation, because high overlap lets strong scores arise from tuple persistence alone rather than from inferring analyst focus. If a drill-down query retains most of the previous result, then even a recommender that simply resamples current tuples can look accurate without identifying the analyst's actual target.
+% \end{itemize}
 
 
-Other fields address this tension with \emph{diagnostic} benchmarks that test specific properties. In computer vision, CLEVR~\cite{johnson2017clevr} probes compositional reasoning; in NLP, CheckList~\cite{ribeiro2020beyond} and adversarial NLI~\cite{nie2020adversarial} test whether models rely on shortcuts.
+% Other fields address this tension with \emph{diagnostic} benchmarks that test specific properties. In computer vision, CLEVR~\cite{johnson2017clevr} probes compositional reasoning; in NLP, CheckList~\cite{ribeiro2020beyond} and adversarial NLI~\cite{nie2020adversarial} test whether models rely on shortcuts.
 
-We apply the same principle to EDA. Our controlled benchmark (Section~\ref{sec:theory:recipe}) tests a method-agnostic capability: \emph{can a recommender detect embedded association rules once simple shortcuts are removed?} We construct it by identifying where each baseline should fail and then instantiating workloads that satisfy those conditions. The result is a general alignment framework for designing construct-valid benchmarks.
+% We apply the same principle to EDA. Our controlled benchmark (Section~\ref{sec:theory:recipe}) tests a method-agnostic capability: \emph{can a recommender detect embedded association rules once simple shortcuts are removed?} We construct it by identifying where each baseline should fail and then instantiating workloads that satisfy those conditions. The result is a general alignment framework for designing construct-valid benchmarks.
+
+
 %=============================================================================
-% SECTION 4: WORKLOAD-RECOMMENDER ALIGNMENT THEORY
+% SECTION 3: Analytical Interest as an Inference Problem
 %=============================================================================
 \input{workload_theory_v2}
 
