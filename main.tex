@@ -9,6 +9,7 @@
 \usepackage{makecell}
 \usepackage{enumitem}
 \usepackage{subcaption}
+\usepackage{tabularx}
 %\usepackage{pifont}
 
 %% copied from acmart.cls, but modified to a4paper
@@ -25,6 +26,7 @@
 }% \AtBeginMaketitle
 
 \usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta}
 \newcommand{\fcirc}[1]{%
   \tikz[baseline=(char.base)]{
     \node[shape=circle, fill=black, text=white, inner sep=1pt] (char) {\scriptsize #1};
@@ -199,9 +201,6 @@ We therefore advocate extending workload-based evaluation with controlled, histo
 %DA Not sure if we need to mention the inevitabilty of human validation here, but it is worth noting that the ultimate goal is to accelerate insight discovery, which requires human validation.
 % Validation with analysts remains necessary to establish whether the resulting assistance accelerates insight discovery.
 
-%=============================================================================
-% SECTION 3: FROM EXPLICIT FEEDBACK TO IMPLICIT SIGNALS
-%=============================================================================
 % \vspace{-0.5em}
 % \section{From Explicit to Implicit Signals}
 % \label{sec:implicit}
@@ -234,11 +233,7 @@ We therefore advocate extending workload-based evaluation with controlled, histo
 
 
 
-
-%=============================================================================
-% SECTION 3: WHY EVALUATION METHODOLOGY MATTERS
-%=============================================================================
-\vspace{-0.5em}
+% \vspace{-0.5em}
 % \section{Why Evaluation Method Matters}
 % \label{sec:evaluation}
 
@@ -322,6 +317,78 @@ We therefore advocate extending workload-based evaluation with controlled, histo
 %=============================================================================
 % SECTION 3: Analytical Interest as an Inference Problem
 %=============================================================================
+
+\section{Analytical Interest as an Inference Problem}
+\label{sec:interest}
+\subsection{Scope and interface}
+Let $R_q$ be the result available at exploration step $q$, and let
+$\mathcal H_q=((Q_0,R_0),\ldots,(Q_{q-1},R_{q-1}))$ describe preceding queries and results in the session. We seek a scoring function
+\begin{equation}
+  s_q(t)=f(t,R_q,Q_q,\mathcal H_q),\qquad t\in R_q.
+  \label{eq:interest}
+\end{equation}
+Its output is a relative ranking of candidate tuples. Scores need not be probabilities, and a system should be able to report insufficient evidence. The current result may contain data not previously encountered, but searching beyond that result is outside our scope. Optional inspection traces can enrich $\mathcal H_q$ when an interface records them. The illustrative implementation below uses result histories only, so it cannot distinguish all behaviours expressible by this interface.
+
+We use \emph{analytical interest} to mean the potential value of data to the analyst's evolving investigation. It is a latent, contextual construct. This differs from \emph{statistical interestingness}, which assigns value according to a specified property such as deviation or association strength. It also differs from \emph{exposure}: a row's presence in a result does not show that the analyst inspected it. A successful model must connect statistical evidence to a session while acknowledging that this connection can be wrong.
+
+The initial setting is a single analyst exploring one tabular dataset through filters, comparisons, and revisits. The minimum input regime requires no reusable corpus of other users' sessions. Such a corpus, when available, can supply learned priors or collaborative evidence; a single active analyst does not preclude a pretrained model. Query results must provide stable entity identities if tuple recurrence is measured. Aggregation, joins that change entity granularity, and incomplete logs require additional semantics. The controlled sessions in Section~\ref{sec:illustration} are stipulated sequences, not estimates of natural session length.
+
+\subsection{Four Dimensions of Analytical Interest}
+\label{sec:interest:dimensions}
+Drawing on Hilderman and Hamilton's treatment of interestingness measures~\cite{robertj.hildermanKnowledgeDiscoveryMeasures2001}, we organise evidence for analytical interest along four dimensions: structural, distributional, temporal, and compositional. These dimensions define a design space for implicit-interest models, rather than a fixed taxonomy of analyst goals. They complement the qualities of interestingness identified by Chanson et al., including peculiarity, novelty, relevance, surprise, diversity, and presentation~\cite{chansonInterestingnessMeasuresExploratory2025a}: temporal evidence, for example, can inform both relevance and novelty.
+
+\noindent \textbf{Structural interest.}
+This dimension captures relationships between variables, including correlations, associations, and dependency structures. Association-rule measures such as support, confidence, lift, and the J-measure~\cite{goodman1991rule} provide candidate evidence about these relationships. Repeated investigation of a relationship may suggest that it matters to the analyst, but its statistical strength alone does not establish its relevance to the investigation. MDI's association component $A(t,q)$ illustrates how rule evidence can be accumulated over a session.
+
+\noindent \textbf{Distributional interest.}
+This dimension captures anomalies, uneven distributions, and contrasts in the diversity of observed values. Candidate measures include Shannon entropy~\cite{shannon1948mathematical}, Simpson concentration, the Gini coefficient~\cite{gini1921measurement}, Berger--Parker dominance~\cite{bergerDiversityPlanktonicForaminifera1970}, and McIntosh diversity~\cite{mcintoshIndexDiversityRelation1967}. These measures describe different distributional properties; none alone determines what an analyst will find useful. MDI's diversity component $D(t,q)$ combines distributional evidence from the session, while a broader model could learn which properties matter to the current investigation.
+
+\noindent \textbf{Temporal interest.}
+Analytical goals may persist, evolve, or be abandoned over the course of a session. Frequent-episode mining~\cite{mannila1997discovery} offers a basis for representing recurring event patterns, motivating attention to the order and proximity of analytical actions. For interest inference, the challenge is to distinguish a persistent investigation thread from repeated exposure caused by query structure. MDI provides a limited instantiation through temporally weighted association evidence: recently reinforced patterns retain influence, while evidence not revisited fades.
+
+\noindent \textbf{Compositional interest.}
+Analysts may investigate natural groupings or contrasts between sub-populations defined by combinations of attributes. A combination can matter even when its individual values are common, so compositional evidence requires attention to joint structure rather than rarity alone. The inverse-frequency principle~\cite{sparckjones1972statistical} motivates MDI's novelty component $N(t,q)$, which rewards under-represented attribute values. This is only a partial treatment of compositional interest; modelling meaningful combinations and contrasts requires richer evidence.
+
+These four dimensions need not be instantiated exactly as in MDI, nor are they independent: a structural relationship may become relevant because it persists over time or distinguishes a particular sub-population. Table~\ref{tab:dimensions} summarises possible cues and competing explanations. The objective is to infer their significance from the evolving session, not to equate a high statistical score with analytical interest.
+
+\begin{table*}[t]
+\caption{Possible evidence for analytical interest. Each dimension admits competing explanations. MDI implements only parts of this design space.}
+\label{tab:dimensions}
+\small
+\begin{tabularx}{\textwidth}{@{}p{0.12\textwidth}XXX@{}}
+\toprule
+Dimension & Candidate evidence in the shipment example & Confounding explanation & Illustrative MDI mechanism \\
+\midrule
+Structural & Repeated exploration of a relation between category and priority & The relation is common in every returned result & Association evidence $A(t,q)$ from session rules \\
+Distributional & Revisiting an unusual price or an uneven distribution & Global rarity has no bearing on the investigation & Diversity evidence $D(t,q)$ from distributional summaries \\
+Temporal & An investigation thread persists, fades, or changes & Predicate nesting repeatedly exposes the same data & Temporal weighting, primarily within $A(t,q)$ \\
+Compositional & Contrasts between combinations of region, category, and transport & A rare combination is incidental or an encoding artefact & Attribute-value novelty $N(t,q)$; only a partial treatment of combinations \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+Information-foraging theory offers a useful motivation: an analyst's successive choices may provide evidence of perceived value~\cite{pirolli2005information}. It does not entail that every returned tuple is interesting. A query is a choice of an operation under constraints, and its output contains both sought and incidental data. In the running example, repeatedly investigating technology shipments may strengthen an association hypothesis, while recurring background shipments should not automatically receive the same interpretation.
+
+This distinction suggests a system architecture with three responsibilities (Figure~\ref{fig:architecture}). An observation layer records what the analyst could encounter and what operations produced it. A model maintains competing explanations of the session. A scoring layer applies that evidence to current candidates, ideally exposing its basis and uncertainty. Keeping these responsibilities explicit makes it possible to change an interface or a ranking model without changing the meaning of the evidence being collected.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[node distance=3mm,box/.style={draw,rounded corners,align=center,text width=.87\columnwidth,inner sep=5pt,font=\small},>=Stealth]
+\node[box] (obs) {Observe queries and results\\Record exposure and operation context};
+\node[box,below=of obs] (model) {Maintain session hypotheses\\Combine evidence; represent ambiguity and change};
+\node[box,below=of model] (score) {Score data in the current result\\Return ranking, evidence, and uncertainty};
+\draw[->] (obs)--(model); \draw[->] (model)--(score);
+\end{tikzpicture}
+\caption{Proposed capability boundary. Recommendation interfaces are downstream consumers. MDI instantiates a restricted scoring model and does not yet estimate uncertainty or model exposure explicitly.}
+\Description{Three vertically connected stages: observe queries and results, maintain session hypotheses, and score data in the current result.}
+\label{fig:architecture}
+\end{figure}
+
+Preserving analytical flow motivates inferring from ordinary exploration rather than repeatedly eliciting relevance judgements. Whether this actually reduces burden is an empirical question. An inaccurate, distracting, or overconfident recommendation can impose its own cost. Explicit feedback also remains valuable when ambiguity cannot be resolved from observed behaviour.
+
+%=============================================================================
+% SECTION 4: 
+%=============================================================================
 \input{workload_theory_v2}
 
 
@@ -346,12 +413,12 @@ At a high level, MDI assigns each tuple $t$ in the current result $R_q$ a score 
 where $A(t,q)$, $D(t,q)$, and $N(t,q)$ denote the association, diversity, and novelty components, respectively; we define these components in the discussion below, and $\alpha + \beta + \gamma = 1$. Equation~\eqref{eq:mdi-score} is intentionally high level: temporal weighting is encoded within the component definitions, primarily $A(t,q)$, rather than as a separate top-level term.
 
 % \vspace{-0.5em}
-\subsection{Four Dimensions of Analytical Interest}
+\subsection{Instantiating the Four Dimensions}
 
-Drawing on Hilderman and Hamilton's taxonomy of interestingness measures~\cite{robertj.hildermanKnowledgeDiscoveryMeasures2001}, we model analytical interest along four dimensions and map them to MDI's components:
+We map the four dimensions introduced in Section~\ref{sec:interest:dimensions} to MDI's association, diversity, and novelty components. Temporal weighting operates within these components rather than defining a fourth additive term:
 
 \noindent \textbf{Structural interest.}
-This dimension captures relationships between variables correlations, associations, and dependency structures. MDI's association component $A(t,q)$ aggregates evidence from association rules mined over the session history, using standard measures such as support, confidence, lift, and the J-measure ~\cite{goodman1991rule}. Rules are weighted by a temporal decay factor so that recently reinforced patterns contribute more strongly than stale ones.
+MDI's association component $A(t,q)$ aggregates evidence from association rules mined over the session history, using standard measures such as support, confidence, lift, and the J-measure~\cite{goodman1991rule}. Rules are weighted by a temporal decay factor so that recently reinforced patterns contribute more strongly than stale ones.
 
 
 \noindent \textbf{Distributional interest.}
@@ -359,12 +426,12 @@ This dimension reflects anomalies and unusual distributional characteristics. We
 %This dimension reflects anomalies and unusual distributional characteristics. We quantify diversity using a small set of standard indices (e.g., entropy and inequality measures) and define $D(t,q)$ as the estimated contribution of tuple $t$ to the diversity of attribute-value distributions observed so far.
 
 \noindent \textbf{Temporal interest.}
-Analytical goals evolve over the course of a session. Temporal cohesion measures~\cite{mannila1997discovery} and sequential pattern mining concepts inform how we track persistent investigation threads across queries. In MDI, this is reflected primarily through temporally weighted association evidence: patterns that continue to be supported by new queries retain high influence, while those not revisited fade over time.
+MDI captures recency primarily through temporally weighted association evidence: patterns that continue to be supported by new queries retain high influence, while those not revisited fade over time. This weighting does not explicitly represent competing investigation threads or infer when an analyst changes goals.
 
 
 \noindent \textbf{Compositional interest.}
 %Analysts often care about natural groupings or contrasts between sub-populations. Cluster validity measures such as the silhouette coefficient and Calinski–Harabasz index~\cite{kaufman2009finding} inform MDI's novelty component $N(t,q)$, which promotes tuples whose attribute combinations are under-represented in the session history, following the inverse-frequency principle~\cite{sparckjones1972statistical}. This encourages exploration of complementary or surprising regions of the data space.
-Analysts often care about natural groupings or contrasts between sub-populations. Inspired by cluster validity measures, MDI's novelty component $N(t,q)$ promotes tuples whose attribute combinations are under-represented in the session history, following the inverse-frequency principle~\cite{sparckjones1972statistical}.
+MDI's novelty component $N(t,q)$ promotes tuples containing attribute values that are under-represented in the session history, following the inverse-frequency principle~\cite{sparckjones1972statistical}. This provides a limited cue for exploring complementary regions of the data; it does not by itself measure the novelty or analytical relevance of joint attribute combinations.
 
 %RBG important for the vision, one instantiation but could be more
 These four dimensions need not be instantiated exactly as in MDI; they define a design space for implicit-interest models combining structural, distributional, temporal, and compositional cues.
