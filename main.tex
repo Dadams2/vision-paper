@@ -4,18 +4,14 @@
 
 \documentclass[sigconf, nonacm]{acmart}
 
-\usepackage{algorithm,algpseudocode}
 \usepackage{multirow}
 \usepackage{makecell}
 \usepackage{enumitem}
-\usepackage{subcaption}
 \usepackage{tabularx}
-%\usepackage{pifont}
 
 %% copied from acmart.cls, but modified to a4paper
 \geometry{twoside=true, head=13pt,
      a4paper, % for EDBT: use A4 paper
-%     paperwidth=8.5in, paperheight=11in,
      includeheadfoot, columnsep=2pc,
      top=57pt, bottom=73pt, inner=54pt, outer=54pt,
      marginparwidth=2pc,heightrounded
@@ -26,16 +22,38 @@
 }% \AtBeginMaketitle
 
 \usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta}
-\newcommand{\fcirc}[1]{%
-  \tikz[baseline=(char.base)]{
-    \node[shape=circle, fill=black, text=white, inner sep=1pt] (char) {\scriptsize #1};
-  }
-}
+\usetikzlibrary{positioning,arrows.meta,calc}
+% ===== Previous draft: preamble (kept for reference) =====
+% \usepackage{algorithm,algpseudocode}
+% ===== End previous draft: preamble =====
 
+% ===== Previous draft: preamble packages (kept for reference) =====
+% \usepackage{enumitem}
+% \usepackage{subcaption}
+% \usepackage{tabularx}
+%\usepackage{pifont}
+% ===== End previous draft: preamble packages =====
+
+% ===== Previous draft: preamble macro (kept for reference) =====
+% \newcommand{\fcirc}[1]{%
+%   \tikz[baseline=(char.base)]{
+%     \node[shape=circle, fill=black, text=white, inner sep=1pt] (char) {\scriptsize #1};
+%   }
+% }
+% ===== End previous draft: preamble macro =====
+
+% ===== Previous draft: short authors (kept for reference) =====
+% \renewcommand{\shortauthors}{First Author et al.} %%MS: removed contents
+%\renewcommand{\shorttitle}{} %%MS: added this one
+% ===== End previous draft: short authors =====
+
+
+\newcommand{\yes}{\checkmark}
+\newcommand{\partly}{($\checkmark$)}
+\newcommand{\no}{--}
 
 \begin{document}
-\title{[Vision Paper]Implicit inference of analytical interest in Exploratory Data Analysis}
+\title{[Vision Paper] From Next Steps to Destinations: Anticipating Analytical Interest in Exploratory Data Analysis}
 
 %%
 %% The "author" command and its associated commands are used to define the authors and their affiliations.
@@ -49,8 +67,6 @@
   \country{Australia}
 }
 \email{david.adams1@student.unimelb.edu.au}
-
-
 
 \author{Nir Lipovetzky}
 \affiliation{%
@@ -74,32 +90,77 @@
 }
 \email{renata.borovica@unimelb.edu.au}
 
-\renewcommand{\shortauthors}{First Author et al.} %%MS: removed contents
-%\renewcommand{\shorttitle}{} %%MS: added this one
+\renewcommand{\shortauthors}{Adams et al.}
 
-%%
-%% The abstract is a short summary of the work to be presented in the
-%% article.
 \begin{abstract}
+Exploratory data analysis (EDA) is goal-directed, yet the systems that assist it mostly predict an analyst's \emph{next step}: the next query, action, or chart. Alternatively, they ask the analyst to label what they want. We argue that database systems should instead anticipate where an investigation is heading: its \emph{destination}, the pattern, exception, or set of entities the exploration is converging on. Anticipating destinations requires four shifts in how systems support EDA. Interest should be inferred implicitly from exploration rather than elicited through feedback. Inference should be conditioned on the whole trajectory rather than the current step. Systems should recognise that analytical interest takes several forms. Finally, they should be evaluated with reproducible benchmarks that plant destinations of known kinds and measure how early each is recovered. We describe such a benchmark and use it to examine MDI, a scorer that is agnostic to the query language. On controlled trajectories, MDI identifies the destination as soon as the evidence distinguishes it, and it never claims to before then. The benchmark also exposes forms of interest and detours that it handles poorly. We close with a research agenda on interfaces that act on predicted destinations and on studies that test whether doing so accelerates EDA.
+% ===== Previous draft: abstract (kept for reference) =====
 
 %Exploratory Data Analysis (EDA) is central to modern data science, yet current EDA systems rely on explicit user feedback, example validation and active learning that disrupts cognitive flow and captures only a narrow view of analytical interest. We argue that implicit behavioral signals from natural exploration provide a richer, more authentic basis for recommendation. However, evaluating implicit recommenders poses its own challenge: realistic workloads produce high inter-query overlap that renders all methods statistically indistinguishable, masking differences in recommender capability. This paper makes four contributions: (1) a systematic critique of explicit feedback paradigms in EDA, showing their cognitive overhead and analytical limitations; (2) a workload recommender alignment theory that formally characterises when each class of recommender succeeds or fails, yielding a prescriptive recipe for constructing controlled benchmarks; (3) a Multi-Dimensional Interestingness (MDI) recommender that combines association rules, diversity measures, and novelty detection through temporal accumulation; and (4) a complementary evaluation methodology pairing realistic visualization-driven sessions (ecological validity) with a controlled adversarial benchmark (construct validity). On the adversarial benchmark, MDI achieves 36\% higher F1 than random selection, while on realistic drill-down workloads all methods perform similarly demonstrating that principled evaluation methodology is as important as recommender design.
-Exploratory data analysis (EDA) is central to modern data science, yet most systems still rely on explicit user feedback, validation, or active learning. These mechanisms interrupt cognitive flow and capture only a limited view of analyst interest. We argue for two paradigm shifts in how database systems (DBMS) support EDA: (1) from explicit to implicit interest signals inferred from temporal patterns in natural exploration behaviour, and (2) from purely ``ecologically valid'' benchmarks to evaluation schemes that measure the ability to model and predict analytical interest over time. 
+% Exploratory data analysis (EDA) is central to modern data science, yet most systems still rely on explicit user feedback, validation, or active learning. These mechanisms interrupt cognitive flow and capture only a limited view of analyst interest. We argue for two paradigm shifts in how database systems (DBMS) support EDA: (1) from explicit to implicit interest signals inferred from temporal patterns in natural exploration behaviour, and (2) from purely ``ecologically valid'' benchmarks to evaluation schemes that measure the ability to model and predict analytical interest over time. 
 
 
-We develop a workload-recommender alignment framework that separates candidate suggestion from interest scoring and motivates complementary evaluation. An illustrative MDI scorer connects the proposed dimensions to concrete mechanisms. An audit of archived SIMBA-derived and SkyServer-derived workloads exposes candidate-availability constraints, while controlled diagnostics test history-conditioned pattern recovery. MDI recovers stipulated targets but adapts slowly to changed focus, and association-only scoring matches its performance in these tests. These findings motivate research on contextual evidence combination, changing interests, and benchmarks that distinguish behavioural prediction from useful analytical assistance.
+% We develop a workload-recommender alignment framework that separates candidate suggestion from interest scoring and motivates complementary evaluation. An illustrative MDI scorer connects the proposed dimensions to concrete mechanisms. An audit of archived SIMBA-derived and SkyServer-derived workloads exposes candidate-availability constraints, while controlled diagnostics test history-conditioned pattern recovery. MDI recovers stipulated targets but adapts slowly to changed focus, and association-only scoring matches its performance in these tests. These findings motivate research on contextual evidence combination, changing interests, and benchmarks that distinguish behavioural prediction from useful analytical assistance.
 
+
+% ===== End previous draft: abstract =====
 
 \end{abstract}
 
-\keywords{exploratory data analysis, analytical interest, implicit feedback, diagnostic evaluation}
+\keywords{exploratory data analysis, analytical interest, implicit feedback, benchmarking}
 
 \maketitle
 
-
-%=============================================================================
-% SECTION 1: Introduction
 %=============================================================================
 \section{Introduction}
+\label{sec:intro}
+%=============================================================================
+
+Exploratory data analysis (EDA) is an iterative process of examining data, formulating questions, and revising an investigation in response to what is found. It includes profiling data quality as well as discovering patterns, and analysts' goals and working context shape which activities are useful~\cite{wongsuphasawat2019edagoals}. Each query result gives the analyst candidate data for the next step. It does not tell a system which of those data matter, or which will matter as the investigation develops. A rare value may be a distraction, while an ordinary-looking row may be central to a developing explanation.
+
+Systems that assist EDA have taken two broad approaches. Explore-by-example and active-learning systems ask analysts to label tuples or regions until the system learns what they want~\cite{dimitriadouAIDEActiveLearningBased2016,qinRankingDesiredTuples2021}. Recommendation systems instead predict the next thing to show: the next query~\cite{eirinakiQuerieCollaborativeDatabase2013}, the next action~\cite{dezoysa2025exploract}, or the most deviating chart for the current query~\cite{vartakSeedbEfficientDatadriven2015}. The first interrupts the analysis it is meant to support. The second answers a narrower question than the analyst is asking. An analyst does not issue a query for its own sake. They issue it because they are heading somewhere.
+
+\textbf{A running example.}
+Consider two analysts exploring a shipments table (Figure~\ref{fig:example}). Analyst A looks at shipments from Asia, narrows to technology products, and then looks at urgent ones. Analyst B also starts in Asia, narrows to healthcare products, and then looks at expensive ones. Both then open the same broad result. A system that predicts the next step, or explains the current one~\cite{deutchFEDEXExplainabilityFramework2022}, sees the same result and gives both analysts the same answer. What each needs from that result is different. A is converging on the relationship between technology and urgency in Asia, B on unusually priced healthcare shipments. We call these \emph{destinations}. A system that anticipates them could surface A's urgent technology shipments and B's high-priced healthcare shipments before either analyst has finished getting there.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+  font=\scriptsize, >=Stealth, node distance=1.5mm and 2.5mm,
+  stp/.style={draw, rounded corners=1.5pt, inner sep=2pt, align=center, minimum height=4.2mm},
+  dest/.style={draw, thick, rounded corners=1.5pt, inner sep=2.5pt, align=center, fill=black!6},
+]
+\node[stp] (a1) {Asia};
+\node[stp, right=of a1] (a2) {+ technology};
+\node[stp, right=of a2] (a3) {+ urgent};
+\node[stp, below=4mm of a1] (b1) {Asia};
+\node[stp, right=of b1] (b2) {+ healthcare};
+\node[stp, right=of b2] (b3) {+ high price};
+\node[left=1mm of a1] {A};
+\node[left=1mm of b1] {B};
+\node[stp, anchor=west, minimum height=6mm] (r) at ($(a3.east)!.5!(b3.east)+(5mm,0)$) {same broad\\result};
+\draw[->] (a1)--(a2); \draw[->] (a2)--(a3); \draw[->] (a3.east)--(r);
+\draw[->] (b1)--(b2); \draw[->] (b2)--(b3); \draw[->] (b3.east)--(r);
+\node[dest, right=5mm of r, yshift=4.5mm] (da) {A: tech $\to$ urgent};
+\node[dest, right=5mm of r, yshift=-4.5mm] (db) {B: price tail};
+\draw[->, dashed] (r)--(da); \draw[->, dashed] (r)--(db);
+\end{tikzpicture}
+\caption{Two trajectories reach the same result but are heading to different destinations. Next-step and per-step methods see only the shared result. A destination-aware system conditions on the trajectory.}
+\Description{Analyst A goes Asia, technology, urgent; analyst B goes Asia, healthcare, high price. Both reach the same broad result, from which dashed arrows lead to two different destinations.}
+\label{fig:example}
+\end{figure}
+
+This example is the litmus test for the vision. We argue that \textbf{database systems should support exploratory analysis by anticipating where an analyst's investigation is heading, inferred implicitly from how their exploration unfolds, rather than by predicting their next step or asking them for feedback}. Predicting the destination comes first. Designing interfaces and interaction paradigms that shorten the path to it, and so accelerate EDA as a whole, comes after. We identify four principles such systems should follow:
+\begin{enumerate}[leftmargin=1.4em, topsep=2pt, itemsep=1pt]
+  \item \textbf{Implicit.} Infer interest from exploration rather than interrupting it with requests for labels or examples.
+  \item \textbf{Trajectory-conditioned.} Condition on the history of the session, which reveals direction, persistence, and change.
+  \item \textbf{Plural interest.} Recognise that destinations take different forms (structural, distributional, compositional) that no single interestingness measure captures.
+  \item \textbf{Reproducible destination benchmarks.} Evaluate by planting destinations of known kinds and measuring how early each is recovered.
+\end{enumerate}
+
+Our contributions are the destination framing of EDA assistance (Section~\ref{sec:destinations}), the four principles as design requirements (Section~\ref{sec:principles}), a positioning of existing work against them (Section~\ref{sec:related}), and a benchmark design with a first instantiation that shows both promise and failure modes (Section~\ref{sec:first-step}). Section~\ref{sec:agenda} sets out a research agenda, including how acting on destinations could accelerate EDA and how that should be validated with analysts.
+
+% ===== Previous draft: introduction (kept for reference) =====
 
 %The volume of enterprise data continues to grow rapidly, with recent projections estimating global data creation will exceed 180 zettabytes by 2025~\cite{idc2019data}. This growth has placed Exploratory Data Analysis (EDA) at the centre of modern data science workflows. Yet despite decades of database research, the fundamental interaction paradigms for data exploration remain largely unchanged.
 
@@ -123,33 +184,213 @@ We develop a workload-recommender alignment framework that separates candidate s
 %Explicitly positioned existing systems as sharing a core reliance on explicit feedback, tying this to cognitive load and disruption of analytical flow.
 %Clarified that the paper’s technical pieces (MDI and the adversarial benchmark) are instantiations / exemplars of a broader methodology, not the sole central contributions.
 
-Exploratory data analysis (EDA) is an iterative process of examining data, formulating questions, and revising an investigation in response to what is found. It includes profiling data quality as well as discovering patterns; analysts' goals and working context affect which activities are useful~\cite{wongsuphasawat2019edagoals}. A query result provides candidate data for the next analytical step, but it does not tell a system which data matter to the analyst or which will become relevant as the investigation develops. A rare value may be a distraction. An ordinary-looking row may be central to a developing explanation.
+% Exploratory data analysis (EDA) is an iterative process of examining data, formulating questions, and revising an investigation in response to what is found. It includes profiling data quality as well as discovering patterns; analysts' goals and working context affect which activities are useful~\cite{wongsuphasawat2019edagoals}. A query result provides candidate data for the next analytical step, but it does not tell a system which data matter to the analyst or which will become relevant as the investigation develops. A rare value may be a distraction. An ordinary-looking row may be central to a developing explanation.
 
-Existing systems address parts of this problem. Active-learning approaches learn interests from explicit relevance feedback~\cite{dimitriadouAIDEActiveLearningBased2016}, while visualisation recommenders identify promising views using statistical and perceptual criteria~\cite{vartakSeedbEfficientDatadriven2015,wongsuphasawat2016voyager}. History-aware systems recommend queries or next actions~\cite{eirinakiQuerieCollaborativeDatabase2013,dezoysa2025exploract}, and session logs can inform the choice of interestingness measure~\cite{somechPredictingWhatInteresting2019}. These advances motivate a further question: \emph{how can temporal patterns in ordinary exploration behaviour support implicit models of an analyst's evolving interests, enabling systems to anticipate relevant data several steps ahead?}
+% Existing systems address parts of this problem. Active-learning approaches learn interests from explicit relevance feedback~\cite{dimitriadouAIDEActiveLearningBased2016}, while visualisation recommenders identify promising views using statistical and perceptual criteria~\cite{vartakSeedbEfficientDatadriven2015,wongsuphasawat2016voyager}. History-aware systems recommend queries or next actions~\cite{eirinakiQuerieCollaborativeDatabase2013,dezoysa2025exploract}, and session logs can inform the choice of interestingness measure~\cite{somechPredictingWhatInteresting2019}. These advances motivate a further question: \emph{how can temporal patterns in ordinary exploration behaviour support implicit models of an analyst's evolving interests, enabling systems to anticipate relevant data several steps ahead?}
 
-\textbf{A running example.}
-Consider two analysts exploring shipments. Analyst A filters technology shipments, compares priorities across regions, and revisits urgent shipments from Asia. Analyst B filters healthcare shipments, compares prices across transport modes, and revisits premium shipments sent by air. Both then open the same broad result. Their histories suggest different interests even when the two patterns are equally common. Looking further ahead, a system might hypothesise that A will find exceptions to the region--priority relationship useful after intermediate comparisons, while B will investigate exceptions to the price--transport relationship. The desired prediction concerns the data or patterns that could matter later, not necessarily the exact sequence of queries each analyst will issue.
+% \textbf{A running example.}
+% Consider two analysts exploring shipments. Analyst A filters technology shipments, compares priorities across regions, and revisits urgent shipments from Asia. Analyst B filters healthcare shipments, compares prices across transport modes, and revisits premium shipments sent by air. Both then open the same broad result. Their histories suggest different interests even when the two patterns are equally common. Looking further ahead, a system might hypothesise that A will find exceptions to the region--priority relationship useful after intermediate comparisons, while B will investigate exceptions to the price--transport relationship. The desired prediction concerns the data or patterns that could matter later, not necessarily the exact sequence of queries each analyst will issue.
 
-These are uncertain hypotheses. Narrowing a query for Asian shipments to urgent Asian shipments retains rows by set containment, whether or not the analyst noticed them. Inspecting an expensive delivery may be an attempt to reject an explanation rather than an expression of preference. An interest model must distinguish persistent investigative themes from repeated exposure, temporary detours, and genuine changes of focus.
+% These are uncertain hypotheses. Narrowing a query for Asian shipments to urgent Asian shipments retains rows by set containment, whether or not the analyst noticed them. Inspecting an expensive delivery may be an attempt to reject an explanation rather than an expression of preference. An interest model must distinguish persistent investigative themes from repeated exposure, temporary detours, and genuine changes of focus.
 
-We envision an \emph{interest-modelling capability} that maintains these hypotheses from queries, results, and available interaction traces. Its longer-term goal is to anticipate analytical relevance over multiple future steps, allowing downstream tools to prioritise inspection or surface useful evidence earlier. This differs from both predicting the next action and autonomously choosing an entire exploration sequence. We do not prescribe a particular interface. Faster insight discovery is the intended benefit, to be established through analyst studies rather than inferred from prediction accuracy alone.
+% We envision an \emph{interest-modelling capability} that maintains these hypotheses from queries, results, and available interaction traces. Its longer-term goal is to anticipate analytical relevance over multiple future steps, allowing downstream tools to prioritise inspection or surface useful evidence earlier. This differs from both predicting the next action and autonomously choosing an entire exploration sequence. We do not prescribe a particular interface. Faster insight discovery is the intended benefit, to be established through analyst studies rather than inferred from prediction accuracy alone.
 
-The present work grounds this vision in a restricted setting: using accumulated result history to score tuples available in the current result. MDI illustrates temporal accumulation. An audit examines candidate availability for future membership, while controlled diagnostics test association recovery from different histories. These are complementary illustrations, not evidence that multi-step analytical relevance has already been predicted. Longer-horizon validation must compare predictions made from the same observed prefix, without revealing intervening actions, and assess relevance separately from recurrence.
+% The present work grounds this vision in a restricted setting: using accumulated result history to score tuples available in the current result. MDI illustrates temporal accumulation. An audit examines candidate availability for future membership, while controlled diagnostics test association recovery from different histories. These are complementary illustrations, not evidence that multi-step analytical relevance has already been predicted. Longer-horizon validation must compare predictions made from the same observed prefix, without revealing intervening actions, and assess relevance separately from recurrence.
 
-Two connected research directions follow. The first is to infer evolving analytical interest without requiring relevance labels at every step, building on existing implicit-feedback and subjective-interest models. The second is to evaluate that inference by pairing observed or generated workloads with controlled stress tests. Workload overlap and candidate availability affect what can be predicted; neither high scores nor low scores alone establish whether a model captures interest.
+% Two connected research directions follow. The first is to infer evolving analytical interest without requiring relevance labels at every step, building on existing implicit-feedback and subjective-interest models. The second is to evaluate that inference by pairing observed or generated workloads with controlled stress tests. Workload overlap and candidate availability affect what can be predicted; neither high scores nor low scores alone establish whether a model captures interest.
 
-Our contributions are a design space for implicit interest modelling (Section~\ref{sec:interest}), a workload--recommender alignment framework for designing diagnostic tests (Section~\ref{sec:theory}), and an illustrative MDI implementation and complementary evaluation (Section~\ref{sec:illustration}). These are starting points for the longer-horizon research programme, not a claim that anticipatory assistance or its human benefit has already been demonstrated.
+% Our contributions are a design space for implicit interest modelling (Section~\ref{sec:interest}), a workload--recommender alignment framework for designing diagnostic tests (Section~\ref{sec:theory}), and an illustrative MDI implementation and complementary evaluation (Section~\ref{sec:illustration}). These are starting points for the longer-horizon research programme, not a claim that anticipatory assistance or its human benefit has already been demonstrated.
+
+% ===== End previous draft: introduction =====
 
 %=============================================================================
-% SECTION 2: Related work
+\section{From Next Steps to Destinations}
+\label{sec:destinations}
 %=============================================================================
-\section{Related Work}
 
-The database community has developed interactive exploration systems that enable users to navigate large datasets through visual interfaces, query-by-example paradigms and other novel interaction models. However many works that model a users interest over time rely on explicit feedback, example validation, or active learning. These mechanisms interrupt cognitive flow and capture only a limited view of analyst interest. Other systems that model interest implicitly are often not historically conditioned and do not evaluate whether the model anticipates future analytical relevance. 
+An exploration session is a sequence of queries $Q_1,\ldots,Q_n$ over a dataset $T$ with results $R_1,\ldots,R_n$. We write $\mathcal{H}_q=((Q_1,R_1),\ldots,(Q_q,R_q))$ for the trajectory observed after $q$ steps.
 
+\textbf{Destinations.}
+A destination $d$ is what the trajectory is converging on. It has two faces: a \emph{description} $\varphi_d$, the pattern or reason the data matter, and an \emph{extension} $E_d\subseteq T$, the tuples that instantiate it. Destinations come in kinds. \emph{Patterns} are structural, distributional, or compositional regularities, such as an association between technology and urgency in Asia. \emph{Exceptions} are tuples that break an expected pattern. \emph{Entities} are specific objects that matter in their own right, such as a newly discovered object in an astronomical survey. Every pattern has an extension, but an extension does not identify its pattern: the same rows can instantiate several descriptions. Exceptions bridge the two, since they have both a description (the pattern they violate) and a small extension.
+
+\textbf{The task.}
+After observing $\mathcal{H}_q$, a system receives a result $R$, typically a broader result the analyst opens or returns to, and ranks its tuples so that $E_d\cap R$ comes first:
+\begin{equation}
+  s_q(t)=f(t,R,\mathcal{H}_q),\qquad t\in R.
+  \label{eq:task}
+\end{equation}
+In this paper we evaluate this tuple-level form. Returning ranked descriptions together with their extensions is part of the longer-term vision (Section~\ref{sec:agenda}). A prediction is valuable to the extent that it is right \emph{early}: the fewer steps a system needs to identify a destination, the more of the path an interface could shorten.
+
+\textbf{Why not predict the next result?}
+A natural alternative is to treat tuples that reappear in the next result as relevant. This confuses exposure with interest. If an analyst narrows ``employees in California'' to ``employees in California earning over 100k'', every retained row reappears by set containment, whether or not the analyst cares about it. Reappearance measures the query's structure, not the analyst's destination. Defining the target as the destination's extension separates the two. A model that merely tracks recurring rows gains nothing, which we test directly in Section~\ref{sec:first-step}.
+
+\textbf{Analytical interest and scope.}
+We use \emph{analytical interest} to mean the potential value of data to the analyst's evolving investigation. It is latent and contextual. It differs from \emph{statistical interestingness}, which values data by a fixed property such as deviation or association strength, and from \emph{exposure}, since presence in a result does not mean a row was inspected. We consider a single analyst exploring one tabular dataset through selections, drill-downs, comparisons, and revisits, in sessions of tens of steps. We assume results carry stable entity identities. We do not assume access to other users' sessions, although a corpus can supply priors when available. We also require scoring to be \emph{agnostic to the query language}, using only results, so that it can sit beneath SQL, dataframe, visual, or natural-language front-ends. Aggregation, joins that change entity granularity, and incomplete logs are outside this initial scope.
+
+%=============================================================================
+\section{Four Principles for Destination-Aware EDA}
+\label{sec:principles}
+%=============================================================================
+
+\subsection{Implicit}
+\textbf{Claim.} Interest should be inferred from the exploration itself, not elicited alongside it.
+\textbf{Why.} Rating tuples, validating examples, or answering membership queries interleaves exploration with evaluation. Exploratory analysis already imposes substantial intrinsic cognitive load~\cite{sweller1988cognitive}, and switching between tasks has measurable costs~\cite{monsell2003task,rubinstein2001executive}. Implicit signals reflect what analysts actually do rather than what they say~\cite{kelly2003implicit}. When an analyst reformulates a query or drills into a subset, the choice itself is evidence.
+\textbf{Demands.} A system must work from what any front-end produces, and must accept that this evidence is ambiguous. Explicit feedback remains valuable when ambiguity cannot be resolved from behaviour. It should be a fallback rather than the default.
+
+\subsection{Trajectory-conditioned}
+\textbf{Claim.} The unit of evidence is the trajectory, not the current step.
+\textbf{Why.} Information-foraging theory describes analysts following an information scent~\cite{pirolli2005information}. Their successive choices form a trail that points somewhere. A single step is ambiguous: the same query can serve several goals, and the same goal can be reached through different queries. Over several steps, some evidence persists (A keeps returning to technology in Asia) while other evidence is incidental, such as a filter applied once and abandoned. Interests also change. An analyst may abandon a thread, take a detour, or switch goals entirely.
+\textbf{Demands.} A system must accumulate evidence across steps, let stale evidence fade, and distinguish a persistent direction from incidental narrowing and a genuine switch from a detour. Section~\ref{sec:first-step} shows that the obvious signal (``whatever was narrowed is where they are going'') is not enough.
+
+\subsection{Plural Analytical Interest}
+\textbf{Claim.} Destinations take different forms, and a system must be able to recognise each.
+\textbf{Why.} No single interestingness measure consistently predicts what analysts find interesting across domains and tasks~\cite{somechPredictingWhatInteresting2019}, and the EDA literature distinguishes several qualities of interesting results~\cite{chansonInterestingnessMeasuresExploratory2025a}. Drawing on the treatment of interestingness measures by Hilderman and Hamilton~\cite{robertj.hildermanKnowledgeDiscoveryMeasures2001}, we distinguish three kinds of pattern destination (Table~\ref{tab:kinds}). \emph{Structural} destinations are relationships between attributes, evidenced by association measures~\cite{goodman1991rule}. \emph{Distributional} destinations are concentrations, skews, and tails, evidenced by diversity measures~\cite{shannon1948mathematical,gini1921measurement,bergerDiversityPlanktonicForaminifera1970,mcintoshIndexDiversityRelation1967}. \emph{Compositional} destinations are contrasts that hold only within particular sub-populations. Each also has a confound that a system must not mistake for interest.
+\textbf{Demands.} Evidence of several kinds must be combined on a common scale. Which kind matters should be inferred from the session rather than fixed in advance.
+
+\begin{table}[t]
+\caption{Kinds of pattern destination. Each admits a confound that should not be mistaken for interest.}
+\label{tab:kinds}
+\small
+\begin{tabularx}{\columnwidth}{@{}p{0.17\columnwidth}XX@{}}
+\toprule
+Kind & Example destination & Confound \\
+\midrule
+Structural & Technology shipments in Asia are mostly urgent & The relation holds in every returned result \\
+Distributional & Healthcare prices have a heavy upper tail & Global rarity unrelated to the investigation \\
+Compositional & In America, transport mode determines priority, with no change in priority overall & A rare combination is incidental \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Reproducible Destination Benchmarks}
+\textbf{Claim.} Progress requires benchmarks that test whether a system recovers destinations of known kinds, and how early it does so.
+\textbf{Why.} Human studies establish usefulness, but they are expensive, and an open dataset alone does not make them reusable: reproduction also needs the tasks, histories, and relevance judgements. Recorded sessions support comparison~\cite{dezoysa2025exploract}, but agreement with an observed next action does not show that a model recovered the analyst's goal. Other fields complement realistic data with diagnostic benchmarks that isolate specific capabilities~\cite{johnson2017clevr,ribeiro2020beyond}.
+\textbf{Demands.} A destination benchmark plants destinations of each kind in a dataset and generates trajectories towards them. It controls how ambiguous early steps are and whether trajectories detour or switch. It then scores how early each destination is recovered. Paired trajectories that reach the same result while heading to different destinations turn the litmus test of Figure~\ref{fig:example} into a measurement. Goal-driven workload generators provide the realistic counterpart. SIMBA models analysis goals as goal queries reached through valid interaction sequences~\cite{purichAdaptiveBenchmarkModeling2025}, so its goals are destinations judged by extension.
+
+% ===== Previous draft: Section 3, Analytical Interest as an Inference Problem (kept for reference) =====
+% \section{Analytical Interest as an Inference Problem}
+% \label{sec:interest}
+% \subsection{Scope and interface}
+% Let $R_q$ be the result available at exploration step $q$, and let
+% $\mathcal H_q=((Q_0,R_0),\ldots,(Q_{q-1},R_{q-1}))$ describe preceding queries and results in the session. We seek a scoring function
+% \begin{equation}
+%   s_q(t)=f(t,R_q,Q_q,\mathcal H_q),\qquad t\in R_q.
+%   \label{eq:interest}
+% \end{equation}
+% Its output is a relative ranking of candidate tuples. Scores need not be probabilities, and a system should be able to report insufficient evidence. The current result may contain data not previously encountered, but searching beyond that result is outside our scope. Optional inspection traces can enrich $\mathcal H_q$ when an interface records them. The illustrative implementation below uses result histories only, so it cannot distinguish all behaviours expressible by this interface.
+
+% We use \emph{analytical interest} to mean the potential value of data to the analyst's evolving investigation. It is a latent, contextual construct. This differs from \emph{statistical interestingness}, which assigns value according to a specified property such as deviation or association strength. It also differs from \emph{exposure}: a row's presence in a result does not show that the analyst inspected it. A successful model must connect statistical evidence to a session while acknowledging that this connection can be wrong.
+
+% The initial setting is a single analyst exploring one tabular dataset through filters, comparisons, and revisits. The minimum input regime requires no reusable corpus of other users' sessions. Such a corpus, when available, can supply learned priors or collaborative evidence; a single active analyst does not preclude a pretrained model. Query results must provide stable entity identities if tuple recurrence is measured. Aggregation, joins that change entity granularity, and incomplete logs require additional semantics. The controlled sessions in Section~\ref{sec:illustration} are stipulated sequences, not estimates of natural session length.
+
+% \subsection{Four Dimensions of Analytical Interest}
+% \label{sec:interest:dimensions}
+% Drawing on Hilderman and Hamilton's treatment of interestingness measures~\cite{robertj.hildermanKnowledgeDiscoveryMeasures2001}, we organise evidence for analytical interest along four dimensions: structural, distributional, temporal, and compositional. These dimensions define a design space for implicit-interest models, rather than a fixed taxonomy of analyst goals. They complement the qualities of interestingness identified by Chanson et al., including peculiarity, novelty, relevance, surprise, diversity, and presentation~\cite{chansonInterestingnessMeasuresExploratory2025a}: temporal evidence, for example, can inform both relevance and novelty.
+
+% \noindent \textbf{Structural interest.}
+% This dimension captures relationships between variables, including correlations, associations, and dependency structures. Association-rule measures such as support, confidence, lift, and the J-measure~\cite{goodman1991rule} provide candidate evidence about these relationships. Repeated investigation of a relationship may suggest that it matters to the analyst, but its statistical strength alone does not establish its relevance to the investigation. MDI's association component $A(t,q)$ illustrates how rule evidence can be accumulated over a session.
+
+% \noindent \textbf{Distributional interest.}
+% This dimension captures anomalies, uneven distributions, and contrasts in the diversity of observed values. Candidate measures include Shannon entropy~\cite{shannon1948mathematical}, Simpson concentration, the Gini coefficient~\cite{gini1921measurement}, Berger--Parker dominance~\cite{bergerDiversityPlanktonicForaminifera1970}, and McIntosh diversity~\cite{mcintoshIndexDiversityRelation1967}. These measures describe different distributional properties; none alone determines what an analyst will find useful. MDI's diversity component $D(t,q)$ combines distributional evidence from the session, while a broader model could learn which properties matter to the current investigation.
+
+% \noindent \textbf{Temporal interest.}
+% Analytical goals may persist, evolve, or be abandoned over the course of a session. Frequent-episode mining~\cite{mannila1997discovery} offers a basis for representing recurring event patterns, motivating attention to the order and proximity of analytical actions. For interest inference, the challenge is to distinguish a persistent investigation thread from repeated exposure caused by query structure. MDI provides a limited instantiation through temporally weighted association evidence: recently reinforced patterns retain influence, while evidence not revisited fades.
+
+% \noindent \textbf{Compositional interest.}
+% Analysts may investigate natural groupings or contrasts between sub-populations defined by combinations of attributes. A combination can matter even when its individual values are common, so compositional evidence requires attention to joint structure rather than rarity alone. The inverse-frequency principle~\cite{sparckjones1972statistical} motivates MDI's novelty component $N(t,q)$, which rewards under-represented attribute values. This is only a partial treatment of compositional interest; modelling meaningful combinations and contrasts requires richer evidence.
+
+% These four dimensions need not be instantiated exactly as in MDI, nor are they independent: a structural relationship may become relevant because it persists over time or distinguishes a particular sub-population. Table~\ref{tab:dimensions} summarises possible cues and competing explanations. The objective is to infer their significance from the evolving session, not to equate a high statistical score with analytical interest.
+
+% \begin{table*}[t]
+% \caption{Possible evidence for analytical interest. Each dimension admits competing explanations. MDI implements only parts of this design space.}
+% \label{tab:dimensions}
+% \small
+% \begin{tabularx}{\textwidth}{@{}p{0.12\textwidth}XXX@{}}
+% \toprule
+% Dimension & Candidate evidence in the shipment example & Confounding explanation & Illustrative MDI mechanism \\
+% \midrule
+% Structural & Repeated exploration of a relation between category and priority & The relation is common in every returned result & Association evidence $A(t,q)$ from session rules \\
+% Distributional & Revisiting an unusual price or an uneven distribution & Global rarity has no bearing on the investigation & Diversity evidence $D(t,q)$ from distributional summaries \\
+% Temporal & An investigation thread persists, fades, or changes & Predicate nesting repeatedly exposes the same data & Temporal weighting, primarily within $A(t,q)$ \\
+% Compositional & Contrasts between combinations of region, category, and transport & A rare combination is incidental or an encoding artefact & Attribute-value novelty $N(t,q)$; only a partial treatment of combinations \\
+% \bottomrule
+% \end{tabularx}
+% \end{table*}
+
+% Information-foraging theory offers a useful motivation: an analyst's successive choices may provide evidence of perceived value~\cite{pirolli2005information}. It does not entail that every returned tuple is interesting. A query is a choice of an operation under constraints, and its output contains both sought and incidental data. In the running example, repeatedly investigating technology shipments may strengthen an association hypothesis, while recurring background shipments should not automatically receive the same interpretation.
+
+% This distinction suggests a system architecture with three responsibilities (Figure~\ref{fig:architecture}). An observation layer records what the analyst could encounter and what operations produced it. A model maintains competing explanations of the session. A scoring layer applies that evidence to current candidates, ideally exposing its basis and uncertainty. Keeping these responsibilities explicit makes it possible to change an interface or a ranking model without changing the meaning of the evidence being collected.
+
+% \begin{figure}[t]
+% \centering
+% \begin{tikzpicture}[node distance=3mm,box/.style={draw,rounded corners,align=center,text width=.87\columnwidth,inner sep=5pt,font=\small},>=Stealth]
+% \node[box] (obs) {Observe queries and results\\Record exposure and operation context};
+% \node[box,below=of obs] (model) {Maintain session hypotheses\\Combine evidence; represent ambiguity and change};
+% \node[box,below=of model] (score) {Score data in the current result\\Return ranking, evidence, and uncertainty};
+% \draw[->] (obs)--(model); \draw[->] (model)--(score);
+% \end{tikzpicture}
+% \caption{Proposed capability boundary. Recommendation interfaces are downstream consumers. MDI instantiates a restricted scoring model and does not yet estimate uncertainty or model exposure explicitly.}
+% \Description{Three vertically connected stages: observe queries and results, maintain session hypotheses, and score data in the current result.}
+% \label{fig:architecture}
+% \end{figure}
+
+% Preserving analytical flow motivates inferring from ordinary exploration rather than repeatedly eliciting relevance judgements. Whether this actually reduces burden is an empirical question. An inaccurate, distracting, or overconfident recommendation can impose its own cost. Explicit feedback also remains valuable when ambiguity cannot be resolved from observed behaviour.
+
+% ===== End previous draft: Section 3, Analytical Interest as an Inference Problem =====
+
+%=============================================================================
+\section{Positioning}
 \label{sec:related}
-\textbf{Explicit feedback and active learning.}
-AIDE uses active learning to acquire relevance labels on selected samples~\cite{dimitriadouAIDEActiveLearningBased2016}. DEXPLORER learns desired tuples and their ranking from labels and pairwise preferences~\cite{qinRankingDesiredTuples2021}. These approaches can model personal interests, but require analysts to supply judgements in addition to exploring the data. We argue that implicit signals reflect analysts actual behaviour \cite{kelly2003implicit}, can better encode temporal structure \cite{koren2009collaborative}, and preserve cognitive flow by avoiding context switching \cite{monsell2003task, rubinstein2001executive}.
+%=============================================================================
+
+Table~\ref{tab:positioning} compares representative work against the four principles and against whether the target is a destination rather than a next step or the current step.
+
+\begin{table}[t]
+\caption{Representative work against the four principles and the destination target. Impl.: implicit; Traj.: trajectory-conditioned; Plur.: plural interest; Dest.: destination target; Bench.: reproducible benchmark. \yes: yes, \partly: partly, \no: no.}
+\label{tab:positioning}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+ & Impl. & Traj. & Plur. & Dest. & Bench. \\
+\midrule
+AIDE, DEXPLORER~\cite{dimitriadouAIDEActiveLearningBased2016,qinRankingDesiredTuples2021} & \no & \partly & \no & \partly & \no \\
+YMALDB~\cite{drosouYmaldbExploringRelational2013} & \yes & \no & \no & \no & \no \\
+SeeDB, Voyager~\cite{vartakSeedbEfficientDatadriven2015,wongsuphasawat2016voyager} & \yes & \no & \partly & \no & \no \\
+FEDEX~\cite{deutchFEDEXExplainabilityFramework2022} & \yes & \no & \yes & \no & \no \\
+Milo et al.~\cite{somechPredictingWhatInteresting2019} & \yes & \yes & \yes & \no & \partly \\
+QueRIE, ExplorAct~\cite{eirinakiQuerieCollaborativeDatabase2013,dezoysa2025exploract} & \yes & \yes & \no & \no & \partly \\
+IDEBench, SIMBA~\cite{eichmannIDEBenchBenchmarkInteractive2020,purichAdaptiveBenchmarkModeling2025} & -- & -- & -- & \partly & \yes \\
+\midrule
+This vision & \yes & \yes & \yes & \yes & \yes \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Implicit or explicit.}
+AIDE uses active learning to acquire relevance labels on selected samples~\cite{dimitriadouAIDEActiveLearningBased2016}, and DEXPLORER learns desired tuples and their ranking from labels and pairwise preferences~\cite{qinRankingDesiredTuples2021}. Both learn a target region, which is a destination judged by extension, but only by asking. Many systems already recommend without feedback. YMALDB uses frequent attribute sets to suggest related tuples~\cite{drosouYmaldbExploringRelational2013}. SeeDB ranks visualisations by deviation from a reference~\cite{vartakSeedbEfficientDatadriven2015}, and Voyager combines statistical and perceptual criteria~\cite{wongsuphasawat2016voyager}. Removing feedback is therefore not new. What these systems lack is a model of where the analyst is going.
+
+\textbf{Per-step or trajectory.}
+FEDEX explains why a single step is interesting. By default it applies exceptionality to filters, joins, and unions and diversity to group-bys, and it also accepts user-defined measures. It then identifies the sets of rows that contribute most to the step's interestingness~\cite{deutchFEDEXExplainabilityFramework2022}. It is implicit and supports several measures, but its output depends only on the last step's input and output. The two analysts in Figure~\ref{fig:example} receive the same explanation. Per-step interestingness is best seen as \emph{evidence} that a destination-aware system accumulates over a trajectory. Milo et al.\ predict which interestingness measure suits a step from session context~\cite{somechPredictingWhatInteresting2019}, and Chanson et al.\ infer user beliefs from past interactions and other users' activity~\cite{chanson2019belief}. Both condition on history, but they score the current step rather than anticipating a destination.
+
+\textbf{Next step or destination.}
+QueRIE recommends queries using collaborative evidence from tuple or query-fragment profiles~\cite{eirinakiQuerieCollaborativeDatabase2013}, and ExplorAct predicts the next action type and column from exploration histories~\cite{dezoysa2025exploract}. Query Steering proposed navigation guided by user interests and interaction histories~\cite{ugurcetintemelQuerySteeringInteractive2013}. ATENA generates whole exploration sessions with reinforcement learning~\cite{barelAutomaticallyGeneratingData2020}, which is a different problem from forecasting a particular analyst's destination from a prefix. A next action may be an intermediate comparison, a data-quality check, or an attempt to reject a hypothesis. Predicting it accurately does not show that a model knows where the analyst is heading, although its representations could inform a model that does.
+
+\textbf{Implicit recommendation.}
+The recommender-systems literature shows that useful signals can be extracted from ordinary behaviour through confidence-weighted factorisation~\cite{hu2008collaborative}, pairwise ranking~\cite{rendle2009bpr}, temporal dynamics~\cite{koren2009collaborative}, and session-based models~\cite{hidasi2016session}. It also separates exposure from preference~\cite{liang2016exposure,lin2024recrec} and models changing intent~\cite{wang2018modeling}. In visual analytics, Follow The Clicks and Semantic Interaction show that analytical interactions can drive adaptive models~\cite{ottley2019clicks,endert2012semantic}. These are natural building blocks. EDA adds structure that recommendation lacks, because a query selects a set and its result reveals why rows were available. It also adds a target, the destination, that is neither the next item nor a static preference.
+
+\textbf{Benchmarks.}
+IDEBench evaluates database performance under interactive exploration workloads~\cite{eichmannIDEBenchBenchmarkInteractive2020}. SIMBA simulates goal-driven sessions and measures goal completion~\cite{purichAdaptiveBenchmarkModeling2025}, so its goal queries supply realistic destinations judged by extension. Operational logs such as SkyServer~\cite{raddickTenYearsSkyserver2014} are dominated by short, templated sessions and lack goal annotations. None of these benchmarks varies the kind of destination, the ambiguity of the trajectory, or whether it switches, which is what Section~\ref{sec:first-step} adds.
+
+% ===== Previous draft: Section 2, Related Work (kept for reference) =====
+%=============================================================================
+% \section{Related Work}
+
+% The database community has developed interactive exploration systems that enable users to navigate large datasets through visual interfaces, query-by-example paradigms and other novel interaction models. However many works that model a users interest over time rely on explicit feedback, example validation, or active learning. These mechanisms interrupt cognitive flow and capture only a limited view of analyst interest. Other systems that model interest implicitly are often not historically conditioned and do not evaluate whether the model anticipates future analytical relevance. 
+
+% \label{sec:related}
+% \textbf{Explicit feedback and active learning.}
+% AIDE uses active learning to acquire relevance labels on selected samples~\cite{dimitriadouAIDEActiveLearningBased2016}. DEXPLORER learns desired tuples and their ranking from labels and pairwise preferences~\cite{qinRankingDesiredTuples2021}. These approaches can model personal interests, but require analysts to supply judgements in addition to exploring the data. We argue that implicit signals reflect analysts actual behaviour \cite{kelly2003implicit}, can better encode temporal structure \cite{koren2009collaborative}, and preserve cognitive flow by avoiding context switching \cite{monsell2003task, rubinstein2001executive}.
 
 % \vspace{-0.5em}
 % \subsection{Implicit Signals as an Alternative}
@@ -168,35 +409,35 @@ AIDE uses active learning to acquire relevance labels on selected samples~\cite{
 % In this paper, we operationalise implicit interest using structural signals readily available in database logs: sequences of queries and the overlap of their result sets. This is a conservative first step that enables us to study methodological challenges in a setting where ground-truth can be controlled. Future work can extend this to additional behavioural traces from visual front-ends (e.g., clicks, hovers, dwell times).
 
 
-\textbf{Implicit data and visualisation recommendation}
+% \textbf{Implicit data and visualisation recommendation}
 
-SeeDB ranks visualisations using deviation from a reference dataset~\cite{vartakSeedbEfficientDatadriven2015} implicitly in relation to a user query. Similarly, Voyager combines statistical and perceptual criteria with interactive browsing~\cite{wongsuphasawat2016voyager} however they both only utilise a singular notion of interest when deciding what to reccomend despite empriacle studies showing no single interestingness measure consistently predicts what analysts find interesting across domains and tasks~\cite{somechPredictingWhatInteresting2019}. YMALDB \cite{drosouYmaldbExploringRelational2013} is similar in that it uses only frequent attribute sets to reccomend related tuples outside a query result.  FEDEX improves on this by identifies rows contributing to result-level diversity or exceptionality~\cite{deutchFEDEXExplainabilityFramework2022} with respect to many possible interestingness measures. Both FEDEX and YMALDB identify useful candidates without requiring a relevance label for each one. Their statistical or presentation criteria, however, do not by themselves establish which candidates will matter to a particular analyst later in a session. The gap is learning an evolving interpretation of those criteria from behaviour, rather than simply adding more measures.
+% SeeDB ranks visualisations using deviation from a reference dataset~\cite{vartakSeedbEfficientDatadriven2015} implicitly in relation to a user query. Similarly, Voyager combines statistical and perceptual criteria with interactive browsing~\cite{wongsuphasawat2016voyager} however they both only utilise a singular notion of interest when deciding what to reccomend despite empriacle studies showing no single interestingness measure consistently predicts what analysts find interesting across domains and tasks~\cite{somechPredictingWhatInteresting2019}. YMALDB \cite{drosouYmaldbExploringRelational2013} is similar in that it uses only frequent attribute sets to reccomend related tuples outside a query result.  FEDEX improves on this by identifies rows contributing to result-level diversity or exceptionality~\cite{deutchFEDEXExplainabilityFramework2022} with respect to many possible interestingness measures. Both FEDEX and YMALDB identify useful candidates without requiring a relevance label for each one. Their statistical or presentation criteria, however, do not by themselves establish which candidates will matter to a particular analyst later in a session. The gap is learning an evolving interpretation of those criteria from behaviour, rather than simply adding more measures.
 
-\textbf{History-aware recommendation and longer-horizon interest}
-Using exploration history to recommend a likely next action does not, by itself, establish a model of the analytical interests underlying that action. Query Steering proposed navigation informed by user interests and interaction histories~\cite{ugurcetintemelQuerySteeringInteractive2013}. QueRIE uses collaborative evidence from tuple or query-fragment profiles to recommend queries~\cite{eirinakiQuerieCollaborativeDatabase2013}, while ExplorAct models exploration histories to predict the next action type and column~\cite{dezoysa2025exploract}. These approaches provide valuable context-sensitive assistance. Nevertheless, an immediate action may be an intermediate comparison, a check of data quality, or an attempt to reject a hypothesis, rather than a direct expression of the analyst's underlying interest. The same action can serve several investigative goals, and the same goal can be pursued through different sequences of actions. Moreover, those goals may emerge or change as exploration proceeds.
+% \textbf{History-aware recommendation and longer-horizon interest}
+% Using exploration history to recommend a likely next action does not, by itself, establish a model of the analytical interests underlying that action. Query Steering proposed navigation informed by user interests and interaction histories~\cite{ugurcetintemelQuerySteeringInteractive2013}. QueRIE uses collaborative evidence from tuple or query-fragment profiles to recommend queries~\cite{eirinakiQuerieCollaborativeDatabase2013}, while ExplorAct models exploration histories to predict the next action type and column~\cite{dezoysa2025exploract}. These approaches provide valuable context-sensitive assistance. Nevertheless, an immediate action may be an intermediate comparison, a check of data quality, or an attempt to reject a hypothesis, rather than a direct expression of the analyst's underlying interest. The same action can serve several investigative goals, and the same goal can be pursued through different sequences of actions. Moreover, those goals may emerge or change as exploration proceeds.
 
-Our vision is to maintain and update hypotheses about these possible directions, using temporal evidence to anticipate which data or patterns could become relevant several steps ahead. Next-action prediction can contribute to such a model, but accuracy on that task alone does not demonstrate that it captures long term analytical interest. 
+% Our vision is to maintain and update hypotheses about these possible directions, using temporal evidence to anticipate which data or patterns could become relevant several steps ahead. Next-action prediction can contribute to such a model, but accuracy on that task alone does not demonstrate that it captures long term analytical interest. 
 
 % idk about this one
 % The distinction is between anticipating the analyst's next observable action and modelling the evolving purposes that may make future data useful. Whether acting on those longer-horizon predictions accelerates insight discovery remains a separate question for human validation.
 
-\textbf{Subjective-interest modelling and sequence generation}
+% \textbf{Subjective-interest modelling and sequence generation}
 
-There are several lines of work on subjective-interest modelling and sequence generation. Two broad approaches are using session logs to predict suitable interestingness measures \cite{somechPredictingWhatInteresting2019} and inferring beliefs from BI interactions, schema structure, and other users' activity \cite{chanson2019belief}. The EDA interestingness survey further distinguishes several qualities of useful insights \cite{chansonInterestingnessMeasuresExploratory2025a}. However these works focus on explaining or scoring the current step, rather than anticipating later analytical relevance. ATENA generates exploration sessions with deep reinforcement learning \cite{barelAutomaticallyGeneratingData2020}, but generating a useful sequence from a dataset differs from forecasting a particular analyst's evolving interests from an observed session prefix. 
+% There are several lines of work on subjective-interest modelling and sequence generation. Two broad approaches are using session logs to predict suitable interestingness measures \cite{somechPredictingWhatInteresting2019} and inferring beliefs from BI interactions, schema structure, and other users' activity \cite{chanson2019belief}. The EDA interestingness survey further distinguishes several qualities of useful insights \cite{chansonInterestingnessMeasuresExploratory2025a}. However these works focus on explaining or scoring the current step, rather than anticipating later analytical relevance. ATENA generates exploration sessions with deep reinforcement learning \cite{barelAutomaticallyGeneratingData2020}, but generating a useful sequence from a dataset differs from forecasting a particular analyst's evolving interests from an observed session prefix. 
 
 
-\textbf{Implicit recommendation and temporal modelling}
-Prior work on implicit factorisation and ranking methods, temporal recommendation, and session-based recommendation demonstrates that useful signals can be extracted from ordinary behaviour~\cite{hu2008collaborative,rendle2009bpr,koren2009collaborative,hidasi2016session}. Follow The Clicks and Semantic Interaction show how analytical interactions can inform adaptive models~\cite{ottley2019clicks,endert2012semantic}. However, these works do not address the ambiguity of what those signals imply about future analytical relevance. ExpoMF and ReCRec explicitly model exposure~\cite{liang2016exposure,lin2024recrec}, and dynamic-missingness models distinguish changing intent from static preferences~\cite{wang2018modeling}. In EDA, query semantics reveal why a set was available, but not which rows were inspected or why. Extending such evidence across multiple future steps requires accounting for this ambiguity and reporting uncertainty.
+% \textbf{Implicit recommendation and temporal modelling}
+% Prior work on implicit factorisation and ranking methods, temporal recommendation, and session-based recommendation demonstrates that useful signals can be extracted from ordinary behaviour~\cite{hu2008collaborative,rendle2009bpr,koren2009collaborative,hidasi2016session}. Follow The Clicks and Semantic Interaction show how analytical interactions can inform adaptive models~\cite{ottley2019clicks,endert2012semantic}. However, these works do not address the ambiguity of what those signals imply about future analytical relevance. ExpoMF and ReCRec explicitly model exposure~\cite{liang2016exposure,lin2024recrec}, and dynamic-missingness models distinguish changing intent from static preferences~\cite{wang2018modeling}. In EDA, query semantics reveal why a set was available, but not which rows were inspected or why. Extending such evidence across multiple future steps requires accounting for this ambiguity and reporting uncertainty.
 
-\textbf{Benchmarks and evaluation.}
+% \textbf{Benchmarks and evaluation.}
 
-Evaluations of exploration assistance differ in both their evidence and their prediction targets. Human studies can assess usefulness and task performance, but an open underlying dataset alone does not provide a reusable benchmark: reproducing the evaluation also requires the tasks, interaction histories, and relevant judgements. Purpose-built tasks and synthetic targets permit controlled comparisons, although their conclusions depend on the particular preferences, patterns, and behaviours represented. Recorded-session benchmarks offer a complementary approach. For example, ExplorAct evaluates next-action recommendation using the REACT benchmark~\cite{dezoysa2025exploract}. Such reuse supports comparison across methods, but agreement with an observed next action does not by itself establish recovery of the analyst's underlying interests.
+% Evaluations of exploration assistance differ in both their evidence and their prediction targets. Human studies can assess usefulness and task performance, but an open underlying dataset alone does not provide a reusable benchmark: reproducing the evaluation also requires the tasks, interaction histories, and relevant judgements. Purpose-built tasks and synthetic targets permit controlled comparisons, although their conclusions depend on the particular preferences, patterns, and behaviours represented. Recorded-session benchmarks offer a complementary approach. For example, ExplorAct evaluates next-action recommendation using the REACT benchmark~\cite{dezoysa2025exploract}. Such reuse supports comparison across methods, but agreement with an observed next action does not by itself establish recovery of the analyst's underlying interests.
 
-Operational SQL logs, such as SkyServer~\cite{raddickTenYearsSkyserver2014} from the Sloan Digital Sky Survey (SDSS) \cite{york_sloan_2000}, provide naturally occurring database interactions, but require careful selection and interpretation. In our experience SDSS is dominated by point lookup and templated queries many of which are not exploratory. The resulting sessions are often short, highly repetitive, and dominated by a few common queries. This makes them unsuitable for evaluating interest modelling, which requires longer sessions with more diverse investigative threads.
+% Operational SQL logs, such as SkyServer~\cite{raddickTenYearsSkyserver2014} from the Sloan Digital Sky Survey (SDSS) \cite{york_sloan_2000}, provide naturally occurring database interactions, but require careful selection and interpretation. In our experience SDSS is dominated by point lookup and templated queries many of which are not exploratory. The resulting sessions are often short, highly repetitive, and dominated by a few common queries. This makes them unsuitable for evaluating interest modelling, which requires longer sessions with more diverse investigative threads.
 
-IDEBench and SIMBA provide more controlled, reusable foundations for evaluating database systems under exploratory workloads~\cite{eichmannIDEBenchBenchmarkInteractive2020,purichAdaptiveBenchmarkModeling2025}. But for the purposes of evaluating analytical interest, IDEBench make it difficult to specifiy the goal of the workload and whilst SIMBA does specify a goal, it does not provide a way to control the investigative threads that lead to that goal. 
+% IDEBench and SIMBA provide more controlled, reusable foundations for evaluating database systems under exploratory workloads~\cite{eichmannIDEBenchBenchmarkInteractive2020,purichAdaptiveBenchmarkModeling2025}. But for the purposes of evaluating analytical interest, IDEBench make it difficult to specifiy the goal of the workload and whilst SIMBA does specify a goal, it does not provide a way to control the investigative threads that lead to that goal. 
 
-We therefore advocate extending workload-based evaluation with controlled, history-conditioned pattern-recovery tests. A benchmark can embed known patterns and identify their associated tuples, then vary the preceding actions to provide evidence for different investigative targets while holding the current candidates fixed. Such tests assess whether a model recovers the stipulated target from session evidence rather than merely detecting globally conspicuous patterns. Our illustrative benchmark takes a step towards this evaluation programme. Its targets provide controlled ground truth for recovery, not proof of human interest. 
+% We therefore advocate extending workload-based evaluation with controlled, history-conditioned pattern-recovery tests. A benchmark can embed known patterns and identify their associated tuples, then vary the preceding actions to provide evidence for different investigative targets while holding the current candidates fixed. Such tests assess whether a model recovers the stipulated target from session evidence rather than merely detecting globally conspicuous patterns. Our illustrative benchmark takes a step towards this evaluation programme. Its targets provide controlled ground truth for recovery, not proof of human interest. 
 
 %DA Not sure if we need to mention the inevitabilty of human validation here, but it is worth noting that the ultimate goal is to accelerate insight discovery, which requires human validation.
 % Validation with analysts remains necessary to establish whether the resulting assistance accelerates insight discovery.
@@ -315,185 +556,178 @@ We therefore advocate extending workload-based evaluation with controlled, histo
 
 
 %=============================================================================
-% SECTION 3: Analytical Interest as an Inference Problem
-%=============================================================================
+% ===== End previous draft: Section 2, Related Work =====
 
-\section{Analytical Interest as an Inference Problem}
-\label{sec:interest}
-\subsection{Scope and interface}
-Let $R_q$ be the result available at exploration step $q$, and let
-$\mathcal H_q=((Q_0,R_0),\ldots,(Q_{q-1},R_{q-1}))$ describe preceding queries and results in the session. We seek a scoring function
-\begin{equation}
-  s_q(t)=f(t,R_q,Q_q,\mathcal H_q),\qquad t\in R_q.
-  \label{eq:interest}
-\end{equation}
-Its output is a relative ranking of candidate tuples. Scores need not be probabilities, and a system should be able to report insufficient evidence. The current result may contain data not previously encountered, but searching beyond that result is outside our scope. Optional inspection traces can enrich $\mathcal H_q$ when an interface records them. The illustrative implementation below uses result histories only, so it cannot distinguish all behaviours expressible by this interface.
-
-We use \emph{analytical interest} to mean the potential value of data to the analyst's evolving investigation. It is a latent, contextual construct. This differs from \emph{statistical interestingness}, which assigns value according to a specified property such as deviation or association strength. It also differs from \emph{exposure}: a row's presence in a result does not show that the analyst inspected it. A successful model must connect statistical evidence to a session while acknowledging that this connection can be wrong.
-
-The initial setting is a single analyst exploring one tabular dataset through filters, comparisons, and revisits. The minimum input regime requires no reusable corpus of other users' sessions. Such a corpus, when available, can supply learned priors or collaborative evidence; a single active analyst does not preclude a pretrained model. Query results must provide stable entity identities if tuple recurrence is measured. Aggregation, joins that change entity granularity, and incomplete logs require additional semantics. The controlled sessions in Section~\ref{sec:illustration} are stipulated sequences, not estimates of natural session length.
-
-\subsection{Four Dimensions of Analytical Interest}
-\label{sec:interest:dimensions}
-Drawing on Hilderman and Hamilton's treatment of interestingness measures~\cite{robertj.hildermanKnowledgeDiscoveryMeasures2001}, we organise evidence for analytical interest along four dimensions: structural, distributional, temporal, and compositional. These dimensions define a design space for implicit-interest models, rather than a fixed taxonomy of analyst goals. They complement the qualities of interestingness identified by Chanson et al., including peculiarity, novelty, relevance, surprise, diversity, and presentation~\cite{chansonInterestingnessMeasuresExploratory2025a}: temporal evidence, for example, can inform both relevance and novelty.
-
-\noindent \textbf{Structural interest.}
-This dimension captures relationships between variables, including correlations, associations, and dependency structures. Association-rule measures such as support, confidence, lift, and the J-measure~\cite{goodman1991rule} provide candidate evidence about these relationships. Repeated investigation of a relationship may suggest that it matters to the analyst, but its statistical strength alone does not establish its relevance to the investigation. MDI's association component $A(t,q)$ illustrates how rule evidence can be accumulated over a session.
-
-\noindent \textbf{Distributional interest.}
-This dimension captures anomalies, uneven distributions, and contrasts in the diversity of observed values. Candidate measures include Shannon entropy~\cite{shannon1948mathematical}, Simpson concentration, the Gini coefficient~\cite{gini1921measurement}, Berger--Parker dominance~\cite{bergerDiversityPlanktonicForaminifera1970}, and McIntosh diversity~\cite{mcintoshIndexDiversityRelation1967}. These measures describe different distributional properties; none alone determines what an analyst will find useful. MDI's diversity component $D(t,q)$ combines distributional evidence from the session, while a broader model could learn which properties matter to the current investigation.
-
-\noindent \textbf{Temporal interest.}
-Analytical goals may persist, evolve, or be abandoned over the course of a session. Frequent-episode mining~\cite{mannila1997discovery} offers a basis for representing recurring event patterns, motivating attention to the order and proximity of analytical actions. For interest inference, the challenge is to distinguish a persistent investigation thread from repeated exposure caused by query structure. MDI provides a limited instantiation through temporally weighted association evidence: recently reinforced patterns retain influence, while evidence not revisited fades.
-
-\noindent \textbf{Compositional interest.}
-Analysts may investigate natural groupings or contrasts between sub-populations defined by combinations of attributes. A combination can matter even when its individual values are common, so compositional evidence requires attention to joint structure rather than rarity alone. The inverse-frequency principle~\cite{sparckjones1972statistical} motivates MDI's novelty component $N(t,q)$, which rewards under-represented attribute values. This is only a partial treatment of compositional interest; modelling meaningful combinations and contrasts requires richer evidence.
-
-These four dimensions need not be instantiated exactly as in MDI, nor are they independent: a structural relationship may become relevant because it persists over time or distinguishes a particular sub-population. Table~\ref{tab:dimensions} summarises possible cues and competing explanations. The objective is to infer their significance from the evolving session, not to equate a high statistical score with analytical interest.
-
-\begin{table*}[t]
-\caption{Possible evidence for analytical interest. Each dimension admits competing explanations. MDI implements only parts of this design space.}
-\label{tab:dimensions}
-\small
-\begin{tabularx}{\textwidth}{@{}p{0.12\textwidth}XXX@{}}
-\toprule
-Dimension & Candidate evidence in the shipment example & Confounding explanation & Illustrative MDI mechanism \\
-\midrule
-Structural & Repeated exploration of a relation between category and priority & The relation is common in every returned result & Association evidence $A(t,q)$ from session rules \\
-Distributional & Revisiting an unusual price or an uneven distribution & Global rarity has no bearing on the investigation & Diversity evidence $D(t,q)$ from distributional summaries \\
-Temporal & An investigation thread persists, fades, or changes & Predicate nesting repeatedly exposes the same data & Temporal weighting, primarily within $A(t,q)$ \\
-Compositional & Contrasts between combinations of region, category, and transport & A rare combination is incidental or an encoding artefact & Attribute-value novelty $N(t,q)$; only a partial treatment of combinations \\
-\bottomrule
-\end{tabularx}
-\end{table*}
-
-Information-foraging theory offers a useful motivation: an analyst's successive choices may provide evidence of perceived value~\cite{pirolli2005information}. It does not entail that every returned tuple is interesting. A query is a choice of an operation under constraints, and its output contains both sought and incidental data. In the running example, repeatedly investigating technology shipments may strengthen an association hypothesis, while recurring background shipments should not automatically receive the same interpretation.
-
-This distinction suggests a system architecture with three responsibilities (Figure~\ref{fig:architecture}). An observation layer records what the analyst could encounter and what operations produced it. A model maintains competing explanations of the session. A scoring layer applies that evidence to current candidates, ideally exposing its basis and uncertainty. Keeping these responsibilities explicit makes it possible to change an interface or a ranking model without changing the meaning of the evidence being collected.
-
-\begin{figure}[t]
-\centering
-\begin{tikzpicture}[node distance=3mm,box/.style={draw,rounded corners,align=center,text width=.87\columnwidth,inner sep=5pt,font=\small},>=Stealth]
-\node[box] (obs) {Observe queries and results\\Record exposure and operation context};
-\node[box,below=of obs] (model) {Maintain session hypotheses\\Combine evidence; represent ambiguity and change};
-\node[box,below=of model] (score) {Score data in the current result\\Return ranking, evidence, and uncertainty};
-\draw[->] (obs)--(model); \draw[->] (model)--(score);
-\end{tikzpicture}
-\caption{Proposed capability boundary. Recommendation interfaces are downstream consumers. MDI instantiates a restricted scoring model and does not yet estimate uncertainty or model exposure explicitly.}
-\Description{Three vertically connected stages: observe queries and results, maintain session hypotheses, and score data in the current result.}
-\label{fig:architecture}
-\end{figure}
-
-Preserving analytical flow motivates inferring from ordinary exploration rather than repeatedly eliciting relevance judgements. Whether this actually reduces burden is an empirical question. An inaccurate, distracting, or overconfident recommendation can impose its own cost. Explicit feedback also remains valuable when ambiguity cannot be resolved from observed behaviour.
-
+% ===== Previous draft: Section 4, workload theory input (kept for reference) =====
 %=============================================================================
 % SECTION 4: 
 %=============================================================================
-\input{workload_theory_v4}
+% \input{workload_theory_v4}
 
+% ===== End previous draft: Section 4, workload theory input =====
+
+%=============================================================================
+\section{A First Step: Recovering Planted Destinations}
+\label{sec:first-step}
+%=============================================================================
+
+We illustrate the principles with a destination benchmark and a simple scorer. The aim is to show what the benchmark reveals, not to propose a final model.
+
+\textbf{Benchmark.}
+A seeded table of 12,000 shipments has categorical region, category, priority, transport mode, and sales channel attributes and a numeric price. We plant six destinations, two of each kind in Table~\ref{tab:kinds}, each in its own region$\times$category context. Within a context, urgency is raised (structural), a quarter of prices are inflated four-fold (distributional), or transport mode determines priority while leaving the priority marginal unchanged (compositional). Extensions are defined from observable values. The two destinations of a kind share a region, so early region-level steps fit both. A trajectory is eight selection queries, each capped at 200 rows. It moves from the region to the destination's context, to the pattern, and then to revisits that add incidental channel filters. \emph{Ambiguous} trajectories delay the distinguishing category step until step six. \emph{Detours} insert steps towards the competing destination, and \emph{switches} change destination after step four. \emph{Null} trajectories never reveal the distinguishing attribute. After every step, a copy of each model ranks a shared 100-row result containing both destinations' extensions, in-context non-matching rows, and background. The copy is discarded, so probes never enter the history. The paired directions see an identical result, which is the litmus test of Figure~\ref{fig:example}. By default these evaluation rows never appear in the trajectory, so success requires transferring evidence rather than recognising rows already seen. We report precision@10, for which chance is about .15. We also report a paired \emph{earliness}: the first step from which, for both directions, precision is at least twice chance and exceeds precision on the competing destination. A model that ranks identically regardless of history can never qualify.
+
+\textbf{MDI.}
+Multi-Dimensional Interestingness (MDI) scores each tuple by three components accumulated over the session with exponential decay. The \emph{association} component sums matching association rules mined from each result, weighted by confidence, support, lift, and leverage. The \emph{distributional} component weights each attribute by how concentrated its session distribution has become, using Shannon evenness and the Simpson, Gini, Berger--Parker, and McIntosh measures. It then scores a tuple by the session share of its values. The \emph{novelty} component rewards under-represented values. MDI reads only results, never queries, so it is agnostic to the query language. The benchmark exposed three flaws in the version of MDI we originally described: its components were on incomparable scales, so association rules dominated; its summary-based distributional component was constant across rows; and equal-width bins hid heavy tails. The revised MDI rank-normalises each component, scores distributions at the attribute level, and uses equal-frequency bins, with weights .4/.4/.2. We designed these changes on development seeds and report ten held-out seeds. We compare against the original MDI, association rules alone, MDI without history, tuple recurrence, random selection, and a query-aware \emph{predicate match} reference that scores rows by the decayed predicates the analyst used.
+
+\begin{table}[t]
+\caption{Precision@10 after eight steps on held-out seeds (chance ${\approx}.15$). Amb: ambiguous; Det: detour; Sw: after a switch. $^\dagger$Reads queries; all other methods read only results.}
+\label{tab:results}
+\small
+\setlength{\tabcolsep}{2.6pt}
+\input{results/paper_table}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{results/paper_switch.pdf}
+\caption{Precision@10 on switch trajectories. The destination changes after step four (vertical line). The dotted line marks chance.}
+\Description{Three panels, one per destination kind. Revised MDI rises at step two, drops to zero after the switch, and recovers to above 0.9 by step eight; original MDI stays near zero for the distributional kind.}
+\label{fig:switch}
+\end{figure}
+
+\textbf{What the benchmark shows.}
+\emph{Destinations can be anticipated, and only when the evidence allows.} On clear trajectories, revised MDI reaches paired earliness at step two for every kind. That is the step that reveals the context, one step before the analyst filters for the pattern. On ambiguous trajectories it reaches it at about step six, the first step that distinguishes the destinations. MDI without history never qualifies, and neither does any method on null trajectories. Tuple recurrence stays at chance, confirming that recognising previously seen rows does not recover destinations.
+\emph{Plural interest matters in practice.} The original MDI is blind to distributional destinations (Table~\ref{tab:results}): its precision there is .01 to .14. The combined score now differs from association rules alone. It adapts much better after a switch (Figure~\ref{fig:switch}), reaching .93 to .98 against .73 to .79. On compositional destinations, however, association alone is better on clear trajectories (.95 against .82). No fixed combination is best for every kind.
+\emph{Persistence is the hard part of trajectory conditioning.} We tried adding a signal for values that a step narrows towards. It made results worse, especially after switches (structural .47), because it follows incidental filters as readily as persistent ones. Detours remain unsolved: on compositional detours every method, including the query-aware reference, stays near .55.
+\emph{Results alone carry most of the signal.} The query-aware reference recovers distributional destinations slightly better (1.00 against .89 to .93). On ambiguous trajectories, though, it is worse than revised MDI (.71 against 1.00 for structural), because it follows every predicate equally.
+
+\textbf{Limits.}
+The trajectories are scripted selection sequences and the destinations are planted. The benchmark tests capabilities; it does not show that these destinations are what real analysts pursue, or that surfacing them helps. In-context rows that do not match make up 40\% of each context in the evaluation result, so recognising the context alone yields precision near .6. Values near 1.0 therefore reflect pattern recovery, while intermediate values are harder to interpret. The generator, models, per-session predictions, and complete results, including all conditions, budgets, and ablations, are in the accompanying artifact. They are reproducible from seeds without a database.
+
+% ===== Previous draft: Section 5, An Illustrative Model and Evaluation (kept for reference) =====
 
 %=============================================================================
 % SECTION 5: MDI - A CONCRETE INSTANTIATION
 %=============================================================================
 % \vspace{-0.5em}
-\section{An Illustrative Model and Evaluation}
-\label{sec:mdi}
-\label{sec:illustration}
-\label{sec:experiments}
+% \section{An Illustrative Model and Evaluation}
+% \label{sec:mdi}
+% \label{sec:illustration}
+% \label{sec:experiments}
 
-We illustrate the separation between candidate suggestion and interest scoring with the simple policy $C_q=R_q$ and the Multi-Dimensional Interestingness (MDI) scorer. This implementation does not attempt database-wide candidate discovery. Instead, it lets us examine how accumulated session evidence influences ranking. We pair an audit of two archived exploration workloads with controlled tests of history-conditioned pattern recovery. These provide complementary evidence, not a single leaderboard or a validation of the full vision.
+% We illustrate the separation between candidate suggestion and interest scoring with the simple policy $C_q=R_q$ and the Multi-Dimensional Interestingness (MDI) scorer. This implementation does not attempt database-wide candidate discovery. Instead, it lets us examine how accumulated session evidence influences ranking. We pair an audit of two archived exploration workloads with controlled tests of history-conditioned pattern recovery. These provide complementary evidence, not a single leaderboard or a validation of the full vision.
 
-\subsection{MDI as an Illustrative Instantiation}
-MDI combines three scores for a candidate tuple $t$:
-\begin{equation}
- s_{\mathrm{MDI}}(t,q)=\alpha A(t,q)+\beta D(t,q)+\gamma N(t,q).
- \label{eq:mdi-score}
-\end{equation}
-The four dimensions from Section~\ref{sec:interest:dimensions} map to this implementation as follows.
+% \subsection{MDI as an Illustrative Instantiation}
+% MDI combines three scores for a candidate tuple $t$:
+% \begin{equation}
+%  s_{\mathrm{MDI}}(t,q)=\alpha A(t,q)+\beta D(t,q)+\gamma N(t,q).
+%  \label{eq:mdi-score}
+% \end{equation}
+% The four dimensions from Section~\ref{sec:interest:dimensions} map to this implementation as follows.
 
-\noindent\textbf{Structural evidence.}
-$A$ accumulates contributions from matching association rules mined in individual query results and retained across the session. Rule contributions combine confidence, support, lift, and absolute leverage, with rule-length normalisation. The implementation uses leverage rather than computing the J-measure discussed as a candidate measure in the design space.
+% \noindent\textbf{Structural evidence.}
+% $A$ accumulates contributions from matching association rules mined in individual query results and retained across the session. Rule contributions combine confidence, support, lift, and absolute leverage, with rule-length normalisation. The implementation uses leverage rather than computing the J-measure discussed as a candidate measure in the design space.
 
-\noindent\textbf{Distributional evidence.}
-$D$ scores tuples using matching summaries. Their contributions are weighted by diversity statistics computed over summary counts, combining Shannon, Simpson, Gini, Berger--Parker, and McIntosh measures. This is a summary-based scoring heuristic, not the marginal increase in diversity obtained by adding a tuple.
+% \noindent\textbf{Distributional evidence.}
+% $D$ scores tuples using matching summaries. Their contributions are weighted by diversity statistics computed over summary counts, combining Shannon, Simpson, Gini, Berger--Parker, and McIntosh measures. This is a summary-based scoring heuristic, not the marginal increase in diversity obtained by adding a tuple.
 
-\noindent\textbf{Temporal evidence.}
-Rule and summary contributions decay exponentially with age. Repeatedly supported patterns can accumulate evidence while older contributions lose influence. This implements recency weighting, not an explicit model of competing goals or an identified change of analytical focus.
+% \noindent\textbf{Temporal evidence.}
+% Rule and summary contributions decay exponentially with age. Repeatedly supported patterns can accumulate evidence while older contributions lose influence. This implements recency weighting, not an explicit model of competing goals or an identified change of analytical focus.
 
-\noindent\textbf{Compositional evidence.}
-$N$ averages inverse log-frequency scores for individual attribute values over observed results. It can promote under-represented values but does not fully capture the novelty of joint attribute combinations. MDI therefore instantiates only part of the compositional dimension.
+% \noindent\textbf{Compositional evidence.}
+% $N$ averages inverse log-frequency scores for individual attribute values over observed results. It can promote under-represented values but does not fully capture the novelty of joint attribute combinations. MDI therefore instantiates only part of the compositional dimension.
 
-We retain illustrative weights $(\alpha,\beta,\gamma)=(.5,.3,.2)$, minimum support $.08$, confidence threshold $.1$, rule decay $.05$, and summary decay $.1$. These are inherited settings, not optimised on the diagnostics. MDI incorporates the current result before scoring, so the comparisons test what accumulated evidence adds beyond current-result structure. Component scales are not calibrated, and neither exposure nor uncertainty is explicitly modelled. The purpose is to expose design questions, including when combining evidence fails to improve ranking.
+% We retain illustrative weights $(\alpha,\beta,\gamma)=(.5,.3,.2)$, minimum support $.08$, confidence threshold $.1$, rule decay $.05$, and summary decay $.1$. These are inherited settings, not optimised on the diagnostics. MDI incorporates the current result before scoring, so the comparisons test what accumulated evidence adds beyond current-result structure. Component scales are not calibrated, and neither exposure nor uncertainty is explicitly modelled. The purpose is to expose design questions, including when combining evidence fails to improve ranking.
 
-\subsection{Workload Opportunities and Limitations}
-\label{sec:workload-audit}
+% \subsection{Workload Opportunities and Limitations}
+% \label{sec:workload-audit}
 
-\textbf{Two sources of exploration workloads.}
-The archived SIMBA-derived sessions originate from generated exploration, while the SkyServer-derived sessions originate from recorded astronomical database usage~\cite{purichAdaptiveBenchmarkModeling2025,raddickTenYearsSkyserver2014}. These sources offer different kinds of context for evaluation. We audit the available gap-$1$ result snapshots to ask a narrower question: how much opportunity do they provide to predict future membership when candidates are restricted to the current result?
+% \textbf{Two sources of exploration workloads.}
+% The archived SIMBA-derived sessions originate from generated exploration, while the SkyServer-derived sessions originate from recorded astronomical database usage~\cite{purichAdaptiveBenchmarkModeling2025,raddickTenYearsSkyserver2014}. These sources offer different kinds of context for evaluation. We audit the available gap-$1$ result snapshots to ask a narrower question: how much opportunity do they provide to predict future membership when candidates are restricted to the current result?
 
-The audit includes one SIMBA-derived session with 14 transitions and seven SkyServer-derived sessions with 608 transitions. These are the available snapshots, not the larger session counts reported in the original experimental draft. Repeated records from different recommenders are deduplicated by session and query pair, checking that their snapshots agree. We compare sets of exact full rows, including column names and aggregate values. Because the SIMBA archive includes grouped results, this is a representation-level audit, not a measurement of stable underlying entity recurrence.
+% The audit includes one SIMBA-derived session with 14 transitions and seven SkyServer-derived sessions with 608 transitions. These are the available snapshots, not the larger session counts reported in the original experimental draft. Repeated records from different recommenders are deduplicated by session and query pair, checking that their snapshots agree. We compare sets of exact full rows, including column names and aggregate values. Because the SIMBA archive includes grouped results, this is a representation-level audit, not a measurement of stable underlying entity recurrence.
 
-\begin{table}[t]
-\caption{Archived candidate-availability audit at gap $1$. SkyServer values are medians [min, max] of session-level statistics. SIMBA has one session. These selected archives do not support population-level conclusions.}
-\label{tab:workload-audit}
-\centering\small
-\begin{tabular}{@{}lrr@{}}
-\toprule
-Statistic & SIMBA-derived & SkyServer-derived \\
-\midrule
-Sessions / transitions & 1 / 14 & 7 / 608 \\
-Median current rows & 11 & 1 [1, 303] \\
-Median future rows & 11 & 1 [1, 302] \\
-Zero-overlap fraction & .429 & .977 [.850, 1] \\
-Mean retention & .302 & .023 [0, .146] \\
-Mean coverage & .537 & .023 [0, .146] \\
-\bottomrule
-\end{tabular}
-\end{table}
+% \begin{table}[t]
+% \caption{Archived candidate-availability audit at gap $1$. SkyServer values are medians [min, max] of session-level statistics. SIMBA has one session. These selected archives do not support population-level conclusions.}
+% \label{tab:workload-audit}
+% \centering\small
+% \begin{tabular}{@{}lrr@{}}
+% \toprule
+% Statistic & SIMBA-derived & SkyServer-derived \\
+% \midrule
+% Sessions / transitions & 1 / 14 & 7 / 608 \\
+% Median current rows & 11 & 1 [1, 303] \\
+% Median future rows & 11 & 1 [1, 302] \\
+% Zero-overlap fraction & .429 & .977 [.850, 1] \\
+% Mean retention & .302 & .023 [0, .146] \\
+% Mean coverage & .537 & .023 [0, .146] \\
+% \bottomrule
+% \end{tabular}
+% \end{table}
 
-\textbf{What the comparison establishes.}
-For current-result candidates, retention is the fraction also present in the next result; coverage is the fraction of that next result available among the candidates. They give the random-precision reference and unbudgeted recall ceiling, respectively (Section~\ref{sec:theory}). All audited results are nonempty. The SkyServer samples frequently provide no matching candidates, while the SIMBA sample offers greater average coverage but still has six zero-overlap transitions. Neither uniform containment nor universal failure of realistic workloads follows. Changes in projection or aggregates can also break row matches. The comparison motivates checking candidate eligibility and representation before attributing ranking scores to interest inference.
+% \textbf{What the comparison establishes.}
+% For current-result candidates, retention is the fraction also present in the next result; coverage is the fraction of that next result available among the candidates. They give the random-precision reference and unbudgeted recall ceiling, respectively (Section~\ref{sec:theory}). All audited results are nonempty. The SkyServer samples frequently provide no matching candidates, while the SIMBA sample offers greater average coverage but still has six zero-overlap transitions. Neither uniform containment nor universal failure of realistic workloads follows. Changes in projection or aggregates can also break row matches. The comparison motivates checking candidate eligibility and representation before attributing ranking scores to interest inference.
 
-The legacy model comparisons used a budget based on the future result size, unlike the fixed-budget diagnostics below. We therefore do not combine their scores. A common-budget evaluation across prediction gaps, and comparison of current-result against seen-so-far candidate policies, remain necessary to test the multi-step behavioural prediction objective in Section~\ref{sec:theory}. The controlled tests instead isolate whether session evidence affects recovery of known patterns.
+% The legacy model comparisons used a budget based on the future result size, unlike the fixed-budget diagnostics below. We therefore do not combine their scores. A common-budget evaluation across prediction gaps, and comparison of current-result against seen-so-far candidate policies, remain necessary to test the multi-step behavioural prediction objective in Section~\ref{sec:theory}. The controlled tests instead isolate whether session evidence affects recovery of known patterns.
 
-\subsection{Controlled Diagnostic Protocol}
+% \subsection{Controlled Diagnostic Protocol}
 
-\textbf{The basic experiment.}
-Consider two sessions that finish at exactly the same candidate result. One history repeatedly exposes pattern A; the other exposes pattern B. Can a scorer change its ranking to favour the pattern supported by the respective history? By using different entities in the histories and candidate result, we test transfer of pattern evidence rather than recognition of previously returned rows.
+% \textbf{The basic experiment.}
+% Consider two sessions that finish at exactly the same candidate result. One history repeatedly exposes pattern A; the other exposes pattern B. Can a scorer change its ranking to favour the pattern supported by the respective history? By using different entities in the histories and candidate result, we test transfer of pattern evidence rather than recognition of previously returned rows.
 
-We use five categorical shipment attributes: region, category, price band, priority, and transport. Pattern A combines Asia, technology, high price, and urgent priority; pattern B combines Europe, healthcare, premium price, and air transport. Each evaluation result contains 60 distinct entities: 15 satisfy A, 15 satisfy B, and 30 satisfy neither. The generator stipulates the active target; target labels and entity IDs are excluded from model features. Distinct entities may have identical attribute values, but evaluation uses their stable IDs. The primary task selects ten candidates and measures the fraction satisfying the active target. Uniform random selection has expected precision $.25$.
+% We use five categorical shipment attributes: region, category, price band, priority, and transport. Pattern A combines Asia, technology, high price, and urgent priority; pattern B combines Europe, healthcare, premium price, and air transport. Each evaluation result contains 60 distinct entities: 15 satisfy A, 15 satisfy B, and 30 satisfy neither. The generator stipulates the active target; target labels and entity IDs are excluded from model features. Distinct entities may have identical attribute values, but evaluation uses their stable IDs. The primary task selects ten candidates and measures the fraction satisfying the active target. Uniform random selection has expected precision $.25$.
 
-\textbf{Four questions about session evidence.}
-All conditions use the paired, identical candidate result, with the following histories:
-\begin{itemize}[leftmargin=1em,topsep=2pt,itemsep=2pt,parsep=0pt]
- \item \textbf{History: does previous evidence transfer?} Four preceding results each contain 24 active-pattern and 24 background rows, with entities distinct from the candidate result. Paired sessions differ in which pattern their histories support.
- \item \textbf{Persistence: can repeated distractors mislead?} Each history result instead contains 24 active-pattern rows, four fresh background rows, and 20 fixed background entities also present among the candidates. Recurrence favours these distractors; pattern evidence favours the target.
- \item \textbf{Switch: can the model change direction?} Four history results support one pattern, followed by four supporting the other. We probe the shared candidate result before the switch and after each new history result. The probes themselves enter observed history; this tests adaptation to new evidence, not prediction of a switch before it occurs.
- \item \textbf{Null: does the history identify a target?} Each of four history results contains 12 rows from each pattern and 24 background rows. Both paired sessions receive identical observations but different evaluator-assigned targets. Recovering either pattern is possible; identifying which target was assigned is not.
-\end{itemize}
+% \textbf{Four questions about session evidence.}
+% All conditions use the paired, identical candidate result, with the following histories:
+% \begin{itemize}[leftmargin=1em,topsep=2pt,itemsep=2pt,parsep=0pt]
+%  \item \textbf{History: does previous evidence transfer?} Four preceding results each contain 24 active-pattern and 24 background rows, with entities distinct from the candidate result. Paired sessions differ in which pattern their histories support.
+%  \item \textbf{Persistence: can repeated distractors mislead?} Each history result instead contains 24 active-pattern rows, four fresh background rows, and 20 fixed background entities also present among the candidates. Recurrence favours these distractors; pattern evidence favours the target.
+%  \item \textbf{Switch: can the model change direction?} Four history results support one pattern, followed by four supporting the other. We probe the shared candidate result before the switch and after each new history result. The probes themselves enter observed history; this tests adaptation to new evidence, not prediction of a switch before it occurs.
+%  \item \textbf{Null: does the history identify a target?} Each of four history results contains 12 rows from each pattern and 24 background rows. Both paired sessions receive identical observations but different evaluator-assigned targets. Recovering either pattern is possible; identifying which target was assigned is not.
+% \end{itemize}
 
-\textbf{Comparators and measurements.}
-We compare MDI with association-only scoring, MDI reset before every result, direct entity-recurrence counts, and the repository's frequency, similarity, clustering, sampling, and random baselines. The first two isolate the contribution of score combination and accumulated history. These are illustrative comparators, not an exhaustive state-of-the-art evaluation. Frequency uses current-result frequencies; the sampling implementation's numeric-variance scores tie on these categorical results, making its ranking depend on candidate order.
+% \textbf{Comparators and measurements.}
+% We compare MDI with association-only scoring, MDI reset before every result, direct entity-recurrence counts, and the repository's frequency, similarity, clustering, sampling, and random baselines. The first two isolate the contribution of score combination and accumulated history. These are illustrative comparators, not an exhaustive state-of-the-art evaluation. Frequency uses current-result frequencies; the sampling implementation's numeric-variance scores tie on these categorical results, making its ranking depend on candidate order.
 
-We use ten independent seeds, both target directions, and budgets $k\in\{5,10,25\}$, with precision@10 primary. Missing recommendations count as misses against the fixed budget. Alternative budgets receive copies of the same pre-query state, and no model sees future results. Results are averaged over directions within each seed; paired differences and descriptive 95\% $t$ intervals use these ten seed-level values, not individual probes as independent replicates. We also report \emph{target contrast}: the selected fraction satisfying the active pattern minus the fraction satisfying its alternative. This separates directional selectivity from detection of both patterns. Rule-decay settings $0$ and $.2$ supplement the default $.05$ without selecting a best setting on the evaluation seeds.
+% We use ten independent seeds, both target directions, and budgets $k\in\{5,10,25\}$, with precision@10 primary. Missing recommendations count as misses against the fixed budget. Alternative budgets receive copies of the same pre-query state, and no model sees future results. Results are averaged over directions within each seed; paired differences and descriptive 95\% $t$ intervals use these ten seed-level values, not individual probes as independent replicates. We also report \emph{target contrast}: the selected fraction satisfying the active pattern minus the fraction satisfying its alternative. This separates directional selectivity from detection of both patterns. Rule-decay settings $0$ and $.2$ supplement the default $.05$ without selecting a best setting on the evaluation seeds.
 
-\subsection{Findings and Implications}
-\begin{table}[t]
-\caption{Controlled target recovery: precision@10 averaged over ten seeds and both target directions. Switch reports the last post-switch probe. Labels stipulate patterns, not human-interest judgements.}
-\label{tab:diagnostics}
-\centering\small
-\input{query-data-predictor/artifacts/vision/diagnostic_table}
-\end{table}
-\input{diagnostic_findings}
+% \subsection{Findings and Implications}
+% \begin{table}[t]
+% \caption{Controlled target recovery: precision@10 averaged over ten seeds and both target directions. Switch reports the last post-switch probe. Labels stipulate patterns, not human-interest judgements.}
+% \label{tab:diagnostics}
+% \centering\small
+% \input{query-data-predictor/artifacts/vision/diagnostic_table}
+% \end{table}
+% \input{diagnostic_findings}
 
-The workload audit and diagnostics answer different questions. The former shows how a particular candidate policy and representation constrain behavioural prediction in the available archives. The latter isolates capabilities and failures under controlled evidence: transferring a pattern across entities, resisting recurrence-based distraction, adapting to changed focus, and recognising when history does not distinguish targets. Neither establishes that MDI models all four dimensions successfully or predicts analytical relevance several steps ahead. The histories are stipulated, not natural SQL trajectories, and useful assistance still requires evaluation against analyst judgements and time to validated insight.
+% The workload audit and diagnostics answer different questions. The former shows how a particular candidate policy and representation constrain behavioural prediction in the available archives. The latter isolates capabilities and failures under controlled evidence: transferring a pattern across entities, resisting recurrence-based distraction, adapting to changed focus, and recognising when history does not distinguish targets. Neither establishes that MDI models all four dimensions successfully or predicts analytical relevance several steps ahead. The histories are stipulated, not natural SQL trajectories, and useful assistance still requires evaluation against analyst judgements and time to validated insight.
 
-The accompanying \texttt{VISION\_EXPERIMENTS.md} documents the generator, configurations, complete budget results, and reproducibility checks. The diagnostic table is included directly from the archived run. The separate \texttt{audit\_legacy\_workloads.py} reproduces the workload audit without rerunning queries. No new model evaluation is implied by combining these two sources of evidence.
+% The accompanying \texttt{VISION\_EXPERIMENTS.md} documents the generator, configurations, complete budget results, and reproducibility checks. The diagnostic table is included directly from the archived run. The separate \texttt{audit\_legacy\_workloads.py} reproduces the workload audit without rerunning queries. No new model evaluation is implied by combining these two sources of evidence.
 
-\section{Challenges and Future Directions}
+% ===== End previous draft: Section 5, An Illustrative Model and Evaluation =====
+
+%=============================================================================
+\section{Research Agenda}
 \label{sec:agenda}
+%=============================================================================
+
+\textbf{From destinations to interfaces.}
+A predicted destination is only useful if the analyst can act on it. A destination can be rendered as highlighted supporting rows, the exceptions that break it, a shortcut query, or a chart. The open questions are which rendering helps for which kind of destination, and when to intervene. Showing a destination too early risks steering the analyst; showing it too late saves nothing. Confidence over competing destinations, together with the earliness measure above, suggests intervention policies that can be compared in simulation by the steps they save before they are tested with people. Each rendering must also fit within interactive latency budgets as histories grow.
+
+\textbf{Richer destinations.}
+The next step beyond tuple scores is to return ranked descriptions together with their extensions, so the system can say \emph{what} it thinks the analyst is converging on as well as which rows support it. Exceptions are the natural bridge to discovery: a pattern sets an expectation, and the tuples that violate it are often the finding. Open-ended entity destinations, such as a new object in an astronomical survey, are the hardest case. On the evaluation side, SIMBA's goal queries~\cite{purichAdaptiveBenchmarkModeling2025} provide realistic, extension-judged destinations. Pairing them with planted destinations would combine realism with control.
+
+\textbf{Persistence, change, and uncertainty.}
+Our ablation shows that following every narrowing step misleads. Distinguishing a persistent direction from incidental filters, a switch from a detour, and a resumed thread from a new one requires models of concurrent investigation threads and change detection. These models should be evaluated on recovery after a change rather than on averages that hide it. When the evidence cannot separate destinations, as in our null trajectories, a system should report uncertainty rather than guess. This is the point at which brief explicit feedback becomes worth its cost. Since the best combination of evidence differs by kind, its weights should be inferred from context~\cite{somechPredictingWhatInteresting2019} rather than fixed.
+
+\textbf{Validation with analysts.}
+Validation proceeds in two stages. First, collect ordinary exploration sessions from analysts carrying out profiling and discovery tasks. Have them, and independent assessors, judge how useful ranked rows were at recorded points, without revealing which method ranked them. Success means agreement beyond history-free and recurrence baselines, with calibrated uncertainty when evidence is ambiguous. Second, run controlled, counterbalanced comparisons of destination-aware assistance with unassisted exploration and an existing aid. Measure time to validated insight, independently assessed finding quality, diversity of exploration, and perceived interruption. A positive outcome reduces time and effort without reducing finding quality or diversity, and without increasing misleading conclusions. Accuracy alone is not enough if recommendations reinforce an early hypothesis or hide contradictory evidence. Longitudinal use should then test whether the benefits persist as analysts come to rely on the system.
+
+% ===== Previous draft: Challenges and Future Directions (kept for reference) =====
+% \section{Challenges and Future Directions}
+% \label{sec:agenda}
 % \vspace{-0.4em}
-The illustrative results motivate four connected research directions, moving from interpreting session evidence to establishing whether acting on it helps analysts.
+% The illustrative results motivate four connected research directions, moving from interpreting session evidence to establishing whether acting on it helps analysts.
 %\textbf{Real-time interest model adaptation.}
 %EDA presents a fundamentally different challenge from traditional recommendation: user interests can shift dramatically within a single session as new patterns are discovered. Developing online learning algorithms that adapt rapidly while maintaining computational efficiency calls for advances in incremental pattern mining, streaming summarisation, and principled strategies for balancing exploration and exploitation.
 
@@ -509,19 +743,28 @@ The illustrative results motivate four connected research directions, moving fro
 %\textbf{User studies and longitudinal evaluation.}
 %Finally, longitudinal user studies are needed to assess whether implicit recommendation systems enhance or constrain analytical discovery compared to explicit-feedback baselines. Such studies should examine not only task performance, but also trust, sense-making, and the diversity of insights uncovered over extended exploration sessions.
 
-\textbf{Disambiguating analytical goals.}
-The same query sequence can support several investigative goals. Query semantics and optional inspection traces (e.g., clicks or dwell times) may help distinguish deliberate investigation from incidental exposure, building on exposure-aware recommendation~\cite{liang2016exposure,lin2024recrec}. Rather than committing prematurely to one interpretation, a model could maintain competing hypotheses, express uncertainty, or request occasional clarification. Progress requires better agreement with independent analyst judgements than current-result and recurrence baselines, while recognising when the available evidence cannot identify a goal.
+% \textbf{Disambiguating analytical goals.}
+% The same query sequence can support several investigative goals. Query semantics and optional inspection traces (e.g., clicks or dwell times) may help distinguish deliberate investigation from incidental exposure, building on exposure-aware recommendation~\cite{liang2016exposure,lin2024recrec}. Rather than committing prematurely to one interpretation, a model could maintain competing hypotheses, express uncertainty, or request occasional clarification. Progress requires better agreement with independent analyst judgements than current-result and recurrence baselines, while recognising when the available evidence cannot identify a goal.
 
-\textbf{Detecting change and combining evidence.}
-The Switch diagnostic exposes the cost of retaining stale evidence. Change detection and separate memories for concurrent investigation threads could distinguish a new goal from a temporary detour. Context-dependent weighting~\cite{somechPredictingWhatInteresting2019} could also determine when association, diversity, or novelty evidence is useful, rather than assuming a fixed combination. Evaluation should measure adaptation after a change and recovery of resumed threads, not only session-average accuracy. Tests across domains and component ablations should establish whether richer models generalise beyond the patterns used to design them.
+% \textbf{Detecting change and combining evidence.}
+% The Switch diagnostic exposes the cost of retaining stale evidence. Change detection and separate memories for concurrent investigation threads could distinguish a new goal from a temporary detour. Context-dependent weighting~\cite{somechPredictingWhatInteresting2019} could also determine when association, diversity, or novelty evidence is useful, rather than assuming a fixed combination. Evaluation should measure adaptation after a change and recovery of resumed threads, not only session-average accuracy. Tests across domains and component ablations should establish whether richer models generalise beyond the patterns used to design them.
 
-\textbf{Choosing an interaction paradigm.}
-Interest scores could support highlighted tuples, contrasting groups, suggested queries, or visualisations. Which form of assistance is useful, and when should the system intervene? Candidate suggestion and ranking must operate within interactive latency and memory budgets, while explanations should expose the historical evidence and uncertainty behind a recommendation. Joins and aggregation further require clarity about what a candidate represents. Comparing presentation choices should assess both analytical usefulness and interruption, while retaining analyst control over the investigation.
+% \textbf{Choosing an interaction paradigm.}
+% Interest scores could support highlighted tuples, contrasting groups, suggested queries, or visualisations. Which form of assistance is useful, and when should the system intervene? Candidate suggestion and ranking must operate within interactive latency and memory budgets, while explanations should expose the historical evidence and uncertainty behind a recommendation. Joins and aggregation further require clarity about what a candidate represents. Comparing presentation choices should assess both analytical usefulness and interruption, while retaining analyst control over the investigation.
 
-\textbf{Validating analytical benefit.}
-User studies should first test whether predictions agree with analysts' assessments of usefulness, then whether presenting those predictions improves analysis. Controlled comparisons with unassisted exploration and an appropriate existing aid should measure time to validated insights, finding quality, exploration diversity, and perceived burden. Counterbalanced tasks and independent assessment of findings can reduce evaluation bias. Higher prediction accuracy is insufficient if recommendations reinforce an early hypothesis or hide contradictory evidence; longitudinal studies should examine whether benefits and appropriate trust persist with use.
+% \textbf{Validating analytical benefit.}
+% User studies should first test whether predictions agree with analysts' assessments of usefulness, then whether presenting those predictions improves analysis. Controlled comparisons with unassisted exploration and an appropriate existing aid should measure time to validated insights, finding quality, exploration diversity, and perceived burden. Counterbalanced tasks and independent assessment of findings can reduce evaluation bias. Higher prediction accuracy is insufficient if recommendations reinforce an early hypothesis or hide contradictory evidence; longitudinal studies should examine whether benefits and appropriate trust persist with use.
 
 
+% ===== End previous draft: Challenges and Future Directions =====
+
+%=============================================================================
+\section{Conclusion}
+%=============================================================================
+
+Systems that assist exploratory data analysis have learned to predict the next step and to explain the current one. We argue that the more useful question is where the analyst is heading. Answering it requires inferring interest implicitly, conditioning on the trajectory, recognising that interest takes several forms, and measuring progress with benchmarks that plant destinations and reward recovering them early. Our first benchmark shows that this is feasible on controlled trajectories, and it also shows exactly where a simple scorer falls short. The opportunity for the database community is to build systems that know where an exploration is going and help analysts get there sooner.
+
+% ===== Previous draft: conclusion (kept for reference) =====
 %=============================================================================
 % SECTION 9: CONCLUSION
 %=============================================================================
@@ -539,13 +782,15 @@ User studies should first test whether predictions agree with analysts' assessme
 
 % Our workload-recommender alignment framework provides a way to reason about when different recommenders succeed or fail, and to design such diagnostic benchmarks by controlling workload parameters. The Multi-Dimensional Interestingness (MDI) recommender and our complementary evaluation illustrate one instantiation of this idea: MDI performs better on a controlled association-focused benchmark while matching baselines on realistic SIMBA workloads. This combination of implicit interest modelling and alignment-driven benchmarking can help guide future work on human-in-the-loop data systems.
 
-\section{Conclusion}
-Exploration histories offer evidence about what data may matter to an analyst, but that evidence is ambiguous. We propose session-conditioned scoring of current-result tuples as a reusable capability, with statistical properties, exposure, and latent interest kept distinct. Controlled tests can reveal whether a model follows stipulated session evidence and where it fails. Human validation must establish whether those distinctions correspond to useful analytical judgements. The opportunity is to build data systems that can act on evolving interest while making the basis and limits of their inferences explicit.
+% \section{Conclusion}
+% Exploration histories offer evidence about what data may matter to an analyst, but that evidence is ambiguous. We propose session-conditioned scoring of current-result tuples as a reusable capability, with statistical properties, exposure, and latent interest kept distinct. Controlled tests can reveal whether a model follows stipulated session evidence and where it fails. Human validation must establish whether those distinctions correspond to useful analytical judgements. The opportunity is to build data systems that can act on evolving interest while making the basis and limits of their inferences explicit.
 
 %\begin{acks}
 %\end{acks}
 
 %\clearpage
+% ===== End previous draft: conclusion =====
+
 \balance
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{references}
