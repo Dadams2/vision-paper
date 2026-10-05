@@ -189,7 +189,7 @@ Empirical studies demonstrate that no single interestingness measure consistentl
 
 Despite their differences, these systems rely on explicit feedback in various forms: tuple rankings~\cite{dimitriadouAIDEActiveLearningBased2016}, example validation~\cite{rezig2021dice}, Boolean membership queries~\cite{bonifati2014interactive}, or similarity assessments~\cite{mottin2014exemplar}. Each interaction forces analysts to step out of the natural flow of exploration to assess recommendation quality. Cognitive psychology studies show that such context switches impose measurable overhead and degrade problem-solving effectiveness~\cite{monsell2003task, rubinstein2001executive}. As exploration deepens, the cumulative cost of explicit feedback scales poorly, potentially discouraging its use when it is most informative.
 
-\vspace{-0.5em}
+% \vspace{-0.5em}
 \subsection{Implicit Signals as an Alternative}
 
 We argue that implicit feedback derived from natural exploration behaviour provides a more direct basis for modelling interest than explicit rankings or ratings. This view rests on three observations:
@@ -210,7 +210,7 @@ In this paper, we operationalise implicit interest using structural signals read
 %=============================================================================
 % SECTION 3: WHY EVALUATION METHODOLOGY MATTERS
 %=============================================================================
-\vspace{-0.5em}
+% \vspace{-0.5em}
 \section{Why Evaluation Method Matters}
 \label{sec:evaluation}
 
@@ -497,7 +497,7 @@ Figure~\ref{fig:workload_comparison} shows the overall pattern: the same recomme
   \includegraphics[width=\linewidth]{figures/workload_comparison_legend.pdf}
 \end{minipage}
 \vspace{-0.7em}
-\caption{Recommender performance (F1 at gap $=1$) across three workload types. Error bars show one standard deviation over gap-$1$ prediction steps. Under exact tuple matching, any step with no overlap between consecutive results will fail to reccomend any tuples. SkyServer is dominated by such transitions, largely due to point-lookups, so mean F1 stays near zero. SIMBA is similar in that progressive drill-down preserves enough overlap to keep F1 higher, but still compresses differences across methods. On the adversarial benchmark, overlap is more consistently informative and MDI separates from the baselines.}
+\caption{Recommender performance (F1 at gap $=1$) across three workload types. Error bars show one standard deviation over gap-$1$ prediction steps. Under exact tuple matching, any step with no overlap between consecutive results will fail to recommend any tuples. SkyServer is dominated by such transitions, largely due to point-lookups, so mean F1 stays near zero. SIMBA is similar as progressive drill-down preserves enough overlap to keep F1 higher, but still compresses differences across methods. On the adversarial benchmark, overlap is more consistently informative and MDI separates from the baselines.}
 \vspace{-1.5em}
 \label{fig:workload_comparison}
 \end{figure*}
@@ -528,25 +528,17 @@ The sampled SkyServer sessions come from real usage logs, but they test a differ
 
 \noindent \fcirc{3}\textbf{Controlled benchmarks reveal model differences.}
 When workload parameters follow the alignment recipe from Section~\ref{sec:theory:recipe}, sparse rule signal (low effective $\rho$), strong frequency skew (high $\xi$), homogeneous noise, and sufficient history, MDI's temporal accumulation yields a clear 36\% F1 improvement over random (Table~\ref{tab:adversarial-results}). This suggests that MDI is using association structure rather than overlap alone.
-
 % Da not menioned:
 % We also observe that MDI's performance is relatively insensitive to the exact choice of temporal decay rate within a broad range, indicating that its qualitative advantage stems from temporal accumulation rather than fine-grained parameter tuning.
-
 % DA the following I think are useful points but have been cut for space
-
 % \noindent \fcirc{4}\textbf{The prediction task is intrinsically hard.}
 % Even on the adversarial benchmark where MDI has a clear advantage, absolute F1 remains around 0.26, far from perfect. This underlines the difficulty of predicting tuple-level analyst focus from implicit structural signals and motivates further research into richer implicit-interest models and hybrid implicit/explicit approaches.
-
 % \noindent \fcirc{5}\textbf{Adversarial Construction is Advantageous to MDI}
 % A natural question is whether the adversarial benchmark is overly tailored to MDI. Our position, grounded in the workload-recommender alignment framework, is that it is one principled instantiation of a broader design pattern, not a special case. First, the same framework can be used to construct workloads that favour other recommender classes (e.g., by increasing signal density, reducing skew, or making overlap clusters more distinct), providing a family of diagnostic tests rather than a single task. Second, the benchmark is defined in terms of a \emph{capability}(detecting embedded associations under skew and sparsity) not in terms of any particular implementation. Any association-aware recommender with temporal memory should, in principle, excel on such workloads. Third, the SIMBA evaluation provides an ecological complement: MDI performs comparably to other methods on realistic workloads, indicating that it does not sacrifice generality for adversarial performance. Together, the realistic and controlled benchmarks offer a more complete picture of recommender behaviour than either could alone.
-
-
 %=============================================================================
 % SECTION 7: RELATED WORK
 %=============================================================================
 %RBG sorry need to trim a bit, too long 
- \vspace{-1em}
-\section{Related Work}
 % \vspace{-0.4em}
 %\subsection{Interactive Exploration and Active Learning}
 
@@ -608,6 +600,10 @@ When workload parameters follow the alignment recipe from Section~\ref{sec:theor
 
 % DA rewrite to make shorter
 
+% 
+\vspace{-0.5em}
+\section{Related Work}
+
 The database community has proposed many alternatives to the traditional query-answer paradigm: online aggregation~\cite{hellerstein1999online},
 query-by-example and explore-by-example systems~\cite{drosouYmaldbExploringRelational2013,dimitriadouAIDEActiveLearningBased2016,mottin2014exemplar}, interactive join inference~\cite{bonifati2014interactive}, drill-down and query steering~\cite{kalininInteractiveDataExploration2014,ugurcetintemelQuerySteeringInteractive2013}, and relevance feedback from information retrieval~\cite{rocchio1971relevance}. All rely on \emph{explicit} feedback through rankings, labels, or confirmations, which interrupt analytical flow. Our work instead infers interest from \emph{implicit} signals in natural exploration behaviour.
 
@@ -627,8 +623,8 @@ fields such as CLEVR~\cite{johnson2017clevr}, CheckList~\cite{ribeiro2020beyond}
 %=============================================================================
 % \vspace{-0.7em}
 \section{Challenges and Future Directions}
-% \vspace{-0.4em}
-The argument outlined in this paper opens several research directions. % for the database and HCI communities.
+\vspace{-0.4em}
+The argument outlined in this paper opens several research directions for the database and HCI communities.
 %\textbf{Real-time interest model adaptation.}
 %EDA presents a fundamentally different challenge from traditional recommendation: user interests can shift dramatically within a single session as new patterns are discovered. Developing online learning algorithms that adapt rapidly while maintaining computational efficiency calls for advances in incremental pattern mining, streaming summarisation, and principled strategies for balancing exploration and exploitation.
 
@@ -652,13 +648,13 @@ Because EDA recommendations directly influence analytical conclusions, systems m
 
 \textbf{Extending alignment and validating impact.}
 Extending the workload-recommender alignment framework to neural and language model-based recommenders and multimodal implicit signals, and learning to weight different interestingness dimensions automatically, are important open problems. Ultimately, longitudinal user studies are needed to assess whether implicit recommendation systems enhance or constrain analytical discovery compared to explicit-feedback baselines.
-
-
+\
 %=============================================================================
 % SECTION 9: CONCLUSION
 %=============================================================================
-\vspace{-0.8em}
+\vspace{-1.0em}
 \section{Conclusion}
+\vspace{-0.2em}
 % \vspace{-0.4em}
 %This paper argues for two paradigm shifts in how database systems support exploratory data analysis. The first is a shift from explicit to implicit feedback: rather than interrupting analysts with ranking requests, systems should infer interest from natural exploration behaviour. The second is a shift from ecological-only to construct-valid evaluation: realistic workloads are necessary but not sufficient for assessing recommender quality, and controlled benchmarks that test specific capabilities are essential.
 
