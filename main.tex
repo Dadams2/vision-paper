@@ -8,6 +8,7 @@
 \usepackage{makecell}
 \usepackage{enumitem}
 \usepackage{tabularx}
+\usepackage{xurl}
 
 %% copied from acmart.cls, but modified to a4paper
 \geometry{twoside=true, head=13pt,
@@ -635,7 +636,7 @@ Numeric attributes are discretised into five equal-frequency bins. We use $(\alp
 \emph{Queries help where only the pattern step distinguishes.} The query-aware reference recovers shared-context (1.00 against .75) and distributional destinations. It is worse on ambiguous trajectories (.71 against 1.00 for structural), as it follows every predicate equally.
 
 \textbf{Limitations.}
-The trajectories are scripted selection sequences and the destinations are planted. The benchmark tests capabilities; it does not show that these destinations are what real analysts pursue, or that surfacing them helps. The baselines are simple adaptations, not tuned systems. Every planted pattern is also a concentration on a few attributes, so the benchmark cannot yet show what modelling several kinds of interest adds over a single proximity model such as Competing Models. The generator, models, per-session predictions, and complete results (all conditions, budgets, and ablations) are available at \url{https://github.com/Dadams2/query-data-predictor/tree/EDBT_2027}. They are reproducible from seeds without a database.
+The trajectories are scripted selection sequences and the destinations are planted. The benchmark tests capabilities; it does not show that these destinations are what real analysts pursue, or that surfacing them helps. The baselines are simple adaptations, not tuned systems. Every planted pattern is also a concentration on a few attributes, so the benchmark cannot yet show what modelling several kinds of interest adds over a single proximity model such as Competing Models.
 
 % ===== Previous draft: Section 5, An Illustrative Model and Evaluation   =====
 
@@ -823,6 +824,11 @@ Systems that assist exploratory data analysis have learned to predict the next s
 
 %\clearpage
 % ===== End previous draft: conclusion =====
+
+\section*{Artifacts}
+The artifacts for reproducing our experiments are available at:
+\href{https://github.com/Dadams2/query-data-predictor/tree/EDBT_2027}{\path{https://github.com/Dadams2/query-data-predictor/}\allowbreak\path{tree/EDBT_2027}}.
+The repository includes source code, data, results, and reproduction instructions.
 
 \balance
 \bibliographystyle{ACM-Reference-Format}
